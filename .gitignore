@@ -1,0 +1,16 @@
+# General
+.DS_Store
+.env
+.venv
+dist/
+build/
+*.egg-info/
+
+# Python / FastAPI
+__pycache__/
+*.py[cod]
+
+# Node / Next.js
+node_modules/
+.next/
+.vscode/

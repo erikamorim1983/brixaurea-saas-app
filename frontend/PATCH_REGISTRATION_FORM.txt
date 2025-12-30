@@ -1,0 +1,86 @@
+// ==============================================================================
+// CORREÇÕES PARA REGISTRO - APLICAR MANUALMENTE
+// ==============================================================================
+
+// Arquivo: frontend/app/[lang]/auth/register/components/RegistrationForm.tsx
+
+// ==============================================================================
+// MUDANÇA 1: Adicionar Toggle Mensal/Anual
+// ==============================================================================
+// Localização: Linha 254 (logo APÓS a linha `</div>` que fecha o text-center mb-8)
+// E ANTES da linha `<div className="grid grid-cols-1 md:grid-cols-2 gap-4">`
+
+// ADICIONE ESTAS LINHAS:
+
+                    {/* Billing Frequency Toggle */}
+                    <div className="flex justify-center mb-6">
+                        <div className="inline-flex items-center bg-gray-100 rounded-xl p-1.5">
+                            <button
+                                type="button"
+                                onClick={() => updateFormData('billingFrequency', 'monthly')}
+                                className={`px-6 py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 ${
+                                    formData.billingFrequency === 'monthly'
+                                        ? 'bg-white text-[#081F2E] shadow-md'
+                                        : 'text-gray-600 hover:text-gray-900'
+                                }`}
+                            >
+                                {lang === 'pt' ? 'Mensal' : lang === 'es' ? 'Mensual' : 'Monthly'}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => updateFormData('billingFrequency', 'yearly')}
+                                className={`px-6 py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 flex items-center gap-2 ${
+                                    formData.billingFrequency === 'yearly'
+                                        ? 'bg-white text-[#081F2E] shadow-md'
+                                        : 'text-gray-600 hover:text-gray-900'
+                                }`}
+                            >
+                                {lang === 'pt' ? 'Anual' : lang === 'es' ? 'Anual' : 'Yearly'}
+                                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-bold rounded-full">
+                                    ~17% OFF
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
+// ==============================================================================
+// MUDANÇA 2: Atualizar Display de Preço (Linha ~279)
+// ==============================================================================
+
+// PROCURE POR (linha 279):
+<span className="text-2xl font-bold text-gray-800">${plan.price.toFixed(2)}</span>
+
+// SUBSTITUA POR:
+<span className="text-2xl font-bold text-gray-800">
+    ${formData.billingFrequency === 'yearly' ? (plan.priceYearly / 12).toFixed(2) : plan.price.toFixed(2)}
+</span>
+
+// ==============================================================================
+// MUDANÇA 3: Adicionar Texto Anual (Logo APÓS linha 280)
+// ==============================================================================
+
+// LOGO APÓS a linha:
+<span className="text-gray-500 text-sm">{c.plan.per_month}</span>
+
+// ADICIONE:
+{formData.billingFrequency === 'yearly' && (
+    <p className="text-xs text-gray-500 mt-1">
+        ${plan.priceYearly.toFixed(2)}/{lang === 'pt' ? 'ano' : 'year'}
+    </p>
+)}
+
+// ==============================================================================
+// RESULTADO FINAL - Como deve ficar a seção de preço (linhas 278-283):
+// ==============================================================================
+
+                                    <div className="text-right">
+                                        <span className="text-2xl font-bold text-gray-800">
+                                            ${formData.billingFrequency === 'yearly' ? (plan.priceYearly / 12).toFixed(2) : plan.price.toFixed(2)}
+                                        </span>
+                                        <span className="text-gray-500 text-sm">{c.plan.per_month}</span>
+                                        {formData.billingFrequency === 'yearly' && (
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                ${plan.priceYearly.toFixed(2)}/{lang === 'pt' ? 'ano' : 'year'}
+                                            </p>
+                                        )}
+                                    </div>

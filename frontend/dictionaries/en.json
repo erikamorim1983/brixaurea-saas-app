@@ -1,0 +1,563 @@
+{
+    "nav": {
+        "solution": "Solution",
+        "plans": "Pricing",
+        "about": "About",
+        "login": "Login",
+        "get_started": "Get Started",
+        "features": "Features"
+    },
+    "feature_details": {
+        "magic-analysis": {
+            "title": "Magic Analysis 🪄",
+            "subtitle": "Instant Land Feasibility",
+            "description": "Our proprietary technology crosses municipal zoning data, environmental constraints, and market comparables to generate appropriate massing studies and financial 'Best Use' scenarios for any lot in seconds.",
+            "benefits": [
+                "GIS and Zoning Code Integration",
+                "Automatic setbacks and height detection",
+                "Ideal product suggestion (Potential GDV)"
+            ]
+        },
+        "construction-simulation": {
+            "title": "Construction Simulation",
+            "subtitle": "Simplified Cost Engineering",
+            "description": "Estimate Hard Costs accurately based on real typologies and market indices, adjusted for finish levels and design efficiency.",
+            "benefits": [
+                "Typology library (Affordable to Luxury)",
+                "Automatic S-Curve disbursement",
+                "Editable parametric budgeting"
+            ]
+        },
+        "sales-projection": {
+            "title": "Sales Projection",
+            "subtitle": "Commercial Strategy & GDV",
+            "description": "Model sales velocity (absorption) and the project pricing table. Simulate different launch scenarios and monetary corrections to maximize revenue.",
+            "benefits": [
+                "Visual Sales Grid assembly",
+                "Sales Velocity Simulation",
+                "Automatic commission and marketing calc"
+            ]
+        },
+        "cash-flow": {
+            "title": "Cash Flow",
+            "subtitle": "The Financial Heart of the Project",
+            "description": "Complete month-by-month view of inflows and outflows. The system automatically consolidates construction costs, soft expenses, taxes, and revenues to deliver the metrics that matter.",
+            "benefits": [
+                "Automatic IRR and NPV calculation",
+                "Maximum Cash Exposure visualization",
+                "Synthetic P&L Statement"
+            ]
+        },
+        "financing": {
+            "title": "Financing",
+            "subtitle": "Capital Stack Structuring",
+            "description": "Simulate project financial leverage. Configure bank loans (Construction Loan), partner equity, and financial or physical swaps.",
+            "benefits": [
+                "Automatic Interest and Amortization calc",
+                "LTV (Loan-to-Value) and LTC analysis",
+                "Mezzanine and Senior Debt modeling"
+            ]
+        },
+        "dashboards": {
+            "title": "Dashboards & Reports",
+            "subtitle": "Investor Presentations",
+            "description": "No more Excel screenshots. Generate professional PDFs and interactive view links ('Investor View') to present the project to partners, banks, and investors with confidence.",
+            "benefits": [
+                "White-label (Your brand, our math)",
+                "Read-only access links",
+                "Interactive charts and heatmaps"
+            ]
+        }
+    },
+    "hero": {
+        "title": "From Land to Keys in Hand.",
+        "subtitle": "Real Estate Intelligence + Financial Management. Leave complex spreadsheets behind and analyze your next development's feasibility in seconds.",
+        "cta_primary": "Viability Analysis 🪄",
+        "cta_secondary": "View Profitability Analysis"
+    },
+    "sections": {
+        "what_is": {
+            "title": "What is BrixAurea",
+            "description": "BrixAurea transforms the chaos of disconnected spreadsheets into an intelligent workflow. Our platform integrates land search (with zoning and market data) directly with a powerful Project Profitability Analysis engine, allowing you to find, analyze, and finance projects with record speed."
+        },
+        "for_whom": {
+            "title": "Who is it for?",
+            "items": [
+                "Developers seeking precision in planning new projects",
+                "Investors who want to validate opportunities before committing capital",
+                "Consultants who need to deliver complete and professional analyses",
+                "Companies wanting to standardize analyses and increase efficiency"
+            ]
+        },
+        "features": {
+            "title": "Main Features",
+            "items": [
+                {
+                    "title": "Magic Analysis 🪄",
+                    "desc": "Paste the address and instantly receive zoning data, constructive potential, and 'Best Use' suggestion for the land.",
+                    "slug": "magic-analysis"
+                },
+                {
+                    "title": "Construction Simulation",
+                    "desc": "Typology definition (houses, townhomes, buildings). Cost per sqft estimation. Physical-financial schedule.",
+                    "slug": "construction-simulation"
+                },
+                {
+                    "title": "Sales Projection",
+                    "desc": "Unit mix definition. Monthly or quarterly sales curve. Estimated gross and net revenue.",
+                    "slug": "sales-projection"
+                },
+                {
+                    "title": "Full Cash Flow",
+                    "desc": "Complete inflows and outflows. Automatic generation of projected P&L, ROI, IRR, NPV, and Payback.",
+                    "slug": "cash-flow"
+                },
+                {
+                    "title": "Real Estate Financing",
+                    "desc": "American Models: Mortgage Loans, Hard Money, Bridge Loans. LTV, DSCR, and amortization calculation.",
+                    "slug": "financing"
+                },
+                {
+                    "title": "Dashboards and Reports",
+                    "desc": "Cumulative cash flow charts, financial indicators, and report export.",
+                    "slug": "dashboards"
+                }
+            ]
+        },
+        "action": {
+            "title": "Start transforming real estate analyses into smart decisions now.",
+            "cta": "Create Account"
+        },
+        "footer": {
+            "copyright": "© 2025 BrixAurea. All rights reserved.",
+            "company_attribution": "A solution by EA Financial Advisory",
+            "company": {
+                "name": "BrixAurea",
+                "description": "The ultimate real estate viability platform."
+            },
+            "legal": {
+                "title": "Legal",
+                "privacy": "Privacy Policy",
+                "terms": "Terms of Use",
+                "support_policy": "Support and Availability Policy"
+            },
+            "support": {
+                "title": "Support",
+                "center": "Support Center",
+                "documentation": "Documentation",
+                "faq": "FAQ"
+            },
+            "contact": {
+                "title": "Contact",
+                "general": "contact@brixaurea.com",
+                "support_email": "support@brixaurea.com",
+                "about": "About Us"
+            }
+        }
+    },
+    "register": {
+        "already_have_account": "Already have an account?",
+        "plans": {
+            "title": "Choose Your Plan",
+            "subtitle": "Start with a free trial, cancel anytime",
+            "most_popular": "Most Popular",
+            "trial_days": "{days} days free trial",
+            "per_month": "/month",
+            "users": "user | users",
+            "projects": "projects",
+            "unlimited_projects": "Unlimited projects",
+            "storage": "storage",
+            "enterprise_cta": "Need more? Contact us for Enterprise"
+        },
+        "features": {
+            "basic_analysis": "Basic analysis",
+            "limited_projects": "5 projects",
+            "storage_2gb": "2GB storage",
+            "email_support": "Email support",
+            "unlimited_projects": "Unlimited projects",
+            "team_3_members": "3 team members",
+            "team_10_members": "10 team members",
+            "team_25_members": "25 team members",
+            "storage_10gb": "10GB storage",
+            "storage_50gb": "50GB storage",
+            "storage_100gb": "100GB storage",
+            "priority_support": "Priority support",
+            "team_management": "Team management",
+            "advanced_reports": "Advanced reports",
+            "api_access": "API access",
+            "unlimited_everything": "Unlimited everything",
+            "custom_integrations": "Custom integrations",
+            "dedicated_support": "Dedicated support",
+            "sla_guarantee": "SLA guarantee",
+            "custom_branding": "Custom branding"
+        },
+        "step1": {
+            "title": "Choose Your Plan",
+            "subtitle": "Start with a free trial, cancel anytime"
+        },
+        "step2": {
+            "title": "Your Information",
+            "subtitle": "Create your account",
+            "first_name": "First Name",
+            "last_name": "Last Name",
+            "email": "Email",
+            "phone": "Phone Number",
+            "password": "Password",
+            "confirm_password": "Confirm Password",
+            "password_hint": "Minimum 8 characters"
+        },
+        "step3": {
+            "title": "Company Details",
+            "subtitle": "Tell us about your organization",
+            "company_name": "Company Name",
+            "ein": "EIN",
+            "ein_placeholder": "XX-XXXXXXX",
+            "website": "Website",
+            "organization_types": "Organization Type",
+            "types": {
+                "developer": "Real Estate Developer",
+                "builder": "Builder/Contractor",
+                "realtor": "Real Estate Agency",
+                "lender": "Financial Lender",
+                "broker": "Independent Broker",
+                "consultant": "Consultant",
+                "other": "Other"
+            },
+            "address": "Address",
+            "address_street": "Street Address",
+            "address_suite": "Suite/Unit",
+            "address_city": "City",
+            "address_state": "State",
+            "address_zip": "ZIP Code"
+        },
+        "step4": {
+            "title": "Confirm Registration",
+            "subtitle": "Review your information",
+            "selected_plan": "Selected Plan",
+            "name": "Name",
+            "email": "Email",
+            "company": "Company",
+            "trial_info": "🎉 {days} days free trial - No charges until trial ends",
+            "terms_accept": "I have read and accept the",
+            "terms_link": "Terms of Service",
+            "and": "and",
+            "privacy_link": "Privacy Policy"
+        },
+        "buttons": {
+            "next": "Continue",
+            "back": "Back",
+            "submit": "Create Account",
+            "creating": "Creating account..."
+        },
+        "errors": {
+            "plan_required": "Please select a plan",
+            "email_required": "Email is required",
+            "email_invalid": "Please enter a valid email",
+            "password_required": "Password is required",
+            "password_weak": "Password must be at least 8 characters",
+            "passwords_mismatch": "Passwords do not match",
+            "first_name_required": "First name is required",
+            "last_name_required": "Last name is required",
+            "company_name_required": "Company name is required",
+            "terms_required": "You must accept the terms to continue"
+        }
+    },
+    "login": {
+        "title": "Welcome Back",
+        "subtitle": "Sign in to your account",
+        "email": "Email Address",
+        "password": "Password",
+        "remember_me": "Remember me",
+        "forgot_password": "Forgot password?",
+        "submit": "Sign In",
+        "no_account": "Don't have an account?",
+        "register": "Create Account",
+        "errors": {
+            "email_required": "Email is required",
+            "email_invalid": "Please enter a valid email",
+            "password_required": "Password is required",
+            "invalid_credentials": "Invalid email or password"
+        },
+        "email_verified": "Email verified successfully! You can now login."
+    },
+    "verifyEmail": {
+        "title": "Check Your Email",
+        "subtitle": "We sent a verification link to",
+        "instructions": "Click the link in your email to verify your account. If you don't see it, check your spam folder.",
+        "resend": "Resend verification email",
+        "resend_sending": "Sending...",
+        "resend_success": "Email sent!",
+        "resend_error": "Error sending",
+        "back_to_login": "Back to login",
+        "didnt_receive": "Didn't receive the email?"
+    },
+    "forgotPassword": {
+        "title": "Forgot Password",
+        "subtitle": "Enter your email and we'll send you a reset link",
+        "email": "Email Address",
+        "submit": "Send Reset Link",
+        "back_to_login": "Back to login",
+        "success_title": "Check Your Email",
+        "success_message": "We sent a password reset link to",
+        "errors": {
+            "email_required": "Email is required",
+            "email_invalid": "Please enter a valid email",
+            "generic_error": "An error occurred. Please try again."
+        }
+    },
+    "resetPassword": {
+        "title": "Reset Password",
+        "subtitle": "Enter your new password",
+        "new_password": "New Password",
+        "confirm_password": "Confirm Password",
+        "password_requirements": "Minimum 8 characters",
+        "submit": "Reset Password",
+        "success_title": "Password Reset!",
+        "success_message": "Your password has been updated successfully.",
+        "go_to_login": "Go to Login",
+        "errors": {
+            "password_required": "Password is required",
+            "password_weak": "Password must be at least 8 characters",
+            "passwords_mismatch": "Passwords don't match",
+            "generic_error": "An error occurred. Please try again.",
+            "invalid_token": "Invalid or expired reset link"
+        }
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "welcome": "Welcome",
+        "subtitle": "Here's an overview of your real estate projects.",
+        "overview": "Overview",
+        "quick_actions": "Quick Actions",
+        "recent_activity": "Recent Activity",
+        "no_activity": "No recent activity",
+        "activity_hint": "Your recent actions will appear here",
+        "new_project": "New Project",
+        "view_reports": "View Reports",
+        "run_analysis": "Run Analysis",
+        "logout": "Logout",
+        "logging_out": "Logging out...",
+        "menu": {
+            "overview": "Overview",
+            "projects": "Projects",
+            "analysis": "Analysis",
+            "reports": "Reports",
+            "settings": "Settings",
+            "back_to_site": "Back to Site"
+        },
+        "stats": {
+            "projects": "Total Projects",
+            "analyses": "Analyses Run",
+            "reports": "Reports Generated"
+        }
+    },
+    "settings": {
+        "title": "Settings",
+        "profile": {
+            "title": "Profile Information",
+            "subtitle": "Update your personal information",
+            "basic_info": "Basic Information",
+            "first_name": "First Name",
+            "last_name": "Last Name",
+            "email": "Email",
+            "phone": "Phone",
+            "account_type": "Account Type",
+            "individual": "Individual",
+            "organization": "Organization",
+            "company_info": "Company Information",
+            "company_logo": "Company Logo",
+            "logo_hint": "Used in reports and documents",
+            "address": "Address",
+            "save": "Save Changes",
+            "saving": "Saving...",
+            "saved": "Changes saved!",
+            "error": "Error saving changes"
+        },
+        "account": {
+            "title": "Account",
+            "subtitle": "Manage your account settings",
+            "change_password": "Change Password",
+            "danger_zone": "Danger Zone",
+            "delete_account": "Delete Account"
+        },
+        "team": {
+            "title": "Team",
+            "subtitle": "Manage your organization members",
+            "members": "Members",
+            "invite": "Invite Member",
+            "roles": {
+                "owner": "Owner",
+                "admin": "Admin",
+                "member": "Member",
+                "viewer": "Viewer"
+            },
+            "upgrade_required": "Upgrade to Business plan to add team members"
+        }
+    },
+    "deleteAccount": {
+        "title": "Delete Account",
+        "subtitle": "We're sorry to see you go",
+        "warning": "This action cannot be undone. All your data will be permanently deleted.",
+        "survey_title": "Before you go, please tell us why",
+        "survey_subtitle": "Your feedback helps us improve BrixAurea",
+        "reasons": {
+            "not_useful": "The platform is not useful for my needs",
+            "too_expensive": "Too expensive",
+            "found_alternative": "Found a better alternative",
+            "missing_features": "Missing features I need",
+            "too_complicated": "Too complicated to use",
+            "technical_issues": "Technical issues or bugs",
+            "not_using": "Not using it anymore",
+            "other": "Other reason"
+        },
+        "other_placeholder": "Please tell us more...",
+        "confirm_email": "Type your email to confirm:",
+        "confirm_delete": "Delete My Account",
+        "cancel": "Cancel",
+        "deleting": "Deleting..."
+    },
+    "projects": {
+        "new": {
+            "title": "New Project",
+            "subtitle": "Start a new real estate feasibility study.",
+            "form": {
+                "name": "Project Name",
+                "name_placeholder": "Ex: Miami Beach Tower",
+                "address": "Full Address",
+                "address_placeholder": "123 Ocean Dr",
+                "city": "City",
+                "state": "State",
+                "zip": "Zip Code",
+                "zoning": "Zoning code (Optional)",
+                "submit": "Create Project",
+                "saving": "Saving...",
+                "success": "Project created successfully!"
+            },
+            "errors": {
+                "name_min": "Name must be at least 3 characters",
+                "address_required": "Address is required",
+                "city_required": "City is required",
+                "state_len": "Use state abbreviation (e.g. FL)",
+                "zip_invalid": "Invalid Zip Code",
+                "creation_failed": "Error creating project"
+            }
+        }
+    },
+    "analysis": {
+        "tabs": {
+            "overview": "Overview",
+            "regional": "Regional Data",
+            "land": "Land",
+            "unit_mix": "Units",
+            "costs": "Costs",
+            "financials": "Financials",
+            "feasibility": "Feasibility"
+        },
+        "land": {
+            "project_config": "Project Configuration",
+            "acquisition_details": "Land Acquisition Details",
+            "owner": "Owner Name",
+            "value": "Land Value ($)",
+            "payment_method": "Payment Method",
+            "far": "FAR Utilization",
+            "notes": "Notes",
+            "methods": {
+                "methodCash": "Outright Purchase (Cash)",
+                "methodSellerFinancing": "Seller Financing",
+                "methodUnitSwap": "Joint Venture (Unit Allocation)",
+                "methodFinancialSwap": "Joint Venture (Revenue Share)",
+                "methodOption": "Option Agreement",
+                "methodGroundLease": "Ground Lease",
+                "swapSharePercent": "Land Owner Share (% of VGV)",
+                "swapHint": "The final land value will be calculated based on the Project Revenue (VGV) defined in the 'Sales / Revenue' tab.",
+                "unitSwapHint": "The final land value will be determined by the market value of the units allocated to the land owner in the 'Unit Mix' tab.",
+                "installment": "Installment Plan"
+            }
+        },
+        "units": {
+            "title": "Unit Mix",
+            "subtitle": "Define real estate products and pricing.",
+            "table": {
+                "model": "Model / Type",
+                "beds": "Beds",
+                "baths": "Baths",
+                "suites": "Suites",
+                "garages": "Garage",
+                "area_sellable": "Square Feet Under Air",
+                "area_outdoor": "Square Feet Non-Conditioned",
+                "area_total": "Total Square Feet",
+                "count": "Count",
+                "price_sqft": "$/ft²",
+                "avg_price": "Unit Price",
+                "total_vgv": "Total Revenue",
+                "actions": ""
+            },
+            "summary": {
+                "total_units": "Total Units",
+                "total_area": "Total Sellable Area",
+                "avg_price_sqft": "Avg Price ($/ft²)",
+                "gross_revenue": "Gross Revenue"
+            },
+            "add_btn": "Add Unit"
+        },
+        "overview": {
+            "project_configuration": "Project Configuration",
+            "project_type": "Project Type",
+            "select_type": "Select Type...",
+            "lot_size": "Lot Size (Acres)",
+            "existing_construction": "Existing Construction on Site?",
+            "demolition_impact": "Impacts demolition costs.",
+            "structure_description": "Structure Description",
+            "structure_placeholder": "e.g. Old 2-story commercial building",
+            "save": "Save Details",
+            "saving": "Saving..."
+        },
+        "types": {
+            "single_family": "Single Family Home",
+            "condo_building": "Condo Building (Residential)",
+            "townhomes": "Townhomes Community",
+            "retail": "Retail / Strip Mall",
+            "mixed_use": "Mixed Use (Res + Retail)",
+            "industrial": "Industrial / Warehouse"
+        },
+        "regional_data": {
+            "title": "Regional & Civic Data",
+            "source": "Source: Brix Aurea Demo Global Data",
+            "sections": {
+                "leadership": "Leadership",
+                "demographics": "Demographics",
+                "market": "Market Data",
+                "education": "Education",
+                "news": "Regional News"
+            },
+            "metrics": {
+                "population": "Population",
+                "median_age": "Median Age",
+                "founding_date": "Founded",
+                "unemployment": "Unemployment",
+                "income": "Income",
+                "home_value": "Home Value",
+                "rent_trend": "Rent Trend",
+                "job_growth": "Job Growth",
+                "interest_rate": "Interest Rate",
+                "inventory": "Inventory",
+                "cap_rate": "Avg Cap Rate"
+            },
+            "schools": {
+                "elementary": "Elementary",
+                "middle": "Middle",
+                "high": "High"
+            },
+            "leadership_roles": {
+                "mayor": "Mayor",
+                "governor": "Governor"
+            }
+        }
+    },
+    "ai": {
+        "welcome_title": "Hello! I am BrixAureIA",
+        "welcome_subtitle": "Your investment assistant.",
+        "placeholder": "Ask about your investments...",
+        "error_generic": "Unable to connect to AI at this moment."
+    }
+}

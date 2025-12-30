@@ -1,0 +1,537 @@
+{
+    "nav": {
+        "solution": "Solución",
+        "plans": "Precios",
+        "about": "Nosotros",
+        "login": "Entrar",
+        "get_started": "Crear Cuenta",
+        "features": "Funcionalidades"
+    },
+    "feature_details": {
+        "magic-analysis": {
+            "title": "Magic Analysis 🪄",
+            "subtitle": "Viabilidad Instantánea de Terrenos",
+            "description": "Nuestra tecnología patentada cruza datos de zonificación municipal, restricciones ambientales y comparables de mercado para generar estudios de masa y el 'Mejor Uso' financiero para cualquier lote en segundos.",
+            "benefits": [
+                "Integración con GIS y Código de Construcción",
+                "Detección automática de retiros y altura",
+                "Sugerencia de producto ideal (VGV potencial)"
+            ]
+        },
+        "construction-simulation": {
+            "title": "Simulación de Construcción",
+            "subtitle": "Ingeniería de Costos Simplificada",
+            "description": "Estime los costos de obra (Hard Costs) con precisión basada en tipologías reales e índices de mercado, ajustados por nivel de acabados y eficiencia de diseño.",
+            "benefits": [
+                "Biblioteca de tipologías (Social a Lujo)",
+                "Curva S de desembolso automático",
+                "Presupuesto paramétrico editable"
+            ]
+        },
+        "sales-projection": {
+            "title": "Proyección de Ventas",
+            "subtitle": "Estrategia Comercial y VGV",
+            "description": "Modele la velocidad de ventas (absorción) y la lista de precios. Simule diferentes escenarios de lanzamiento y corrección monetaria para maximizar los ingresos.",
+            "benefits": [
+                "Montaje visual de la Cuadrícula de Ventas",
+                "Simulación de Velocidad de Ventas",
+                "Cálculo automático de comisiones y marketing"
+            ]
+        },
+        "cash-flow": {
+            "title": "Flujo de Caja",
+            "subtitle": "El Corazón Financiero del Proyecto",
+            "description": "Vista completa mes a mes de entradas y salidas. El sistema consolida automáticamente costos de construcción, gastos soft, impuestos e ingresos para entregar las métricas clave.",
+            "benefits": [
+                "Cálculo automático de TIR (IRR) y VPL (NPV)",
+                "Visualización de Exposición Máxima de Caja",
+                "Estado de Resultados Sintético"
+            ]
+        },
+        "financing": {
+            "title": "Financiamiento",
+            "subtitle": "Estructuración de Capital y Deuda",
+            "description": "Simule el apalancamiento financiero del proyecto. Configure préstamos bancarios (Crédito Constructor), aporte de socios (Equity) y canjes financieros o físicos.",
+            "benefits": [
+                "Cálculo automático de Intereses y Amortización",
+                "Análisis de LTV (Loan-to-Value) y LTC",
+                "Modelado de Deuda Senior y Mezzanine"
+            ]
+        },
+        "dashboards": {
+            "title": "Tableros y Reportes",
+            "subtitle": "Presentaciones para Inversores",
+            "description": "Basta de capturas de Excel. Genere PDFs profesionales y enlaces de vista interactiva ('Investor View') para presentar el proyecto a socios, bancos e inversores con confianza.",
+            "benefits": [
+                "Marca blanca (Su marca, nuestras cuentas)",
+                "Enlaces de acceso de 'solo lectura'",
+                "Gráficos interactivos y mapas de calor"
+            ]
+        }
+    },
+    "hero": {
+        "title": "Del Terreno a Llave en Mano.",
+        "subtitle": "Inteligencia Inmobiliaria + Gestión Financiera. Deja atrás las hojas de cálculo complejas y analiza la viabilidad de tu próximo desarrollo en segundos.",
+        "cta_primary": "Análisis de Viabilidad 🪄",
+        "cta_secondary": "Ver Análisis de Rentabilidad"
+    },
+    "sections": {
+        "what_is": {
+            "title": "¿Qué es BrixAurea?",
+            "description": "BrixAurea transforma el caos de hojas de cálculo desconectadas en un flujo de trabajo inteligente. Nuestra plataforma integra la búsqueda de terrenos (con datos de zonificación y mercado) directamente con un potente motor de Análisis de Rentabilidad del Proyecto, permitiéndote encontrar, analizar y financiar proyectos con velocidad récord."
+        },
+        "for_whom": {
+            "title": "¿Para quién es?",
+            "items": [
+                "Desarrolladores que buscan precisión en la planificación de nuevos proyectos",
+                "Inversores que quieren validar oportunidades antes de invertir capital",
+                "Consultores que necesitan entregar análisis completos y profesionales",
+                "Empresas que desean estandarizar análisis y aumentar eficiencia"
+            ]
+        },
+        "features": {
+            "title": "Funcionalidades Principales",
+            "items": [
+                {
+                    "title": "Magic Analysis 🪄",
+                    "desc": "Pegue la dirección y reciba instantáneamente datos de zonificación, potencial constructivo y sugerencia de 'Mejor Uso' para el terreno.",
+                    "slug": "magic-analysis"
+                },
+                {
+                    "title": "Simulación de Construcción",
+                    "desc": "Definición de tipología (casas, adosados, edificios). Estimación de costo por m². Cronograma físico-financiero.",
+                    "slug": "construction-simulation"
+                },
+                {
+                    "title": "Proyección de Ventas",
+                    "desc": "Definición de mix de unidades. Curva de ventas mensual o trimestral. Ingresos brutos y netos estimados.",
+                    "slug": "sales-projection"
+                },
+                {
+                    "title": "Flujo de Caja Completo",
+                    "desc": "Entradas y Salidas completas. Generación automática de Estado de Resultados proyectado, ROI, TIR, VPL y Payback.",
+                    "slug": "cash-flow"
+                },
+                {
+                    "title": "Financiamiento Inmobiliario",
+                    "desc": "Modelos Americanos: Préstamos Hipotecarios, Hard Money, Bridge Loans. Cálculo de LTV, DSCR y amortización.",
+                    "slug": "financing"
+                },
+                {
+                    "title": "Tableros y Reportes",
+                    "desc": "Gráficos de flujo de caja acumulado, indicadores financieros y exportación de reportes.",
+                    "slug": "dashboards"
+                }
+            ]
+        },
+        "action": {
+            "title": "Comience ahora a transformar análisis inmobiliarios en decisiones inteligentes.",
+            "cta": "Crear Cuenta"
+        },
+        "footer": {
+            "copyright": "© 2025 BrixAurea. Todos los derechos reservados.",
+            "company_attribution": "Una solución de EA Financial Advisory",
+            "company": {
+                "name": "BrixAurea",
+                "description": "La plataforma definitiva de viabilidad inmobiliaria."
+            },
+            "legal": {
+                "title": "Legal",
+                "privacy": "Política de Privacidad",
+                "terms": "Términos de Uso",
+                "support_policy": "Política de Soporte y Disponibilidad"
+            },
+            "support": {
+                "title": "Soporte",
+                "center": "Centro de Soporte",
+                "documentation": "Documentación",
+                "faq": "Preguntas Frecuentes"
+            },
+            "contact": {
+                "title": "Contacto",
+                "general": "contact@brixaurea.com",
+                "support_email": "support@brixaurea.com",
+                "about": "Sobre Nosotros"
+            }
+        }
+    },
+    "register": {
+        "already_have_account": "¿Ya tienes una cuenta?",
+        "plans": {
+            "title": "Elige tu Plan",
+            "subtitle": "Comienza con una prueba gratis, cancela cuando quieras",
+            "most_popular": "Más Popular",
+            "trial_days": "Prueba gratis de {days} días",
+            "per_month": "/mes",
+            "users": "usuario | usuarios",
+            "projects": "proyectos",
+            "unlimited_projects": "Proyectos ilimitados",
+            "storage": "almacenamiento",
+            "enterprise_cta": "¿Necesitas más? Contáctanos para Enterprise"
+        },
+        "features": {
+            "basic_analysis": "Análisis básico",
+            "limited_projects": "5 proyectos",
+            "storage_2gb": "2GB almacenamiento",
+            "email_support": "Soporte por email",
+            "unlimited_projects": "Proyectos ilimitados",
+            "team_3_members": "3 miembros",
+            "team_10_members": "10 miembros",
+            "team_25_members": "25 miembros",
+            "storage_10gb": "10GB almacenamiento",
+            "storage_50gb": "50GB almacenamiento",
+            "storage_100gb": "100GB almacenamiento",
+            "priority_support": "Soporte prioritario",
+            "team_management": "Gestión de equipo",
+            "advanced_reports": "Reportes avanzados",
+            "api_access": "Acceso a API",
+            "unlimited_everything": "Todo ilimitado",
+            "custom_integrations": "Integraciones personalizadas",
+            "dedicated_support": "Soporte dedicado",
+            "sla_guarantee": "Garantía de SLA",
+            "custom_branding": "Marca personalizada"
+        },
+        "step1": {
+            "title": "Elige tu Plan",
+            "subtitle": "Comienza con una prueba gratis, cancela cuando quieras"
+        },
+        "step2": {
+            "title": "Tus Datos",
+            "subtitle": "Crea tu cuenta",
+            "first_name": "Nombre",
+            "last_name": "Apellido",
+            "email": "Correo Electrónico",
+            "phone": "Teléfono",
+            "password": "Contraseña",
+            "confirm_password": "Confirmar Contraseña",
+            "password_hint": "Mínimo 8 caracteres"
+        },
+        "step3": {
+            "title": "Datos de la Empresa",
+            "subtitle": "Información de tu organización",
+            "company_name": "Nombre de la Empresa",
+            "ein": "EIN",
+            "ein_placeholder": "XX-XXXXXXX",
+            "website": "Sitio Web",
+            "organization_types": "Tipo de Organización",
+            "types": {
+                "developer": "Desarrollador Inmobiliario",
+                "builder": "Constructor",
+                "realtor": "Agencia Inmobiliaria",
+                "lender": "Prestamista Financiero",
+                "broker": "Corredor Independiente",
+                "consultant": "Consultor",
+                "other": "Otro"
+            },
+            "address": "Dirección",
+            "address_street": "Calle y Número",
+            "address_suite": "Suite/Unidad",
+            "address_city": "Ciudad",
+            "address_state": "Estado",
+            "address_zip": "Código Postal"
+        },
+        "step4": {
+            "title": "Confirmar Registro",
+            "subtitle": "Revisa tu información",
+            "selected_plan": "Plan Seleccionado",
+            "name": "Nombre",
+            "email": "Email",
+            "company": "Empresa",
+            "trial_info": "🎉 Prueba gratis de {days} días - Sin cargos hasta el final de la prueba",
+            "terms_accept": "He leído y acepto los",
+            "terms_link": "Términos de Servicio",
+            "and": "y la",
+            "privacy_link": "Política de Privacidad"
+        },
+        "buttons": {
+            "next": "Continuar",
+            "back": "Volver",
+            "submit": "Crear Cuenta",
+            "creating": "Creando cuenta..."
+        },
+        "errors": {
+            "plan_required": "Selecciona un plan",
+            "email_required": "El correo electrónico es obligatorio",
+            "email_invalid": "Por favor, ingresa un correo válido",
+            "password_required": "La contraseña es obligatoria",
+            "password_weak": "La contraseña debe tener al menos 8 caracteres",
+            "passwords_mismatch": "Las contraseñas no coinciden",
+            "first_name_required": "El nombre es obligatorio",
+            "last_name_required": "El apellido es obligatorio",
+            "company_name_required": "El nombre de la empresa es obligatorio",
+            "terms_required": "Debes aceptar los términos para continuar"
+        }
+    },
+    "login": {
+        "title": "Bienvenido de Nuevo",
+        "subtitle": "Inicia sesión en tu cuenta",
+        "email": "Correo Electrónico",
+        "password": "Contraseña",
+        "remember_me": "Recordarme",
+        "forgot_password": "¿Olvidaste tu contraseña?",
+        "submit": "Iniciar Sesión",
+        "no_account": "¿No tienes una cuenta?",
+        "register": "Crear Cuenta",
+        "errors": {
+            "email_required": "El correo electrónico es obligatorio",
+            "email_invalid": "Por favor, ingresa un correo válido",
+            "password_required": "La contraseña es obligatoria",
+            "invalid_credentials": "Correo o contraseña inválidos"
+        },
+        "email_verified": "¡Email verificado exitosamente! Ahora puedes iniciar sesión."
+    },
+    "verifyEmail": {
+        "title": "Verifica tu Email",
+        "subtitle": "Enviamos un enlace de verificación a",
+        "instructions": "Haz clic en el enlace de tu email para verificar tu cuenta. Si no lo encuentras, revisa la carpeta de spam.",
+        "resend": "Reenviar email de verificación",
+        "resend_sending": "Enviando...",
+        "resend_success": "¡Email enviado!",
+        "resend_error": "Error al enviar",
+        "back_to_login": "Volver al login",
+        "didnt_receive": "¿No recibiste el email?"
+    },
+    "forgotPassword": {
+        "title": "Olvidé mi Contraseña",
+        "subtitle": "Ingresa tu email y te enviaremos un enlace de restablecimiento",
+        "email": "Correo Electrónico",
+        "submit": "Enviar Enlace de Restablecimiento",
+        "back_to_login": "Volver al login",
+        "success_title": "Revisa tu Email",
+        "success_message": "Enviamos un enlace de restablecimiento a",
+        "errors": {
+            "email_required": "El correo electrónico es obligatorio",
+            "email_invalid": "Por favor, ingresa un correo válido",
+            "generic_error": "Ocurrió un error. Por favor, intenta de nuevo."
+        }
+    },
+    "resetPassword": {
+        "title": "Restablecer Contraseña",
+        "subtitle": "Ingresa tu nueva contraseña",
+        "new_password": "Nueva Contraseña",
+        "confirm_password": "Confirmar Contraseña",
+        "password_requirements": "Mínimo 8 caracteres",
+        "submit": "Restablecer Contraseña",
+        "success_title": "¡Contraseña Restablecida!",
+        "success_message": "Tu contraseña ha sido actualizada exitosamente.",
+        "go_to_login": "Ir al Login",
+        "errors": {
+            "password_required": "La contraseña es obligatoria",
+            "password_weak": "La contraseña debe tener al menos 8 caracteres",
+            "passwords_mismatch": "Las contraseñas no coinciden",
+            "generic_error": "Ocurrió un error. Por favor, intenta de nuevo.",
+            "invalid_token": "Enlace de restablecimiento inválido o expirado"
+        }
+    },
+    "dashboard": {
+        "title": "Panel",
+        "welcome": "Bienvenido",
+        "subtitle": "Aquí tienes una visión general de tus proyectos inmobiliarios.",
+        "overview": "Resumen",
+        "quick_actions": "Acciones Rápidas",
+        "recent_activity": "Actividad Reciente",
+        "no_activity": "Sin actividad reciente",
+        "activity_hint": "Tus acciones recientes aparecerán aquí",
+        "new_project": "Nuevo Proyecto",
+        "view_reports": "Ver Informes",
+        "run_analysis": "Ejecutar Análisis",
+        "logout": "Cerrar Sesión",
+        "logging_out": "Cerrando sesión...",
+        "menu": {
+            "overview": "Resumen",
+            "projects": "Proyectos",
+            "analysis": "Análisis",
+            "reports": "Informes",
+            "settings": "Configuración",
+            "back_to_site": "Volver al Sitio"
+        },
+        "stats": {
+            "projects": "Total de Proyectos",
+            "analyses": "Análisis Ejecutados",
+            "reports": "Informes Generados"
+        }
+    },
+    "settings": {
+        "title": "Configuración",
+        "profile": {
+            "title": "Información del Perfil",
+            "subtitle": "Actualiza tu información personal",
+            "basic_info": "Información Básica",
+            "first_name": "Nombre",
+            "last_name": "Apellido",
+            "email": "Correo Electrónico",
+            "phone": "Teléfono",
+            "account_type": "Tipo de Cuenta",
+            "individual": "Individual",
+            "organization": "Organización",
+            "company_info": "Información de la Empresa",
+            "company_logo": "Logo de la Empresa",
+            "logo_hint": "Usado en informes y documentos",
+            "address": "Dirección",
+            "save": "Guardar Cambios",
+            "saving": "Guardando...",
+            "saved": "¡Cambios guardados!",
+            "error": "Error al guardar cambios"
+        },
+        "account": {
+            "title": "Cuenta",
+            "subtitle": "Administra la configuración de tu cuenta",
+            "change_password": "Cambiar Contraseña",
+            "danger_zone": "Zona de Peligro",
+            "delete_account": "Eliminar Cuenta"
+        },
+        "team": {
+            "title": "Equipo",
+            "subtitle": "Administra los miembros de tu organización",
+            "members": "Miembros",
+            "invite": "Invitar Miembro",
+            "roles": {
+                "owner": "Propietario",
+                "admin": "Administrador",
+                "member": "Miembro",
+                "viewer": "Visualizador"
+            },
+            "upgrade_required": "Actualiza al plan Business para agregar miembros"
+        }
+    },
+    "deleteAccount": {
+        "title": "Eliminar Cuenta",
+        "subtitle": "Lamentamos verte ir",
+        "warning": "Esta acción no se puede deshacer. Todos tus datos serán eliminados permanentemente.",
+        "survey_title": "Antes de irte, cuéntanos por qué",
+        "survey_subtitle": "Tu feedback nos ayuda a mejorar BrixAurea",
+        "reasons": {
+            "not_useful": "La plataforma no es útil para mis necesidades",
+            "too_expensive": "Muy caro",
+            "found_alternative": "Encontré una alternativa mejor",
+            "missing_features": "Faltan funciones que necesito",
+            "too_complicated": "Muy complicado de usar",
+            "technical_issues": "Problemas técnicos o bugs",
+            "not_using": "Ya no lo estoy usando",
+            "other": "Otro motivo"
+        },
+        "other_placeholder": "Por favor, cuéntanos más...",
+        "confirm_email": "Escribe tu email para confirmar:",
+        "confirm_delete": "Eliminar Mi Cuenta",
+        "cancel": "Cancelar",
+        "deleting": "Eliminando..."
+    },
+    "analysis": {
+        "tabs": {
+            "overview": "Resumen",
+            "regional": "Datos Regionales",
+            "land": "Terreno",
+            "unit_mix": "Unidades",
+            "costs": "Costos",
+            "financials": "Financiero",
+            "feasibility": "Viabilidad"
+        },
+        "overview": {
+            "title": "Análisis del Proyecto",
+            "project_configuration": "Configuración del Proyecto",
+            "existing_construction": "¿Construcción Existente en el Sitio?",
+            "demolition_impact": "Impacta los costos de demolición.",
+            "structure_description": "Descripción de la Estructura",
+            "structure_placeholder": "ej. Edificio comercial antiguo de 2 pisos",
+            "project_type": "Tipo de Proyecto",
+            "select_type": "Seleccione el Tipo...",
+            "lot_size": "Tamaño del Lote (Acres)",
+            "save": "Guardar Detalles",
+            "saving": "Guardando..."
+        },
+        "land": {
+            "project_config": "Configuración del Proyecto",
+            "acquisition_details": "Detalles de Adquisición",
+            "owner": "Nombre del Propietario",
+            "value": "Valor del Terreno ($)",
+            "payment_method": "Método de Pago",
+            "far": "Uso de FAR (Aprovechamiento)",
+            "notes": "Notas",
+            "methods": {
+                "methodCash": "Compra Directa (Contado)",
+                "methodSellerFinancing": "Financiamiento del Vendedor",
+                "methodUnitSwap": "Permuta Física (Unidades / JV)",
+                "methodFinancialSwap": "Permuta Financiera (% VGV / JV)",
+                "methodOption": "Opción de Compra (Option Agreement)",
+                "methodGroundLease": "Arrendamiento de Suelo (Ground Lease)",
+                "swapSharePercent": "Participación del Terreno (% del VGV)",
+                "swapHint": "El valor final del terreno se calculará en función de los Ingresos Totales (VGV) definidos en la pestaña de 'Ventas / Ingresos'.",
+                "unitSwapHint": "El valor final del terreno será determinado por el valor de mercado de las unidades asignadas al propietario en la pestaña 'Mezcla de Unidades'.",
+                "installment": "Cuotas"
+            }
+        },
+        "units": {
+            "title": "Mezcla de Unidades",
+            "subtitle": "Defina los productos inmobiliarios y precios.",
+            "table": {
+                "model": "Modelo / Tipo",
+                "beds": "Hab.",
+                "baths": "Baños",
+                "suites": "Suites",
+                "garages": "Cocheras",
+                "area_sellable": "Área Priv. (Int)",
+                "area_outdoor": "Área No-Cond. / Ext.",
+                "area_total": "Área Total",
+                "count": "Cant.",
+                "price_sqft": "$/ft²",
+                "avg_price": "Precio Unit.",
+                "total_vgv": "VGV Total",
+                "actions": ""
+            },
+            "summary": {
+                "total_units": "Total Unidades",
+                "total_area": "Área Privada Total",
+                "avg_price_sqft": "Precio Promedio ($/ft²)",
+                "gross_revenue": "Ingresos Brutos (VGV)"
+            },
+            "add_btn": "Agregar Unidad"
+        },
+        "types": {
+            "single_family": "Casa Unifamiliar",
+            "condo_building": "Edificio de Condominios",
+            "townhomes": "Comunidad de Adosados",
+            "retail": "Comercial / Strip Mall",
+            "mixed_use": "Uso Mixto (Res + Com)",
+            "industrial": "Industrial / Almacén"
+        },
+        "regional_data": {
+            "title": "Datos Regionales y Cívicos",
+            "source": "Fuente: Demostración Brix Aurea",
+            "sections": {
+                "leadership": "Liderazgo",
+                "demographics": "Demografía",
+                "market": "Datos de Mercado",
+                "education": "Educación",
+                "news": "Noticias Regionales"
+            },
+            "metrics": {
+                "population": "Población",
+                "median_age": "Edad Media",
+                "founding_date": "Fundación",
+                "unemployment": "Desempleo",
+                "income": "Ingresos",
+                "home_value": "Valor Vivienda",
+                "rent_trend": "Tend. Alquiler",
+                "job_growth": "Crec. Empleo",
+                "interest_rate": "Tasa Interés",
+                "inventory": "Inventario",
+                "cap_rate": "Cap Rate Prom"
+            },
+            "schools": {
+                "elementary": "Primaria",
+                "middle": "Secundaria",
+                "high": "Preparatoria"
+            },
+            "leadership_roles": {
+                "mayor": "Alcalde",
+                "governor": "Gobernador"
+            }
+        }
+    },
+    "ai": {
+        "welcome_title": "¡Hola! Soy BrixAureIA",
+        "welcome_subtitle": "Tu asistente de inversiones.",
+        "placeholder": "Pregunta sobre tus inversiones...",
+        "error_generic": "No se pudo conectar a la IA en este momento."
+    }
+}

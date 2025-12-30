@@ -1,0 +1,286 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+:root {
+  /* Core Brand Colors */
+  --primary: #081F2E;
+  --primary-light: #0F3A52;
+  --secondary: #00D9FF;
+  --secondary-glow: #00F0FF;
+  --accent: #0EA5E9;
+  --gold: #FFD700;
+  --gold-glow: #FFEA00;
+  --gold-dim: #D4AF37;
+
+  /* Backgrounds - Light Theme */
+  --background: #FFFFFF;
+  --foreground: #081F2E;
+  --surface: #FFFFFF;
+  --surface-light: #F8FAFC;
+  --border-color: #E2E8F0;
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #081F2E 0%, #0F3A52 100%);
+  --gradient-tech: linear-gradient(135deg, #00D9FF 0%, #0EA5E9 100%);
+  --gradient-shine: linear-gradient(135deg, #081F2E 0%, #00D9FF 50%, #081F2E 100%);
+  --gradient-border: linear-gradient(90deg, #00D9FF, #0EA5E9, #00D9FF);
+  --gradient-premium: linear-gradient(135deg, #081F2E 0%, #0F3A52 50%, #D4AF37 100%);
+  --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+
+  /* Rotating Border Animation */
+  --angle: 0deg;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Keyframes for Rotating Border Effect */
+@keyframes rotate-border {
+  0% {
+    --angle: 0deg;
+  }
+
+  100% {
+    --angle: 360deg;
+  }
+}
+
+@keyframes rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes gradient-shift {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 40px rgba(0, 217, 255, 0.6);
+  }
+}
+
+/* Animated Border Card Effect - Smooth Running Border */
+.animated-border-card {
+  position: relative;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.animated-border-card::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 16px;
+  background: conic-gradient(from 0deg,
+      #00D9FF,
+      #0EA5E9,
+      #00D9FF,
+      #0EA5E9,
+      #00D9FF);
+  animation: rotate-border 3s linear infinite;
+  z-index: 0;
+}
+
+.animated-border-card::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  background: white;
+  border-radius: 14px;
+  z-index: 1;
+}
+
+@keyframes rotate-border {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animated-border-card-content {
+  position: relative;
+  background: transparent;
+  border-radius: 14px;
+  padding: 2rem;
+  height: 100%;
+  z-index: 2;
+}
+
+/* Glassmorphism Effect */
+.glass {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 217, 255, 0.2);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.85);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.25);
+  border-color: rgba(0, 217, 255, 0.5);
+}
+
+.glass-heavy {
+  background: rgba(8, 31, 46, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+/* Gradient Text */
+.gradient-text {
+  background: var(--gradient-tech);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animated Gradient Background */
+.animated-gradient {
+  background: linear-gradient(270deg, #081F2E, #0A2A3D, #081F2E);
+  background-size: 400% 400%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+/* Premium Button Styles */
+.btn-primary {
+  background: var(--gradient-tech);
+  color: white;
+  font-weight: 600;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 217, 255, 0.4);
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+/* Body Styles */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--secondary);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary-glow);
+}
+
+/* FadeIn Animation for Form Steps */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}

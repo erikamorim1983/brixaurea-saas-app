@@ -1,0 +1,25 @@
+/**
+ * TEMPORARY DEV BYPASS
+ * Add this button to the homepage header for quick dashboard access during development
+ * 
+ * Instructions:
+ * 1. Open: frontend/app/[lang]/page.tsx
+ * 2. Find line 35: <LanguageSwitcher currentLang={lang} />
+ * 3. Add this code RIGHT AFTER line 36 (after <LanguageSwitcher currentLang={lang} />):
+ */
+
+{/* TEMPORARY DEV BUTTON - Remove in production */}
+<Link
+    href={`/${lang}/dashboard`}
+    className="px-3 py-1.5 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-md hover:bg-yellow-200 transition-colors border-2 border-yellow-300"
+    title="Dev: Skip to Dashboard"
+>
+    🚀 DEV
+</Link>
+
+/**
+ * This adds a yellow "DEV" button in the header that goes straight to /dashboard
+ * No login or registration needed - perfect for development!
+ * 
+ * To remove later: Just delete these lines
+ */

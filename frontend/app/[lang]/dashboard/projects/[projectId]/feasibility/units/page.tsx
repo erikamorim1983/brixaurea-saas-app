@@ -1,0 +1,25 @@
+import { getProjectWithLocation } from '@/lib/data/project';
+import UnitMixTab from '@/components/Analysis/UnitMixTab';
+import { getDictionary } from '@/get-dictionary';
+
+export default async function ProjectUnitsPage({ params }: { params: { lang: string; projectId: string } }) {
+    const { lang, projectId } = await params;
+    const data = await getProjectWithLocation(projectId);
+    const dictionary = await getDictionary(lang);
+
+    if (!data) return <div>Project not found</div>;
+    const { project, location } = data;
+
+    return (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="w-full">
+                <UnitMixTab
+                    project={project}
+                    location={location}
+                    lang={lang}
+                    dictionary={dictionary}
+                />
+            </div>
+        </div>
+    );
+}

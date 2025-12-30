@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+sqlmodel
+psycopg2-binary
+python-multipart
+python-jose[cryptography]
+passlib[bcrypt]
+supabase==2.3.0
+python-dotenv
+
+# Security additions
+slowapi
+starlette
+pydantic[email]
