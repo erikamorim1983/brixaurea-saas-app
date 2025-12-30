@@ -49,6 +49,23 @@ export async function generateMetadata({
     return {
         title: titles[lang as keyof typeof titles] || titles.en,
         description: descriptions[lang as keyof typeof descriptions] || descriptions.en,
+        icons: {
+            icon: '/favicon.svg',
+            shortcut: '/favicon.svg',
+            apple: '/favicon.svg',
+        },
+        openGraph: {
+            title: titles[lang as keyof typeof titles] || titles.en,
+            description: descriptions[lang as keyof typeof descriptions] || descriptions.en,
+            images: [
+                {
+                    url: '/images/logo/delta_icon.svg',
+                    width: 512,
+                    height: 512,
+                    alt: 'BrixAurea Logo',
+                },
+            ],
+        },
     };
 }
 
