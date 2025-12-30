@@ -51,7 +51,7 @@ export default function Header({ lang, dictionary, showAuthButtons = true }: Hea
                             </Link>
                             <Link
                                 href={`/${lang}/auth/register`}
-                                className="px-4 py-2 bg-gradient-to-r from-[#00D9FF] to-[#0EA5E9] text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:shadow-cyan-500/30 transition-all hover:scale-105"
+                                className="btn-primary text-sm !py-2 !px-4 !rounded-lg"
                             >
                                 {dictionary.nav.get_started}
                             </Link>

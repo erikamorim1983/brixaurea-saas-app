@@ -59,7 +59,7 @@ export default async function Page({
 
                         <Link
                             href={`/${lang}/auth/register`}
-                            className="px-4 py-2 bg-gradient-to-r from-[#00D9FF] to-[#0EA5E9] text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:shadow-cyan-500/30 transition-all hover:scale-105"
+                            className="btn-primary text-sm !py-2 !px-4 !rounded-lg"
                         >
                             {dict.nav.get_started}
                         </Link>
@@ -94,10 +94,9 @@ export default async function Page({
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link
                             href={`/${lang}/auth/register`}
-                            className="group px-8 py-4 bg-gradient-to-r from-[#00D9FF] to-[#0EA5E9] text-white text-base font-bold rounded-xl shadow-lg shadow-cyan-500/20 hover:shadow-2xl hover:shadow-cyan-500/40 hover:scale-105 transition-all duration-300 relative overflow-hidden"
+                            className="btn-primary text-base font-bold !py-4 !px-8 !rounded-xl shadow-lg shadow-cyan-500/20 hover:shadow-2xl hover:shadow-cyan-500/40 transition-all duration-300"
                         >
-                            <span className="relative z-10">{dict.hero.cta_primary}</span>
-                            <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            {dict.hero.cta_primary}
                         </Link>
                         <button className="px-8 py-4 bg-white text-gray-700 text-base font-semibold rounded-xl border-2 border-gray-200 hover:border-cyan-300 hover:bg-gray-50 transition-all duration-300">
                             {dict.hero.cta_secondary}
