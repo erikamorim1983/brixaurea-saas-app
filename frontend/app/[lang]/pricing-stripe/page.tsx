@@ -41,13 +41,11 @@ export default async function StripePricingPage({
                             strategy="lazyOnload"
                         />
 
-                        {/* Pricing Table */}
-                        {/* @ts-ignore - Web Component defined in script */}
-                        <stripe-pricing-table
-                            pricing-table-id="prctbl_1SfWpAGqIvEjcgEEONGu8jwy"
-                            publishable-key="pk_live_51SfCWbGqIvEjcgEEMVM8oueG7DHK3FxF5ifodLrKcwqgJVbretT60UV0yHeIMb7U0o5MsN4Skgw6dkLrKamDsySE00sDmgQ2oA"
-                        >
-                        </stripe-pricing-table>
+                        {/* Pricing Table - Using createElement to bypass TS check for Web Component */}
+                        {React.createElement('stripe-pricing-table', {
+                            'pricing-table-id': "prctbl_1SfWpAGqIvEjcgEEONGu8jwy",
+                            'publishable-key': "pk_live_51SfCWbGqIvEjcgEEMVM8oueG7DHK3FxF5ifodLrKcwqgJVbretT60UV0yHeIMb7U0o5MsN4Skgw6dkLrKamDsySE00sDmgQ2oA"
+                        })}
                     </div>
                 </section>
 
