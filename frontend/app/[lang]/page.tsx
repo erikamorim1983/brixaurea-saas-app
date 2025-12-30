@@ -48,14 +48,7 @@ export default async function Page({
                             {dict.nav.login}
                         </Link>
 
-                        {/* Access MyValuation Link */}
-                        <a
-                            href="https://brixaurea-saas-app.vercel.app"
-                            target="_blank"
-                            className="btn-primary text-sm !py-2 !px-4 !rounded-lg"
-                        >
-                            Acessar MyValuation
-                        </a>
+
 
                         <Link
                             href={`/${lang}/auth/register`}
