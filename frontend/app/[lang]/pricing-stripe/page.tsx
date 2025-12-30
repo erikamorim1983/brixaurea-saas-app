@@ -42,6 +42,7 @@ export default async function StripePricingPage({
                         />
 
                         {/* Pricing Table */}
+                        {/* @ts-ignore - Web Component defined in script */}
                         <stripe-pricing-table
                             pricing-table-id="prctbl_1SfWpAGqIvEjcgEEONGu8jwy"
                             publishable-key="pk_live_51SfCWbGqIvEjcgEEMVM8oueG7DHK3FxF5ifodLrKcwqgJVbretT60UV0yHeIMb7U0o5MsN4Skgw6dkLrKamDsySE00sDmgQ2oA"
