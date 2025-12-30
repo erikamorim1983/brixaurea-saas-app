@@ -50,7 +50,7 @@ export default async function Page({
 
                         {/* Access MyValuation Link */}
                         <a
-                            href="https://github.com/erikamorim1983/brixaurea-saas-app.git"
+                            href="https://brixaurea-saas-app.vercel.app"
                             target="_blank"
                             className="btn-primary text-sm !py-2 !px-4 !rounded-lg"
                         >
