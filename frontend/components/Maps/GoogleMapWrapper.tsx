@@ -1,9 +1,9 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { useJsApiLoader, Library } from '@react-google-maps/api';
+import { useJsApiLoader } from '@react-google-maps/api';
 
-const LIBRARIES: Library[] = ["places"];
+const LIBRARIES: any[] = ["places"];
 
 interface GoogleMapWrapperProps {
     children: ReactNode;
