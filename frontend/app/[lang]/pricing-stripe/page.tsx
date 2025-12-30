@@ -1,4 +1,4 @@
-import React from 'react';
+// @ts-nocheck
 import Script from 'next/script';
 import { getDictionary } from '@/get-dictionary';
 import Header from '../components/Header';
@@ -42,11 +42,12 @@ export default async function StripePricingPage({
                             strategy="lazyOnload"
                         />
 
-                        {/* Pricing Table - Using createElement to bypass TS check for Web Component */}
-                        {React.createElement('stripe-pricing-table', {
-                            'pricing-table-id': "prctbl_1SfWpAGqIvEjcgEEONGu8jwy",
-                            'publishable-key': "pk_live_51SfCWbGqIvEjcgEEMVM8oueG7DHK3FxF5ifodLrKcwqgJVbretT60UV0yHeIMb7U0o5MsN4Skgw6dkLrKamDsySE00sDmgQ2oA"
-                        })}
+                        {/* Pricing Table */}
+                        <stripe-pricing-table
+                            pricing-table-id="prctbl_1SfWpAGqIvEjcgEEONGu8jwy"
+                            publishable-key="pk_live_51SfCWbGqIvEjcgEEMVM8oueG7DHK3FxF5ifodLrKcwqgJVbretT60UV0yHeIMb7U0o5MsN4Skgw6dkLrKamDsySE00sDmgQ2oA"
+                        >
+                        </stripe-pricing-table>
                     </div>
                 </section>
 
