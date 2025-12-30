@@ -67,7 +67,7 @@ export default function ShareProjectModal({ project, isOpen, onClose, lang }: Sh
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 outline-none"
-                            placeholder="investor@example.com"
+                            placeholder="user@example.com"
                         />
                     </div>
 

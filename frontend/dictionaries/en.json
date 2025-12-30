@@ -61,7 +61,7 @@
         "dashboards": {
             "title": "Dashboards & Reports",
             "subtitle": "Investor Presentations",
-            "description": "No more Excel screenshots. Generate professional PDFs and interactive view links ('Investor View') to present the project to partners, banks, and investors with confidence.",
+            "description": "No more Excel screenshots. Generate professional PDFs and interactive view links ('Client View') to present the project to partners, banks, and stakeholders with confidence.",
             "benefits": [
                 "White-label (Your brand, our math)",
                 "Read-only access links",
@@ -84,7 +84,7 @@
             "title": "Who is it for?",
             "items": [
                 "Developers seeking precision in planning new projects",
-                "Investors who want to validate opportunities before committing capital",
+                "Partners who want to validate opportunities before committing capital",
                 "Consultants who need to deliver complete and professional analyses",
                 "Companies wanting to standardize analyses and increase efficiency"
             ]
