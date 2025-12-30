@@ -59,7 +59,7 @@ export async function generateMetadata({
             description: descriptions[lang as keyof typeof descriptions] || descriptions.en,
             images: [
                 {
-                    url: '/images/logo/delta_icon.svg',
+                    url: '/images/logo/ba_icon.svg',
                     width: 512,
                     height: 512,
                     alt: 'BrixAurea Logo',
