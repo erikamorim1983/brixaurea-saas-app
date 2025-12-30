@@ -61,7 +61,7 @@
         "dashboards": {
             "title": "Tableros y Reportes",
             "subtitle": "Presentaciones para Inversores",
-            "description": "Basta de capturas de Excel. Genere PDFs profesionales y enlaces de vista interactiva ('Investor View') para presentar el proyecto a socios, bancos e inversores con confianza.",
+            "description": "Basta de capturas de pantalla de Excel. Genere PDF profesionales y enlaces de visualización interactivos ('Vista del Cliente') para presentar el proyecto a socios, bancos y partes interesadas con confianza.",
             "benefits": [
                 "Marca blanca (Su marca, nuestras cuentas)",
                 "Enlaces de acceso de 'solo lectura'",
@@ -84,7 +84,7 @@
             "title": "¿Para quién es?",
             "items": [
                 "Desarrolladores que buscan precisión en la planificación de nuevos proyectos",
-                "Inversores que quieren validar oportunidades antes de invertir capital",
+                "Socios que desean validar oportunidades antes de comprometer capital",
                 "Consultores que necesitan entregar análisis completos y profesionales",
                 "Empresas que desean estandarizar análisis y aumentar eficiencia"
             ]

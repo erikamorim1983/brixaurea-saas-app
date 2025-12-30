@@ -61,7 +61,7 @@
         "dashboards": {
             "title": "Dashboards & Reports",
             "subtitle": "Apresentações para Investidores",
-            "description": "Chega de prints de Excel. Gere PDFs profissionais e links de visualização interativa ('Investor View') para apresentar o projeto a sócios, bancos e investidores com confiança.",
+            "description": "Chega de prints do Excel. Gere PDFs profissionais e links de visualização interativa ('Visualização do Cliente') para apresentar o projeto a parceiros, bancos e partes interessadas com confiança.",
             "benefits": [
                 "White-label (Sua marca, nossas contas)",
                 "Links de acesso 'somente leitura'",
@@ -84,7 +84,7 @@
             "title": "Para quem é",
             "items": [
                 "Incorporadores que buscam precisão no planejamento de novos empreendimentos",
-                "Investidores que querem validar oportunidades antes de aportar capital",
+                "Parceiros que desejam validar oportunidades antes de comprometer capital",
                 "Consultores que precisam entregar análises completas e profissionais",
                 "Empresas que desejam padronizar análises e aumentar eficiência"
             ]
