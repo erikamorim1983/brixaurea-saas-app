@@ -118,7 +118,7 @@ export default function InvestorRelationsPage() {
                                     <YAxis stroke="#94a3b8" tickFormatter={(value) => `$${value / 1000}k`} />
                                     <Tooltip
                                         contentStyle={{ backgroundColor: '#1e293b', color: '#fff', border: 'none', borderRadius: '8px' }}
-                                        formatter={(value: number) => [`$${value.toLocaleString()}`, '']}
+                                        formatter={(value: number | undefined) => [value ? `$${value.toLocaleString()}` : '', '']}
                                     />
                                     <Area type="monotone" dataKey="revenue" stackId="1" stroke="#06b6d4" fill="url(#colorRevenue)" name="Receita" />
                                     <Line type="monotone" dataKey="cost" stroke="#ef4444" strokeWidth={3} dot={false} name="Custo Infra" />
