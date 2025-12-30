@@ -36,10 +36,6 @@ export default function Footer({ lang, dictionary: dict, simplified = false }: F
                             <Link href={`/${lang}/faq`} className="hover:text-cyan-400 transition-colors">
                                 {dict.sections?.footer?.support?.faq || 'FAQ'}
                             </Link>
-                            <span className="text-gray-600">|</span>
-                            <Link href={`/${lang}/investor-relations`} className="hover:text-cyan-400 transition-colors font-semibold text-cyan-200">
-                                Investor Relations 🔒
-                            </Link>
                         </nav>
 
                         {/* Copyright */}
@@ -175,10 +171,6 @@ export default function Footer({ lang, dictionary: dict, simplified = false }: F
                     <p className="text-sm text-gray-400">{dict.sections?.footer?.copyright || '© 2025 BrixAurea. Todos os direitos reservados.'}</p>
                     <p className="text-xs text-gray-500 mt-2">
                         {dict.sections?.footer?.company_attribution || 'Uma solução da EA Financial Advisory'} • <a href="https://www.eafinancialadvisory.com/" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-400 transition-colors">eafinancialadvisory.com</a>
-                        <span className="mx-2 text-gray-700">|</span>
-                        <Link href={`/${lang}/investor-relations`} className="text-gray-500 hover:text-cyan-400 transition-colors text-[10px] uppercase tracking-wider">
-                            Investor Relations (Confidential)
-                        </Link>
                         <span className="mx-2 text-gray-700">|</span>
                         <Link href={`/${lang}/test-aura`} className="text-gray-600 hover:text-[#00D9FF] transition-colors text-[10px] uppercase tracking-wider">
                             ✨

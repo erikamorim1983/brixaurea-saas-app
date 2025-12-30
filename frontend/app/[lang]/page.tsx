@@ -75,13 +75,6 @@ export default async function Page({
                 <div className="absolute bottom-20 right-10 w-40 h-40 bg-blue-400/10 rounded-full blur-3xl animate-[float_8s_ease-in-out_infinite]"></div>
                 <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-cyan-300/5 rounded-full blur-3xl"></div>
 
-                {/* TEMPORARY: Investor Access Link */}
-                <div className="absolute top-4 right-4 z-50">
-                    <Link href={`/${lang}/investor-relations`} className="inline-flex items-center gap-2 px-4 py-2 bg-black/5 backdrop-blur-sm border border-black/10 rounded-full text-xs font-bold uppercase tracking-wider text-gray-600 hover:bg-black/10 hover:text-black transition-all">
-                        <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-                        Investor Access
-                    </Link>
-                </div>
 
                 <div className="container mx-auto max-w-5xl text-center relative z-10">
                     <div className="inline-block mb-4 px-4 py-2 bg-gradient-to-r from-cyan-50 to-blue-50 text-cyan-600 rounded-full text-xs font-bold uppercase tracking-wider border border-cyan-200 backdrop-blur-sm">
