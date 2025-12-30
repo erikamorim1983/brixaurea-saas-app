@@ -61,11 +61,12 @@ export async function POST(request: Request) {
         });
 
         if (error) {
-            // 4. Log failed attempt (don't reveal specific error)
+            // 4. Log failed attempt
+            console.error('Authentication attempt failed:', error.message, '| Email:', sanitizedEmail);
             await logLoginFailed(sanitizedEmail, error.message, request);
 
             return NextResponse.json(
-                { message: 'Invalid credentials' }, // Generic message
+                { message: 'Invalid credentials' }, // Generic message for security
                 {
                     status: 401,
                     headers: getRateLimitHeaders(rateLimitResult),
@@ -74,6 +75,8 @@ export async function POST(request: Request) {
         }
 
         // 5. Successful login - log and respond
+        if (!data.user) throw new Error('User object missing after login');
+
         await logLoginSuccess(data.user.id, sanitizedEmail, request);
 
         return NextResponse.json(
@@ -88,10 +91,10 @@ export async function POST(request: Request) {
                 headers: getRateLimitHeaders(rateLimitResult),
             }
         );
-    } catch (error) {
-        console.error('Login error:', error);
+    } catch (error: any) {
+        console.error('API Login critical error:', error.message || error);
         return NextResponse.json(
-            { message: 'An error occurred' }, // Generic error
+            { message: 'An error occurred during login' },
             { status: 500 }
         );
     }

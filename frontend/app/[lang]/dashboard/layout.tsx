@@ -17,18 +17,24 @@ export default async function DashboardLayout({
     const dictionary = await getDictionary(lang);
 
     // Double-check authentication on the server side
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const { data, error: authError } = await supabase.auth.getUser();
+    const user = data?.user;
 
-    if (error || !user) {
+    if (authError || !user) {
+        console.error('Dashboard Auth Error:', authError?.message);
         redirect(`/${lang}/auth/login`);
     }
 
-    // Get user profile data
-    const { data: profile } = await supabase
+    // Get user profile data safely
+    const { data: profile, error: profileError } = await supabase
         .from('user_profiles')
         .select('first_name, last_name, company_name, logo_url, account_type')
         .eq('id', user.id)
         .single();
+
+    if (profileError) {
+        console.warn('Profile fetch warning (Dashboard):', profileError.message);
+    }
 
     const userName = profile?.first_name
         ? `${profile.first_name} ${profile.last_name || ''}`.trim()

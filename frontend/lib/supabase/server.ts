@@ -4,9 +4,19 @@ import { cookies } from 'next/headers';
 export async function createClient() {
     const cookieStore = await cookies();
 
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    // Server-side diagnostic logging (visible in Vercel logs)
+    if (!supabaseUrl || !supabaseKey) {
+        console.error('CRITICAL: Supabase environment variables are missing!');
+        console.log('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? 'Present' : 'MISSING');
+        console.log('NEXT_PUBLIC_SUPABASE_ANON_KEY:', supabaseKey ? 'Present' : 'MISSING');
+    }
+
     return createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        supabaseUrl || '',
+        supabaseKey || '',
         {
             cookies: {
                 getAll() {

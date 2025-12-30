@@ -30,15 +30,24 @@ export default async function DashboardPage({
     const dictionary = await getDictionary(lang);
     const supabase = await createClient();
 
-    // Get user data
-    const { data: { user } } = await supabase.auth.getUser();
+    // Get user data safely
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    const user = userData?.user;
 
-    // Get user profile
-    const { data: profile } = await supabase
+    if (userError || !user) {
+        console.error('Dashboard Page Auth Error:', userError?.message);
+    }
+
+    // Get user profile safely
+    const { data: profile, error: profileError } = await supabase
         .from('user_profiles')
         .select('first_name, last_name, account_type')
         .eq('id', user?.id)
         .single();
+
+    if (profileError) {
+        console.warn('Dashboard Page Profile Warning:', profileError.message);
+    }
 
     const t = dictionary.dashboard || {
         welcome: 'Welcome',
