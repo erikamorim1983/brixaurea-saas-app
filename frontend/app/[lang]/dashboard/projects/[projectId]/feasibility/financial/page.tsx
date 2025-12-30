@@ -1,7 +1,7 @@
 import { getProjectCosts } from '@/lib/actions/feasibility';
 import { getDictionary } from '@/get-dictionary';
 
-export default async function ProjectFinancialPage({ params }: { params: { lang: string; projectId: string } }) {
+export default async function ProjectFinancialPage({ params }: { params: Promise<{ lang: string; projectId: string }> }) {
     const { lang, projectId } = await params;
     const dictionary = await getDictionary(lang);
     const costs = await getProjectCosts(projectId);

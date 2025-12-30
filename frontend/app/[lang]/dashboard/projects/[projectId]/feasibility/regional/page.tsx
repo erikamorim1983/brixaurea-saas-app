@@ -2,7 +2,7 @@ import { getProjectWithLocation } from '@/lib/data/project';
 import { getDictionary } from '@/get-dictionary';
 import RegionalTab from '@/components/Analysis/RegionalTab';
 
-export default async function ProjectRegionalPage({ params }: { params: { lang: string; projectId: string } }) {
+export default async function ProjectRegionalPage({ params }: { params: Promise<{ lang: string; projectId: string }> }) {
     const { lang, projectId } = await params;
     const dictionary = await getDictionary(lang);
     const data = await getProjectWithLocation(projectId);

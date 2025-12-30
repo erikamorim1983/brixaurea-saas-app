@@ -5,7 +5,7 @@ import { Suspense } from 'react';
 import { getDictionary } from '@/get-dictionary';
 
 // Using server component to fetch initial data
-export default async function LandFeasibilityPage({ params }: { params: { lang: string; projectId: string } }) {
+export default async function LandFeasibilityPage({ params }: { params: Promise<{ lang: string; projectId: string }> }) {
     const { lang, projectId } = await params;
     const dict = await getDictionary(lang);
 

@@ -4,7 +4,7 @@ import OverviewTab from '@/components/Analysis/OverviewTab';
 import GoogleMapWrapper from '@/components/Maps/GoogleMapWrapper';
 import PropertyMap from '@/components/Maps/PropertyMap';
 
-export default async function ProjectOverviewPage({ params }: { params: { lang: string; projectId: string } }) {
+export default async function ProjectOverviewPage({ params }: { params: Promise<{ lang: string; projectId: string }> }) {
     const { lang, projectId } = await params;
     const dictionary = await getDictionary(lang);
     const data = await getProjectWithLocation(projectId);

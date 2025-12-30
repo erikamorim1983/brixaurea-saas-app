@@ -2,7 +2,7 @@ import { getProjectWithLocation } from '@/lib/data/project';
 import UnitMixTab from '@/components/Analysis/UnitMixTab';
 import { getDictionary } from '@/get-dictionary';
 
-export default async function ProjectUnitsPage({ params }: { params: { lang: string; projectId: string } }) {
+export default async function ProjectUnitsPage({ params }: { params: Promise<{ lang: string; projectId: string }> }) {
     const { lang, projectId } = await params;
     const data = await getProjectWithLocation(projectId);
     const dictionary = await getDictionary(lang);

@@ -3,7 +3,7 @@ import { getDictionary } from '@/get-dictionary';
 import CurrencyInput from '@/components/ui/CurrencyInput'; // reusing for display format if useful or just Intl
 // We can display a simple table
 
-export default async function ProjectCostsPage({ params }: { params: { lang: string; projectId: string } }) {
+export default async function ProjectCostsPage({ params }: { params: Promise<{ lang: string; projectId: string }> }) {
     const { lang, projectId } = await params;
     const dictionary = await getDictionary(lang);
     const costs = await getProjectCosts(projectId);
