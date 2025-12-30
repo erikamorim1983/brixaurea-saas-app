@@ -1,24 +1,46 @@
-import { getDictionary } from "../../get-dictionary";
-import Link from "next/link";
+'use client';
 
-export default async function NotFound({
-    params,
-}: {
-    params: Promise<{ lang: string }>;
-}) {
-    const { lang } = await params;
-    const dict = await getDictionary(lang);
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+export default function NotFound() {
+    const pathname = usePathname();
+    const lang = pathname.split('/')[1] || 'en';
+
+    // Traduções simples para o 404 (evitando complexidade de carregar dicionários JSON no cliente agora)
+    const translations = {
+        en: {
+            title: "Page not found",
+            message: "Sorry, the page you are looking for does not exist or has been moved.",
+            back: "Back to Home",
+            footer: "© 2025 BrixAurea. All rights reserved."
+        },
+        pt: {
+            title: "Página não encontrada",
+            message: "Desculpe, a página que você está procurando não existe ou foi movida.",
+            back: "Voltar ao Início",
+            footer: "© 2025 BrixAurea. Todos os direitos reservados."
+        },
+        es: {
+            title: "Página no encontrada",
+            message: "Lo sentimos, la página que está buscando no existe o ha sido movida.",
+            back: "Volver al Inicio",
+            footer: "© 2025 BrixAurea. Todos los derechos reservados."
+        }
+    };
+
+    const t = translations[lang as keyof typeof translations] || translations.en;
 
     return (
         <div className="flex flex-col min-h-screen bg-white">
             {/* Navbar */}
             <header className="sticky top-0 z-50 w-full glass border-b border-gray-200">
                 <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-                    <Link href="/" className="font-bold text-2xl tracking-tight block w-40 h-10 relative mb-8">
+                    <Link href={`/${lang}`} className="font-bold text-2xl tracking-tight block w-40 h-10 relative">
                         <img
                             src="/images/logo/BrixAurea_full_transparent.png"
                             alt="BrixAurea"
-                            className="w-full h-full object-contain"
+                            className="w-full h-full object-contain object-left"
                         />
                     </Link>
                 </div>
@@ -35,15 +57,10 @@ export default async function NotFound({
 
                     <h1 className="text-6xl font-bold text-[#081F2E] mb-4">404</h1>
                     <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                        {lang === 'pt' ? 'Página não encontrada' : lang === 'es' ? 'Página no encontrada' : 'Page not found'}
+                        {t.title}
                     </h2>
                     <p className="text-gray-600 mb-8">
-                        {lang === 'pt'
-                            ? 'Desculpe, a página que você está procurando não existe ou foi movida.'
-                            : lang === 'es'
-                                ? 'Lo sentimos, la página que está buscando no existe o ha sido movida.'
-                                : 'Sorry, the page you are looking for does not exist or has been moved.'
-                        }
+                        {t.message}
                     </p>
 
                     <Link
@@ -53,7 +70,7 @@ export default async function NotFound({
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
-                        {lang === 'pt' ? 'Voltar ao Início' : lang === 'es' ? 'Volver al Inicio' : 'Back to Home'}
+                        {t.back}
                     </Link>
                 </div>
             </main>
@@ -61,7 +78,7 @@ export default async function NotFound({
             {/* Simple Footer */}
             <footer className="bg-gray-50 border-t border-gray-200 py-8">
                 <div className="container mx-auto px-4 text-center text-sm text-gray-600">
-                    <p>{dict.sections.footer.copyright}</p>
+                    <p>{t.footer}</p>
                 </div>
             </footer>
         </div>
