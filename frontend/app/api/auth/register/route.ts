@@ -101,11 +101,16 @@ export async function POST(request: Request) {
         const supabase = await createClient();
 
         // 5. Create user in Supabase Auth
+        // Determine the redirect URL dynamically
+        const origin = request.headers.get('origin');
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || origin || 'https://www.brixaurea.com';
+        const redirectTo = `${siteUrl.endsWith('/') ? siteUrl.slice(0, -1) : siteUrl}/auth/callback`;
+
         const { data: authData, error: authError } = await supabase.auth.signUp({
             email,
             password,
             options: {
-                emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+                emailRedirectTo: redirectTo,
                 data: {
                     first_name: firstName,
                     last_name: lastName,
