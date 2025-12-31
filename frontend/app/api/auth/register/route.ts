@@ -46,7 +46,7 @@ export async function POST(request: Request) {
         } = sanitized;
 
         // Extract non-sanitizable fields
-        const { password, planId, billingFrequency, ein, organizationTypes } = body;
+        const { password, planId, billingFrequency, ein, organizationTypes, lang } = body;
 
         // 3. Server-side validation
         if (!email || !isValidEmail(email)) {
@@ -112,6 +112,7 @@ export async function POST(request: Request) {
                     account_type: derivedAccountType,
                     plan_id: selectedPlanId,
                     billing_frequency: validBillingFrequency,
+                    lang: lang || 'en',
                 },
             },
         });

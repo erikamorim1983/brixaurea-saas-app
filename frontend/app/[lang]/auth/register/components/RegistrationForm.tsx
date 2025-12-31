@@ -197,6 +197,7 @@ export default function RegistrationForm({ dictionary, lang, preselectedPlan, pr
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...formData,
+                    lang,
                     // Derive accountType from plan
                     accountType: isBusinessPlan ? 'organization' : 'individual',
                 }),
@@ -259,8 +260,8 @@ export default function RegistrationForm({ dictionary, lang, preselectedPlan, pr
                                 type="button"
                                 onClick={() => updateFormData('billingFrequency', 'monthly')}
                                 className={`px-6 py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 ${formData.billingFrequency === 'monthly'
-                                        ? 'bg-white text-[#081F2E] shadow-md'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    ? 'bg-white text-[#081F2E] shadow-md'
+                                    : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 {lang === 'pt' ? 'Mensal' : lang === 'es' ? 'Mensual' : 'Monthly'}
@@ -269,8 +270,8 @@ export default function RegistrationForm({ dictionary, lang, preselectedPlan, pr
                                 type="button"
                                 onClick={() => updateFormData('billingFrequency', 'yearly')}
                                 className={`px-6 py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 flex items-center gap-2 ${formData.billingFrequency === 'yearly'
-                                        ? 'bg-white text-[#081F2E] shadow-md'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    ? 'bg-white text-[#081F2E] shadow-md'
+                                    : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 {lang === 'pt' ? 'Anual' : lang === 'es' ? 'Anual' : 'Yearly'}
