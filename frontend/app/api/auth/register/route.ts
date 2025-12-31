@@ -15,6 +15,7 @@ import {
     logAuditEvent,
 } from '@/lib/security';
 
+
 export async function POST(request: Request) {
     // 1. Rate limiting check (stricter for registration)
     const clientId = getClientIdentifier(request);
@@ -151,6 +152,7 @@ export async function POST(request: Request) {
                 { status: 500 }
             );
         }
+
 
         // 6. Create user profile with sanitized data using Admin Client
         const profileData: Record<string, unknown> = {
