@@ -104,7 +104,8 @@ export async function POST(request: Request) {
         // Determine the redirect URL dynamically
         const origin = request.headers.get('origin');
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || origin || 'https://www.brixaurea.com';
-        const redirectTo = `${siteUrl.endsWith('/') ? siteUrl.slice(0, -1) : siteUrl}/auth/callback`;
+        const locale = lang || 'en';
+        const redirectTo = `${siteUrl.endsWith('/') ? siteUrl.slice(0, -1) : siteUrl}/${locale}/auth/callback`;
 
         const { data: authData, error: authError } = await supabase.auth.signUp({
             email,
