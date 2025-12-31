@@ -9,10 +9,10 @@ const containerStyle: CSSProperties = {
     borderRadius: '0.5rem',
 };
 
-// Default center (São Paulo)
+// Default center (Aventura, FL - 33180)
 const defaultCenter = {
-    lat: -23.5505,
-    lng: -46.6333,
+    lat: 25.9545,
+    lng: -80.1418,
 };
 
 interface PropertyMapProps {

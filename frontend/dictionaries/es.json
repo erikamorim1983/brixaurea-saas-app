@@ -15,7 +15,7 @@
             "benefits": [
                 "Integración con GIS y Código de Construcción",
                 "Detección automática de retiros y altura",
-                "Sugerencia de producto ideal (VGV potencial)"
+                "Sugerencia de producto ideal (GDV potencial)"
             ]
         },
         "construction-simulation": {
@@ -23,14 +23,14 @@
             "subtitle": "Ingeniería de Costos Simplificada",
             "description": "Estime los costos de obra (Hard Costs) con precisión basada en tipologías reales e índices de mercado, ajustados por nivel de acabados y eficiencia de diseño.",
             "benefits": [
-                "Biblioteca de tipologías (Social a Lujo)",
+                "Biblioteca de tipologías (Entry-level a Lujo)",
                 "Curva S de desembolso automático",
                 "Presupuesto paramétrico editable"
             ]
         },
         "sales-projection": {
             "title": "Proyección de Ventas",
-            "subtitle": "Estrategia Comercial y VGV",
+            "subtitle": "Estrategia Comercial y GDV",
             "description": "Modele la velocidad de ventas (absorción) y la lista de precios. Simule diferentes escenarios de lanzamiento y corrección monetaria para maximizar los ingresos.",
             "benefits": [
                 "Montaje visual de la Cuadrícula de Ventas",
@@ -41,11 +41,11 @@
         "cash-flow": {
             "title": "Flujo de Caja",
             "subtitle": "El Corazón Financiero del Proyecto",
-            "description": "Vista completa mes a mes de entradas y salidas. El sistema consolida automáticamente costos de construcción, gastos soft, impuestos e ingresos para entregar las métricas clave.",
+            "description": "Vista completa mes a mes de todas las entradas [(+) Incomes, (+) Other Incomes, (+) Loan Entry] y salidas [(-) Tax Expense, (-) Land, (-) Soft Costs, (-) Hard Costs, (-) Other Expenses, (-) Financing, (-) Payment of Loans]. El sistema consolida automáticamente todos los componentes financieros para entregar índices de performance del proyecto.",
             "benefits": [
-                "Cálculo automático de TIR (IRR) y VPL (NPV)",
-                "Visualización de Exposición Máxima de Caja",
-                "Estado de Resultados Sintético"
+                "Cálculo automático de IRR, NPV, ROI, Multiple y Rentability Margin",
+                "Visualización de Maximum Exposure y Cashflow Turning Point",
+                "P&L Statement completo con análisis por unidad"
             ]
         },
         "financing": {
@@ -61,11 +61,11 @@
         "dashboards": {
             "title": "Tableros y Reportes",
             "subtitle": "Presentaciones para Inversores",
-            "description": "Basta de capturas de pantalla de Excel. Genere PDF profesionales y enlaces de visualización interactivos ('Vista del Cliente') para presentar el proyecto a socios, bancos y partes interesadas con confianza.",
+            "description": "Basta de capturas de pantalla de Excel. Genere PDF profesionales, enlaces de visualización interactivos ('Vista del Cliente') y haga seguimiento del desempeño real del proyecto con análisis Budget vs Actual (Presupuestado vs Real) para presentar a socios, bancos y partes interesadas con confianza.",
             "benefits": [
                 "Marca blanca (Su marca, nuestras cuentas)",
-                "Enlaces de acceso de 'solo lectura'",
-                "Gráficos interactivos y mapas de calor"
+                "Budget vs Actual tracking en tiempo real",
+                "Enlaces de acceso de 'solo lectura' y gráficos interactivos"
             ]
         }
     },
@@ -451,11 +451,11 @@
                 "methodCash": "Compra Directa (Contado)",
                 "methodSellerFinancing": "Financiamiento del Vendedor",
                 "methodUnitSwap": "Permuta Física (Unidades / JV)",
-                "methodFinancialSwap": "Permuta Financiera (% VGV / JV)",
+                "methodFinancialSwap": "Permuta Financiera (% GDV / JV)",
                 "methodOption": "Opción de Compra (Option Agreement)",
                 "methodGroundLease": "Arrendamiento de Suelo (Ground Lease)",
-                "swapSharePercent": "Participación del Terreno (% del VGV)",
-                "swapHint": "El valor final del terreno se calculará en función de los Ingresos Totales (VGV) definidos en la pestaña de 'Ventas / Ingresos'.",
+                "swapSharePercent": "Participación del Terreno (% del GDV)",
+                "swapHint": "El valor final del terreno se calculará en función de los Ingresos Totales (GDV) definidos en la pestaña de 'Ventas / Ingresos'.",
                 "unitSwapHint": "El valor final del terreno será determinado por el valor de mercado de las unidades asignadas al propietario en la pestaña 'Mezcla de Unidades'.",
                 "installment": "Cuotas"
             }
@@ -475,14 +475,14 @@
                 "count": "Cant.",
                 "price_sqft": "$/ft²",
                 "avg_price": "Precio Unit.",
-                "total_vgv": "VGV Total",
+                "total_vgv": "GDV Total",
                 "actions": ""
             },
             "summary": {
                 "total_units": "Total Unidades",
                 "total_area": "Área Privada Total",
                 "avg_price_sqft": "Precio Promedio ($/ft²)",
-                "gross_revenue": "Ingresos Brutos (VGV)"
+                "gross_revenue": "Ingresos Brutos (GDV)"
             },
             "add_btn": "Agregar Unidad"
         },

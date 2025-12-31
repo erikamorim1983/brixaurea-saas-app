@@ -15,57 +15,57 @@
             "benefits": [
                 "Integração com GIS e Código de Obras",
                 "Detecção automática de recuos e altura máxima",
-                "Sugestão de produto ideal (VGV potencial)"
+                "Sugestão de produto ideal (GDV potencial)"
             ]
         },
         "construction-simulation": {
             "title": "Simulação de Construção",
             "subtitle": "Engenharia de Custos Simplificada",
-            "description": "Estime o custo de obra (Hard Costs) com precisão baseada em tipologias reais e índices de mercado (CUB/SINAPI), ajustados pelo padrão de acabamento e eficiência de projeto.",
+            "description": "Estime o custo de obra (Hard Costs) com precisão baseada em tipologias reais e índices de mercado (RSMeans / Cost Indexes), ajustados pelo padrão de acabamento e eficiência de projeto.",
             "benefits": [
-                "Biblioteca de tipologias (MCMV a Alto Padrão)",
+                "Biblioteca de tipologias (Entry-level a Luxury)",
                 "Curva S de desembolso automático",
                 "Orçamento paramétrico editável"
             ]
         },
         "sales-projection": {
             "title": "Projeção de Vendas",
-            "subtitle": "Estratégia Comercial e VGV",
-            "description": "Modele a velocidade de vendas (absorção) e a tabela de preços do empreendimento. Simule diferentes cenários de lançamento, repasses e correção monetária (INCC) para maximizar a receita.",
+            "subtitle": "Estratégia Comercial e GDV",
+            "description": "Modele a velocidade de vendas (absorção) e a tabela de preços do empreendimento. Simule diferentes cenários de lançamento, repasses e valorização de mercado para maximizar a receita.",
             "benefits": [
                 "Montagem visual do Espelho de Vendas",
-                "Simulação de Velocidade de Vendas (VSO)",
+                "Simulação de Velocidade de Vendas (Absorption Rate)",
                 "Cálculo automático de comissões e marketing"
             ]
         },
         "cash-flow": {
             "title": "Fluxo de Caixa",
             "subtitle": "O Coração Financeiro do Projeto",
-            "description": "Visualização completa das entradas e saídas mês a mês. O sistema consolida automaticamente custos de obra, despesas soft, impostos e receitas para entregar os indicadores que importam.",
+            "description": "Visualização completa mês a mês de todas entradas [(+) Incomes, (+) Other Incomes, (+) Loan Entry] e saídas [(-) Tax Expense, (-) Land, (-) Soft Costs, (-) Hard Costs, (-) Other Expenses, (-) Financing, (-) Payment of Loans]. O sistema consolida automaticamente todos os componentes financeiros para entregar índices de performance do projeto.",
             "benefits": [
-                "Cálculo automático de TIR (IRR) e VPL (NPV)",
-                "Visualização de Exposição Máxima de Caixa",
-                "DRE (Demonstrativo de Resultado) Sintético"
+                "Cálculo automático de IRR, NPV, ROI, Multiple e Rentability Margin",
+                "Visualização de Maximum Exposure e Cashflow Turning Point",
+                "P&L Statement completo com análise por unidade"
             ]
         },
         "financing": {
             "title": "Financiamento",
             "subtitle": "Estruturação de Capital e Dívida",
-            "description": "Simule a alavancagem financeira do projeto (Capital Stack). Configure empréstimos bancários (Plano Empresário), aporte de sócios (Equity) e permuta financeira ou física.",
+            "description": "Simule a alavancagem financeira do projeto (Capital Stack). Configure empréstimos bancários (Construction Loan), aporte de sócios (Equity) e permuta financeira ou física.",
             "benefits": [
                 "Cálculo automático de Juros e Amortização",
-                "Simulação de SFH / SFI e Funding 2.0",
+                "Simulação de Mortgage Loans e Institutional Equity",
                 "Análise de LTV (Loan-to-Value) e LTC"
             ]
         },
         "dashboards": {
             "title": "Dashboards & Reports",
             "subtitle": "Apresentações para Investidores",
-            "description": "Chega de prints do Excel. Gere PDFs profissionais e links de visualização interativa ('Visualização do Cliente') para apresentar o projeto a parceiros, bancos e partes interessadas com confiança.",
+            "description": "Chega de prints do Excel. Gere PDFs profissionais, links de visualização interativa ('Visualização do Cliente') e acompanhe o desempenho real do projeto com análise Budget vs Actual (Orçado vs Realizado) para apresentar a parceiros, bancos e partes interessadas com confiança.",
             "benefits": [
                 "White-label (Sua marca, nossas contas)",
-                "Links de acesso 'somente leitura'",
-                "Gráficos interativos e mapas de calor"
+                "Budget vs Actual tracking em tempo real",
+                "Links de acesso 'somente leitura' e gráficos interativos"
             ]
         }
     },
@@ -466,11 +466,11 @@
                 "methodCash": "Compra Direta (À Vista)",
                 "methodSellerFinancing": "Parcelamento Direto com Proprietário",
                 "methodUnitSwap": "Permuta Física (Unidades / JV)",
-                "methodFinancialSwap": "Permuta Financeira (% VGV / JV)",
+                "methodFinancialSwap": "Permuta Financeira (% GDV / JV)",
                 "methodOption": "Opção de Compra (Option Agreement)",
                 "methodGroundLease": "Aluguel de Solo (Ground Lease)",
-                "swapSharePercent": "Participação do Terreno (% do VGV)",
-                "swapHint": "O valor final do terreno será calculado com base no VGV (Receita Total) definido na aba de 'Vendas / Receita'.",
+                "swapSharePercent": "Participação do Terreno (% do GDV)",
+                "swapHint": "O valor final do terreno será calculado com base no GDV (Receita Total) definido na aba de 'Vendas / Receita'.",
                 "unitSwapHint": "O valor final do terreno será determinado pelo valor de mercado das unidades alocadas ao proprietário na aba 'Mix de Unidades'.",
                 "installment": "Fluxo de Pagamento"
             }
@@ -490,14 +490,14 @@
                 "count": "Qtd",
                 "price_sqft": "$/ft²",
                 "avg_price": "Preço Unit.",
-                "total_vgv": "VGV Total",
+                "total_vgv": "GDV Total",
                 "actions": ""
             },
             "summary": {
                 "total_units": "Total Unidades",
                 "total_area": "Área Privativa Total",
                 "avg_price_sqft": "Preço Médio ($/ft²)",
-                "gross_revenue": "VGV Bruto (Gross Revenue)"
+                "gross_revenue": "GDV Bruto (Gross Revenue)"
             },
             "add_btn": "Adicionar Unidade"
         },

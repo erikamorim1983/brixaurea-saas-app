@@ -41,11 +41,11 @@
         "cash-flow": {
             "title": "Cash Flow",
             "subtitle": "The Financial Heart of the Project",
-            "description": "Complete month-by-month view of inflows and outflows. The system automatically consolidates construction costs, soft expenses, taxes, and revenues to deliver the metrics that matter.",
+            "description": "Complete month-by-month view of all inflows [(+) Incomes, (+) Other Incomes, (+) Loan Entry] and outflows [(-) Tax Expense, (-) Land, (-) Soft Costs, (-) Hard Costs, (-) Other Expenses, (-) Financing, (-) Payment of Loans]. The system automatically consolidates all financial components to deliver project performance indices.",
             "benefits": [
-                "Automatic IRR and NPV calculation",
-                "Maximum Cash Exposure visualization",
-                "Synthetic P&L Statement"
+                "Automatic calculation of IRR, NPV, ROI, Multiple and Rentability Margin",
+                "Visualization of Maximum Exposure and Cashflow Turning Point",
+                "Complete P&L Statement with per-unit analysis"
             ]
         },
         "financing": {
@@ -61,11 +61,11 @@
         "dashboards": {
             "title": "Dashboards & Reports",
             "subtitle": "Investor Presentations",
-            "description": "No more Excel screenshots. Generate professional PDFs and interactive view links ('Client View') to present the project to partners, banks, and stakeholders with confidence.",
+            "description": "No more Excel screenshots. Generate professional PDFs, interactive view links ('Client View'), and track real project performance with Budget vs Actual analysis to present to partners, banks, and stakeholders with confidence.",
             "benefits": [
                 "White-label (Your brand, our math)",
-                "Read-only access links",
-                "Interactive charts and heatmaps"
+                "Budget vs Actual tracking in real-time",
+                "Read-only access links and interactive charts"
             ]
         }
     },

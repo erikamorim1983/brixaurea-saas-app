@@ -1,8 +1,10 @@
 import { getDictionary } from "../../../../get-dictionary";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import GoogleMapWrapper from "@/components/Maps/GoogleMapWrapper";
 import PropertyMap from "@/components/Maps/PropertyMap";
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
+import Link from "next/link";
 
 export default async function FeaturePage({
     params,
@@ -21,17 +23,7 @@ export default async function FeaturePage({
 
     return (
         <div className="min-h-screen bg-white flex flex-col">
-            {/* Header / Nav Placeholder (Simplified for Minimalist request or could import Navbar) */}
-            <header className="w-full py-6 px-4 border-b border-gray-100">
-                <div className="container mx-auto flex justify-between items-center">
-                    <Link href={`/${lang}`} className="font-bold text-2xl text-[#081F2E]">
-                        Brix<span className="text-cyan-400">Aurea</span>
-                    </Link>
-                    <Link href={`/${lang}/#features`} className="text-sm font-medium text-gray-500 hover:text-cyan-600">
-                        ← {lang === 'en' ? 'Back to Features' : (lang === 'pt' ? 'Voltar' : 'Volver')}
-                    </Link>
-                </div>
-            </header>
+            <Header lang={lang} dictionary={dict} />
 
             <main className="flex-grow">
                 {/* Hero Section */}
@@ -109,14 +101,7 @@ export default async function FeaturePage({
                 </section>
             </main>
 
-            {/* Simple Footer */}
-            <footer className="bg-gray-50 py-12 border-t border-gray-200 mt-auto">
-                <div className="container mx-auto px-4 text-center">
-                    <p className="text-sm text-gray-500">
-                        © 2025 BrixAurea. {lang === 'en' ? 'All rights reserved.' : (lang === 'pt' ? 'Todos os direitos reservados.' : 'Todos los derechos reservados.')}
-                    </p>
-                </div>
-            </footer>
+            <Footer lang={lang} dictionary={dict} />
         </div>
     );
 }
