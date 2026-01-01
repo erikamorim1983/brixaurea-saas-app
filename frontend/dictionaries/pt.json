@@ -346,9 +346,9 @@
             "back_to_site": "Voltar ao Site"
         },
         "stats": {
-            "projects": "Total de Projetos",
-            "analyses": "Análises Executadas",
-            "reports": "Relatórios Gerados"
+            "projects": "Total de Projetos Analizados",
+            "analyses": "Total de Projetos em andamento",
+            "reports": "Total de Projetos em analise"
         }
     },
     "settings": {

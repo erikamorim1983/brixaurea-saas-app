@@ -346,9 +346,9 @@
             "back_to_site": "Back to Site"
         },
         "stats": {
-            "projects": "Total Projects",
-            "analyses": "Analyses Run",
-            "reports": "Reports Generated"
+            "projects": "Total Analyzed Projects",
+            "analyses": "Total Projects in Progress",
+            "reports": "Total Projects Under Analysis"
         }
     },
     "settings": {

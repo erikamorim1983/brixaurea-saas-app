@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getDictionary } from '@/get-dictionary';
 import Link from 'next/link';
 import SubscriptionStatusBadge from './components/SubscriptionStatusBadge';
+import YellowWaveEmoji from './components/YellowWaveEmoji';
 
 export async function generateMetadata({
     params,
@@ -70,7 +71,7 @@ export default async function DashboardPage({
     // Placeholder stats (will be real data later)
     const stats = [
         {
-            label: t.stats?.projects || 'Total Projects',
+            label: t.stats?.projects || 'Total de Projetos Analizados',
             value: '0',
             icon: (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,7 +81,7 @@ export default async function DashboardPage({
             color: 'from-cyan-500 to-blue-500',
         },
         {
-            label: t.stats?.analyses || 'Analyses Run',
+            label: t.stats?.analyses || 'Total de Projetos em andamento',
             value: '0',
             icon: (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,7 +91,7 @@ export default async function DashboardPage({
             color: 'from-purple-500 to-pink-500',
         },
         {
-            label: t.stats?.reports || 'Reports Generated',
+            label: t.stats?.reports || 'Total de Projetos em analise',
             value: '0',
             icon: (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,7 +144,7 @@ export default async function DashboardPage({
                 </div>
 
                 <h1 className="text-4xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-[var(--primary)] to-[var(--primary-light)]">
-                    {t.welcome}, {firstName}! 👋
+                    {t.welcome}, {firstName}! <YellowWaveEmoji />
                 </h1>
                 <p className="text-gray-500 max-w-2xl text-lg">
                     {dictionary.dashboard?.subtitle || 'Here\'s an overview of your real estate projects.'}

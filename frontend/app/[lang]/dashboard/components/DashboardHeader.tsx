@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import LanguageSwitcher from '../../components/LanguageSwitcher';
+import { useSidebar } from './SidebarContext';
 
 interface DashboardHeaderProps {
     lang: string;
@@ -25,6 +26,7 @@ export default function DashboardHeader({
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const router = useRouter();
+    const { toggleSidebar } = useSidebar();
 
     const handleLogout = async () => {
         setIsLoggingOut(true);
@@ -47,10 +49,22 @@ export default function DashboardHeader({
     const displayName = companyName || userName;
 
     return (
-        <header className="sticky top-0 z-30 h-16 bg-white border-b border-gray-200 px-6 flex items-center justify-between shadow-sm">
-            {/* Page Title / Breadcrumb area */}
-            <div>
-                <h1 className="text-xl font-semibold text-gray-800">
+        <header className="sticky top-0 z-30 h-16 bg-white border-b border-gray-200 px-4 md:px-6 flex items-center justify-between shadow-sm">
+            {/* Left side - Hamburger + Title */}
+            <div className="flex items-center gap-3">
+                {/* Hamburger Menu Button - Only visible on mobile */}
+                <button
+                    onClick={toggleSidebar}
+                    className="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                    aria-label="Toggle Menu"
+                >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+
+                {/* Page Title */}
+                <h1 className="text-lg md:text-xl font-semibold text-gray-800">
                     {dictionary.dashboard?.title || 'Dashboard'}
                 </h1>
             </div>

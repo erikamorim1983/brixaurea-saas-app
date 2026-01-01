@@ -3,7 +3,9 @@ import { redirect } from 'next/navigation';
 import { getDictionary } from '@/get-dictionary';
 import DashboardSidebar from './components/DashboardSidebar';
 import DashboardHeader from './components/DashboardHeader';
+import DashboardMainContent from './components/DashboardMainContent';
 import BrixAureAI from '@/components/BrixAureAI/BrixAureAI';
+import { SidebarProvider } from './components/SidebarContext';
 
 export default async function DashboardLayout({
     children,
@@ -45,28 +47,30 @@ export default async function DashboardLayout({
         : undefined;
 
     return (
-        <div className="flex min-h-screen bg-slate-50">
-            {/* Sidebar */}
-            <DashboardSidebar lang={lang} dictionary={dictionary} />
+        <SidebarProvider>
+            <div className="flex min-h-screen bg-slate-50">
+                {/* Sidebar */}
+                <DashboardSidebar lang={lang} dictionary={dictionary} />
 
-            {/* Main Content Area */}
-            <div className="flex-1 flex flex-col ml-64">
-                {/* Top Header */}
-                <DashboardHeader
-                    lang={lang}
-                    dictionary={dictionary}
-                    userName={userName}
-                    userEmail={user.email || ''}
-                    companyName={displayCompanyName}
-                    logoUrl={profile?.logo_url || undefined}
-                />
+                {/* Main Content Area - Responsive margin */}
+                <DashboardMainContent>
+                    {/* Top Header */}
+                    <DashboardHeader
+                        lang={lang}
+                        dictionary={dictionary}
+                        userName={userName}
+                        userEmail={user.email || ''}
+                        companyName={displayCompanyName}
+                        logoUrl={profile?.logo_url || undefined}
+                    />
 
-                {/* Page Content */}
-                <main className="flex-1 p-6">
-                    {children}
-                </main>
-                <BrixAureAI lang={lang} dict={dictionary.ai} />
+                    {/* Page Content */}
+                    <main className="flex-1 p-4 md:p-6">
+                        {children}
+                    </main>
+                    <BrixAureAI lang={lang} dict={dictionary.ai} />
+                </DashboardMainContent>
             </div>
-        </div>
+        </SidebarProvider>
     );
 }
