@@ -58,7 +58,6 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
     // Filter Logic Helper
     const getFilteredProjects = (excludeKey?: string) => {
         return projects.filter(p => {
-            // Soft Delete Filter
             const isDeleted = !!p.deleted_at;
             if (showTrash && !isDeleted) return false;
             if (!showTrash && isDeleted) return false;
@@ -75,48 +74,28 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
         });
     };
 
-    // Derived Options for Dropdowns (Dynamic/Faceted)
-    // We calculate options based on the filtered set excluding the current filter itself
-    // This allows the user to see valid options for the *other* selected criteria, 
-    // but keeps all options available for the current criteria (so they can switch).
-    // WAIT: Standard faceted search usually Narrows down. 
-    // If I select State=FL, I want to see Cities in FL. -> excludeKey='city' (Filtered by State=FL)
-    // If I select State=FL. I want to see Types in FL. -> excludeKey='type' (Filtered by State=FL)
-    // If I select State=FL. I want to see States... ALL of them? Or only those matching other criteria?
-    // Usually for the filter ITSELF, we want to show all options that are compatible with the *other* filters.
-    // So excludeKey='state' means "Filter by Type/City/Status/Search, but IGNORE State". 
-    // Then we get all States that *could* apply if we changed the state selection.
-
     const statusOptions = useMemo(() => {
         const relevantProjects = getFilteredProjects('status');
         return Array.from(new Set(relevantProjects.map(p => p.status).filter(Boolean)));
-    }, [projects, searchTerm, typeFilter, stateFilter, cityFilter]);
+    }, [projects, searchTerm, typeFilter, stateFilter, cityFilter, showTrash]);
 
     const typeOptions = useMemo(() => {
         const relevantProjects = getFilteredProjects('type');
         return Array.from(new Set(relevantProjects.map(p => p.project_type).filter(Boolean)));
-    }, [projects, searchTerm, statusFilter, stateFilter, cityFilter]);
+    }, [projects, searchTerm, statusFilter, stateFilter, cityFilter, showTrash]);
 
     const stateOptions = useMemo(() => {
         const relevantProjects = getFilteredProjects('state');
         return Array.from(new Set(relevantProjects.map(p => p.locations?.state).filter(Boolean)));
-    }, [projects, searchTerm, statusFilter, typeFilter, cityFilter]);
+    }, [projects, searchTerm, statusFilter, typeFilter, cityFilter, showTrash]);
 
     const cityOptions = useMemo(() => {
         const relevantProjects = getFilteredProjects('city');
         return Array.from(new Set(relevantProjects.map(p => p.locations?.city).filter(Boolean)));
-    }, [projects, searchTerm, statusFilter, typeFilter, stateFilter]);
+    }, [projects, searchTerm, statusFilter, typeFilter, stateFilter, showTrash]);
 
-    // Final Filtered List for Display
-    const filteredProjects = getFilteredProjects(); // No exclude, apply all
+    const filteredProjects = getFilteredProjects();
 
-    // Handlers
-    const handleStateChange = (newState: string) => {
-        setStateFilter(newState);
-        setCityFilter('all'); // Reset city when state changes to avoid invalid combinations
-    };
-
-    // Actions
     const handleMoveToTrash = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
         const now = new Date().toISOString();
@@ -138,7 +117,8 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
 
     const handlePermanentDelete = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (!confirm(dictionary?.list?.confirm_permanent || (lang === 'pt' ? 'Tem certeza que deseja excluir permanentemente?' : 'Are you sure you want to permanently delete?'))) return;
+        const isPt = lang?.startsWith('pt') || dictionary?.list?.typology_label === 'Tipologia';
+        if (!confirm(dictionary?.list?.confirm_permanent || (isPt ? 'Tem certeza que deseja excluir permanentemente?' : 'Are you sure you want to permanently delete?'))) return;
 
         const { error } = await supabase.from('projects').delete().eq('id', id);
         if (!error) {
@@ -149,10 +129,10 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'approved': return 'bg-emerald-100 text-emerald-700 border-emerald-200'; // Aprovado (Verde)
-            case 'feasibility': return 'bg-blue-100 text-blue-700 border-blue-200'; // Estudo de Viabilidade (Azul)
-            case 'execution': return 'bg-cyan-100 text-cyan-700 border-cyan-200'; // Acompanhamento (Azul Claro)
-            case 'rejected': return 'bg-red-50 text-red-600 border-red-100'; // Não Viável (Vermelho)
+            case 'approved': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+            case 'feasibility': return 'bg-blue-100 text-blue-700 border-blue-200';
+            case 'execution': return 'bg-cyan-100 text-cyan-700 border-cyan-200';
+            case 'rejected': return 'bg-red-50 text-red-600 border-red-100';
             case 'draft': return 'bg-gray-100 text-gray-600 border-gray-200';
             case 'completed': return 'bg-indigo-100 text-indigo-700 border-indigo-200';
             case 'archived': return 'bg-gray-100 text-gray-500 border-gray-200';
@@ -162,31 +142,38 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
 
     const getCardGradient = (status: string) => {
         switch (status) {
-            case 'approved': return 'from-[#059669] to-[#047857]'; // Emerald (Green)
-            case 'feasibility': return 'from-[#2563eb] to-[#1d4ed8]'; // Blue
-            case 'execution': return 'from-[#06b6d4] to-[#0891b2]'; // Cyan (Light Blue)
-            case 'rejected': return 'from-red-900/80 to-slate-900'; // Red
-            case 'draft': return 'from-slate-600 to-slate-800'; // Gray
-            default: return 'from-[#081F2E] to-[#113a52]'; // Default Brand
+            case 'approved': return 'from-[#059669] to-[#047857]';
+            case 'feasibility': return 'from-[#2563eb] to-[#1d4ed8]';
+            case 'execution': return 'from-[#06b6d4] to-[#0891b2]';
+            case 'rejected': return 'from-red-900/80 to-slate-900';
+            case 'draft': return 'from-slate-600 to-slate-800';
+            default: return 'from-[#081F2E] to-[#113a52]';
         }
     };
 
-    const translateStatus = (status: string, lang: string) => {
+    const translateStatus = (status: string, currentLang: string) => {
+        const isPt = currentLang?.startsWith('pt') || dictionary?.list?.typology_label === 'Tipologia';
+        const isEs = currentLang?.startsWith('es') || dictionary?.list?.typology_label === 'Tipología';
+        const targetLang = isPt ? 'pt' : (isEs ? 'es' : 'en');
+
         const map: Record<string, any> = {
             draft: { pt: 'Rascunho', es: 'Borrador', en: 'Draft' },
             feasibility: { pt: 'Estudo de Viabilidade', es: 'Estudio de Viabilidad', en: 'Feasibility Study' },
-            approved: { pt: 'Aprovado', es: 'Aprobado', en: 'Approved' },
+            approved: { pt: 'Aprovado', es: 'Aprovado', en: 'Approved' },
             execution: { pt: 'Acompanhamento', es: 'Ejecución', en: 'Execution' },
             rejected: { pt: 'Não Viável', es: 'No Viable', en: 'Not Viable' },
             completed: { pt: 'Concluído', es: 'Completado', en: 'Completed' },
             archived: { pt: 'Arquivado', es: 'Archivado', en: 'Archived' },
         };
-        return map[status]?.[lang === 'pt' || lang === 'es' ? lang : 'en'] || status;
+        return map[status]?.[targetLang] || status;
     };
 
     const getTypologyName = (project: Project) => {
-        const propDict: any = lang === 'pt' ? propertyTypesPT : lang === 'es' ? propertyTypesES : propertyTypesEN;
-        const key = project.subtype_key || project.subtype_id; // Try key first, then fallback
+        const isPt = lang?.startsWith('pt') || dictionary?.list?.typology_label === 'Tipologia';
+        const isEs = lang?.startsWith('es') || dictionary?.list?.typology_label === 'Tipología';
+        const propDict: any = isPt ? propertyTypesPT : (isEs ? propertyTypesES : propertyTypesEN);
+
+        const key = project.subtype_key || project.subtype_id;
         if (key && propDict.property_subtypes[key]) {
             return propDict.property_subtypes[key];
         }
@@ -195,18 +182,26 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
 
     const getStateFlagUrl = (state?: string, country?: string) => {
         if (!state) return null;
-        const s = state.toUpperCase();
-        const c = country?.toUpperCase() || 'USA';
+        let s = state.trim().toLowerCase();
+        const c = country?.trim().toUpperCase() || 'USA';
 
-        if (c === 'USA' || c === 'UNITED STATES') {
-            return `https://cdn.jsdelivr.net/gh/kamranahmedse/gists@master/flags/US/${s.toLowerCase()}.svg`;
+        const stateMap: Record<string, string> = {
+            'florida': 'fl', 'sp': 'sp', 'sao paulo': 'sp', 'são paulo': 'sp',
+            'rio de janeiro': 'rj', 'rj': 'rj', 'texas': 'tx', 'tx': 'tx',
+            'california': 'ca', 'ca': 'ca', 'ny': 'ny', 'new york': 'ny',
+            'mg': 'mg', 'minas gerais': 'mg', 'sc': 'sc', 'santa catarina': 'sc',
+            'fl': 'fl', 'ga': 'ga', 'georgia': 'ga'
+        };
+
+        const code = stateMap[s] || s;
+
+        if (c === 'USA' || c === 'UNITED STATES' || c === 'US') {
+            return `https://flagcdn.com/w40/us-${code}.png`;
         }
-        // Fallback for Brazil if possible, or just return code
         if (c === 'BRAZIL' || c === 'BRASIL' || c === 'BR') {
-            // Some common BR flags on CDN
-            return `https://raw.githubusercontent.com/luizomf/estados-brasileiros-e-siglas/master/bandeiras/${s.toLowerCase()}.png`;
+            return `https://flagcdn.com/w40/br-${code}.png`;
         }
-        return null;
+        return `https://flagcdn.com/w40/us-${code}.png`; // Safe US fallback
     };
 
     return (
@@ -216,60 +211,50 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900">
-                            {dictionary?.list?.title || (lang === 'pt' ? 'Meus Projetos' : 'My Projects')}
+                            {dictionary?.list?.title || (lang?.startsWith('pt') ? 'Meus Projetos' : 'My Projects')}
                         </h1>
                         <p className="text-gray-500">
-                            {dictionary?.list?.subtitle || (lang === 'pt' ? 'Gerencie seu portfolio imobiliário' : 'Manage your real estate portfolio')}
+                            {dictionary?.list?.subtitle || (lang?.startsWith('pt') ? 'Gerencie seu portfolio imobiliário' : 'Manage your real estate portfolio')}
                         </p>
                     </div>
-                    <div className="flex gap-2 bg-gray-100 p-1 rounded-xl">
+                    <div className="flex gap-2 bg-gray-100 p-1.5 rounded-2xl shadow-inner">
                         <button
                             onClick={() => setShowTrash(false)}
-                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${!showTrash ? 'bg-white text-cyan-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${!showTrash ? 'bg-white text-cyan-600 shadow-md' : 'text-gray-500 hover:text-gray-700'}`}
                         >
-                            {dictionary?.list?.active || (lang === 'pt' ? 'Ativos' : 'Active')}
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" /></svg>
+                            {dictionary?.list?.active || (lang?.startsWith('pt') ? 'Ativos' : 'Active')}
                         </button>
                         <button
                             onClick={() => setShowTrash(true)}
-                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${showTrash ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${showTrash ? 'bg-white text-red-600 shadow-md' : 'text-gray-500 hover:text-gray-700'}`}
                         >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                            {dictionary?.list?.trash || (lang === 'pt' ? 'Lixeira' : 'Trash')}
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            {dictionary?.list?.trash || (lang?.startsWith('pt') ? 'Lixeira' : 'Trash')}
                         </button>
                     </div>
-                    <Link
-                        href={`/${lang}/dashboard/projects/new`}
-                        className="inline-flex items-center justify-center px-4 py-2 bg-[#081F2E] text-white font-medium rounded-lg shadow-md hover:bg-opacity-90 transition-all"
-                    >
-                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        {dictionary?.list?.new_project_btn || (lang === 'pt' ? 'Novo Projeto' : 'New Project')}
-                    </Link>
                 </div>
 
-                {/* Advanced Filter Bar - Glassmorphism Refinement */}
+                {/* Filter Bar */}
                 <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white/80 backdrop-blur-xl p-6 rounded-2xl border border-gray-100 shadow-sm border-b-4 border-b-cyan-500/10"
-                    onClick={e => e.stopPropagation()}
+                    layout
+                    className="bg-white/80 backdrop-blur-md p-6 rounded-[2.5rem] border border-gray-100 shadow-xl overflow-hidden"
                 >
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                        {/* Search */}
-                        <div className="col-span-1">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+                        {/* Search Input */}
+                        <div className="md:col-span-1">
                             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                                {dictionary?.list?.search_label || (lang === 'pt' ? 'Buscar' : 'Search')}
+                                {dictionary?.list?.search_label || (lang?.startsWith('pt') ? 'Buscar' : 'Search')}
                             </label>
-                            <div className="relative">
+                            <div className="relative group">
                                 <input
                                     type="text"
-                                    placeholder={dictionary?.list?.search_placeholder || (lang === 'pt' ? 'Nome ou endereço...' : 'Name or address...')}
+                                    placeholder={dictionary?.list?.search_placeholder || (lang?.startsWith('pt') ? 'Nome ou endereço...' : 'Name or address...')}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg w-full text-sm focus:ring-2 focus:ring-[#00D9FF] outline-none transition-all placeholder:text-gray-400"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-[#00D9FF] outline-none transition-all"
                                 />
-                                <svg className="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 absolute left-3 top-2.5 text-gray-400 group-focus-within:text-[#00D9FF] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
@@ -278,38 +263,33 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                         {/* Status Filter */}
                         <div>
                             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                                {dictionary?.list?.status_label || 'Status'}
+                                {dictionary?.list?.status_label || (lang?.startsWith('pt') ? 'Status' : 'Status')}
                             </label>
                             <select
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
                                 className="w-full px-3 py-2.5 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-[#00D9FF] outline-none cursor-pointer hover:border-gray-300 transition-colors"
                             >
-                                <option value="all">{dictionary?.list?.all_option || (lang === 'pt' ? 'Todos' : 'All')}</option>
-                                {['draft', 'feasibility', 'approved', 'execution', 'rejected', 'completed', 'archived']
-                                    .filter(s => statusOptions.includes(s))
-                                    .map(s => (
-                                        <option key={s} value={s}>
-                                            {translateStatus(s, lang)}
-                                        </option>
-                                    ))
-                                }
+                                <option value="all">{dictionary?.list?.all_option || (lang?.startsWith('pt') ? 'Todos' : 'All')}</option>
+                                {statusOptions.map(opt => (
+                                    <option key={opt} value={opt}>{translateStatus(opt, lang)}</option>
+                                ))}
                             </select>
                         </div>
 
                         {/* Type Filter */}
                         <div>
                             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                                {dictionary?.list?.type_label || (lang === 'pt' ? 'Tipo' : 'Type')}
+                                {dictionary?.list?.type_label || (lang?.startsWith('pt') ? 'Tipo' : 'Type')}
                             </label>
                             <select
                                 value={typeFilter}
                                 onChange={(e) => setTypeFilter(e.target.value)}
-                                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-[#00D9FF] outline-none cursor-pointer hover:border-gray-300 transition-colors capitalize"
+                                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-[#00D9FF] outline-none cursor-pointer hover:border-gray-300 transition-colors"
                             >
-                                <option value="all">{dictionary?.list?.all_option || (lang === 'pt' ? 'Todos' : 'All')}</option>
+                                <option value="all">{dictionary?.list?.all_option || (lang?.startsWith('pt') ? 'Todos' : 'All')}</option>
                                 {typeOptions.map(t => (
-                                    <option key={t} value={t as string}>{t?.toString().replace('_', ' ')}</option>
+                                    <option key={t as string} value={t as string}>{t as string}</option>
                                 ))}
                             </select>
                         </div>
@@ -317,16 +297,16 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                         {/* State Filter */}
                         <div>
                             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                                {dictionary?.list?.state_label || (lang === 'pt' ? 'Estado' : 'State')}
+                                {dictionary?.list?.state_label || (lang?.startsWith('pt') ? 'Estado' : 'State')}
                             </label>
                             <select
                                 value={stateFilter}
-                                onChange={(e) => handleStateChange(e.target.value)}
+                                onChange={(e) => setStateFilter(e.target.value)}
                                 className="w-full px-3 py-2.5 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-[#00D9FF] outline-none cursor-pointer hover:border-gray-300 transition-colors"
                             >
-                                <option value="all">{dictionary?.list?.all_option || (lang === 'pt' ? 'Todos' : 'All')}</option>
+                                <option value="all">{dictionary?.list?.all_option || (lang?.startsWith('pt') ? 'Todos' : 'All')}</option>
                                 {stateOptions.map(s => (
-                                    <option key={s} value={s as string}>{s}</option>
+                                    <option key={s as string} value={s as string}>{s as string}</option>
                                 ))}
                             </select>
                         </div>
@@ -334,16 +314,16 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                         {/* City Filter */}
                         <div>
                             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                                {dictionary?.list?.city_label || (lang === 'pt' ? 'Cidade' : 'City')}
+                                {dictionary?.list?.city_label || (lang?.startsWith('pt') ? 'Cidade' : 'City')}
                             </label>
                             <select
                                 value={cityFilter}
                                 onChange={(e) => setCityFilter(e.target.value)}
                                 className="w-full px-3 py-2.5 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-[#00D9FF] outline-none cursor-pointer hover:border-gray-300 transition-colors"
                             >
-                                <option value="all">{dictionary?.list?.all_option || (lang === 'pt' ? 'Todas' : 'All')}</option>
+                                <option value="all">{dictionary?.list?.all_option || (lang?.startsWith('pt') ? 'Todos' : 'All')}</option>
                                 {cityOptions.map(c => (
-                                    <option key={c} value={c as string}>{c}</option>
+                                    <option key={c as string} value={c as string}>{c as string}</option>
                                 ))}
                             </select>
                         </div>
@@ -351,64 +331,63 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                 </motion.div>
             </div>
 
-            {/* Grid with Framer Motion Stagger */}
-            <AnimatePresence mode="popLayout">
+            {/* Content Area */}
+            <AnimatePresence mode="wait">
                 {filteredProjects.length > 0 ? (
                     <motion.div
+                        key={showTrash ? 'trash' : 'active'}
                         layout
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
                     >
                         {filteredProjects.map((project, index) => (
                             <motion.div
-                                layout
                                 key={project.id}
-                                initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                                transition={{
-                                    delay: index * 0.05,
-                                    duration: 0.4,
-                                    ease: [0.23, 1, 0.32, 1]
-                                }}
-                                className="group bg-white rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(8,112,184,0.12)] transition-all duration-500 overflow-hidden flex flex-col h-[400px] relative"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                className="group relative bg-white rounded-[2.5rem] shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-full"
                             >
-                                {/* 3 Dots Menu */}
+                                {/* Quick Menu */}
                                 <div className="absolute top-5 right-5 z-20">
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
+                                            e.preventDefault();
                                             setActiveMenuId(activeMenuId === project.id ? null : project.id);
                                         }}
-                                        className="p-2 rounded-full bg-white/10 hover:bg-white text-white hover:text-gray-800 transition-all backdrop-blur-md shadow-lg border border-white/20"
+                                        className="p-2 bg-white/20 backdrop-blur-md hover:bg-white/40 rounded-full transition-all border border-white/20"
                                     >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path></svg>
+                                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                                        </svg>
                                     </button>
 
-                                    {/* Dropdown - Animated */}
                                     <AnimatePresence>
                                         {activeMenuId === project.id && (
                                             <motion.div
-                                                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                                initial={{ opacity: 0, scale: 0.9, y: -10 }}
                                                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                                className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 overflow-hidden z-50 origin-top-right"
+                                                exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                                                className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100 py-2 z-30"
                                             >
-                                                {project.deleted_at ? (
+                                                {showTrash ? (
                                                     <>
                                                         <button
                                                             onClick={(e) => handleRestore(project.id, e)}
                                                             className="block w-full text-left px-5 py-3 text-sm text-green-600 hover:bg-green-50 flex items-center gap-3 transition-colors font-bold"
                                                         >
-                                                            <span>🔄</span>
-                                                            {dictionary?.list?.restore || (lang === 'pt' ? 'Restaurar Projeto' : 'Restore Project')}
+                                                            <span>♻️</span>
+                                                            {dictionary?.list?.restore || (lang?.startsWith('pt') ? 'Restaurar Projeto' : 'Restore Project')}
                                                         </button>
-                                                        <div className="h-px bg-gray-50 my-1 mx-2" />
                                                         <button
                                                             onClick={(e) => handlePermanentDelete(project.id, e)}
-                                                            className="block w-full text-left px-5 py-3 text-sm text-red-700 hover:bg-red-50 flex items-center gap-3 transition-colors font-black"
+                                                            className="block w-full text-left px-5 py-3 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors font-bold border-t border-gray-50"
                                                         >
                                                             <span>🔥</span>
-                                                            {dictionary?.list?.delete_permanent || (lang === 'pt' ? 'Excluir Permanente' : 'Delete Permanent')}
+                                                            {dictionary?.list?.delete_permanent || (lang?.startsWith('pt') ? 'Excluir Permanente' : 'Delete Permanent')}
                                                         </button>
                                                     </>
                                                 ) : (
@@ -418,7 +397,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                                             className="block px-5 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors font-bold"
                                                         >
                                                             <span>✏️</span>
-                                                            {dictionary?.list?.edit_analyze || (lang === 'pt' ? 'Editar / Analisar' : 'Edit / Analyze')}
+                                                            {dictionary?.list?.edit_analyze || (lang?.startsWith('pt') ? 'Editar / Analisar' : 'Edit / Analyze')}
                                                         </Link>
                                                         <button
                                                             onClick={(e) => {
@@ -429,7 +408,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                                             className="block w-full text-left px-5 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors font-bold"
                                                         >
                                                             <span>🔗</span>
-                                                            {dictionary?.list?.share || (lang === 'pt' ? 'Compartilhar' : 'Share')}
+                                                            {dictionary?.list?.share || (lang?.startsWith('pt') ? 'Compartilhar' : 'Share')}
                                                         </button>
                                                         <div className="h-px bg-gray-50 my-1 mx-2" />
                                                         <button
@@ -437,7 +416,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                                             className="block w-full text-left px-5 py-3 text-sm text-red-500 hover:bg-red-50 flex items-center gap-3 transition-colors font-bold"
                                                         >
                                                             <span>🗑️</span>
-                                                            {dictionary?.list?.move_to_trash || (lang === 'pt' ? 'Mover para Lixeira' : 'Move to Trash')}
+                                                            {dictionary?.list?.move_to_trash || (lang?.startsWith('pt') ? 'Mover para Lixeira' : 'Move to Trash')}
                                                         </button>
                                                     </>
                                                 )}
@@ -447,25 +426,35 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                 </div>
 
                                 <Link href={`/${lang}/dashboard/projects/${project.id}/feasibility/land`} className="flex-1 flex flex-col no-underline group shadow-none">
-                                    {/* Card Header with Improved Gradient */}
                                     <div className={`h-44 bg-gradient-to-br ${getCardGradient(project.status)} relative p-8 flex flex-col justify-end group-hover:brightness-110 transition-all duration-700`}>
                                         <div className="absolute inset-0 bg-black/5 mix-blend-overlay group-hover:opacity-0 transition-opacity" />
 
-                                        {project.deleted_at && (
-                                            <div className="absolute top-5 left-8 z-20">
+                                        <div className="absolute top-5 left-8 flex items-center gap-3">
+                                            {project.deleted_at ? (
                                                 <span className="px-4 py-1.5 bg-red-600/90 text-white text-[11px] font-black uppercase rounded-full shadow-2xl border border-white/20 backdrop-blur-sm animate-pulse flex items-center gap-1.5">
                                                     <span className="w-2 h-2 bg-white rounded-full" />
-                                                    {dictionary?.list?.trash_full || (lang === 'pt' ? 'Lixeira (30 dias)' : 'Trash (30 days)')}
+                                                    {dictionary?.list?.trash_full || (lang?.startsWith('pt') ? 'Lixeira (30 dias)' : 'Trash (30 days)')}
                                                 </span>
-                                            </div>
-                                        )}
-                                        {!project.deleted_at && (
-                                            <div className="absolute top-5 left-8">
-                                                <span className={`px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest border ${getStatusColor(project.status)} bg-white/95 shadow-lg`}>
-                                                    {translateStatus(project.status, lang)}
-                                                </span>
-                                            </div>
-                                        )}
+                                            ) : (
+                                                <>
+                                                    <span className={`px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest border ${getStatusColor(project.status)} bg-white/95 shadow-lg`}>
+                                                        {translateStatus(project.status, lang)}
+                                                    </span>
+
+                                                    {project.locations?.state && (
+                                                        <div className="flex items-center bg-white/90 backdrop-blur-sm p-1 rounded-md border border-white/20 shadow-sm overflow-hidden min-w-[32px] justify-center">
+                                                            <img
+                                                                src={getStateFlagUrl(project.locations.state, project.locations.country) || ''}
+                                                                onError={(e) => (e.currentTarget.style.display = 'none')}
+                                                                alt={project.locations.state}
+                                                                className="h-4 w-auto object-contain"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
+
                                         <div className="relative z-10">
                                             <h3 className="text-2xl font-black text-white mb-2 leading-tight tracking-tight group-hover:translate-x-1 transition-transform duration-500">
                                                 {project.name}
@@ -475,19 +464,17 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                                 </svg>
                                                 <span className="truncate opacity-90">
-                                                    {project.locations?.address_full || (lang === 'pt' ? 'Localização Pendente' : lang === 'es' ? 'Ubicación Pendiente' : 'Location Pending')}
+                                                    {project.locations?.address_full || (lang?.startsWith('pt') ? 'Localização Pendente' : 'Location Pending')}
                                                 </span>
                                             </div>
                                         </div>
-
                                     </div>
 
-                                    {/* Project Meta Info */}
                                     <div className="p-8 flex-1 flex flex-col justify-between bg-gradient-to-b from-white to-gray-50/50">
                                         <div className="space-y-4">
                                             <div className="flex justify-between items-center group/row">
                                                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                                                    {dictionary?.list?.typology_label || (lang === 'pt' ? 'Tipologia' : 'Typology')}
+                                                    {dictionary?.list?.typology_label || (lang?.startsWith('pt') ? 'Tipologia' : 'Typology')}
                                                 </span>
                                                 <span className="text-sm font-bold text-gray-800 capitalize bg-gray-100/50 px-3 py-1 rounded-lg">
                                                     {getTypologyName(project)}
@@ -495,35 +482,25 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                             </div>
                                             <div className="flex justify-between items-center group/row">
                                                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                                                    {dictionary?.list?.market_area_label || (lang === 'pt' ? 'Área de Mercado' : 'Market Area')}
+                                                    {dictionary?.list?.market_area_label || (lang?.startsWith('pt') ? 'Área de Mercado' : 'Market Area')}
                                                 </span>
-                                                <div className="flex items-center gap-2">
-                                                    {project.locations?.state && (
-                                                        <img
-                                                            src={getStateFlagUrl(project.locations.state, project.locations.country) || ''}
-                                                            onError={(e) => (e.currentTarget.style.display = 'none')}
-                                                            alt={project.locations.state}
-                                                            className="w-4 h-auto rounded-sm opacity-80"
-                                                        />
-                                                    )}
-                                                    <span className="text-sm font-bold text-gray-800">
-                                                        {(project.locations?.city || project.locations?.state) ? `${project.locations?.city || ''}, ${project.locations?.state || ''}` : '-'}
-                                                    </span>
-                                                </div>
+                                                <span className="text-sm font-bold text-gray-800">
+                                                    {(project.locations?.city || project.locations?.state) ? `${project.locations?.city || ''}, ${project.locations?.state || ''}` : '-'}
+                                                </span>
                                             </div>
                                         </div>
 
                                         <div className="mt-8 pt-6 border-t border-gray-100 flex justify-between items-center">
                                             <div className="flex flex-col">
                                                 <span className="text-[10px] font-bold text-gray-300 uppercase">
-                                                    {dictionary?.list?.last_activity_label || (lang === 'pt' ? 'Última Atividade' : 'Last Activity')}
+                                                    {dictionary?.list?.last_activity_label || (lang?.startsWith('pt') ? 'Última Atividade' : 'Last Activity')}
                                                 </span>
                                                 <span className="text-xs font-bold text-gray-500">
-                                                    {new Date(project.updated_at).toLocaleDateString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US')}
+                                                    {new Date(project.updated_at).toLocaleDateString(lang?.startsWith('pt') ? 'pt-BR' : 'en-US')}
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-2 text-[#00D9FF] font-black text-xs uppercase tracking-tighter group-hover:gap-4 transition-all duration-500">
-                                                {dictionary?.list?.access_feasibility || (lang === 'pt' ? 'Acessar Viabilidade' : 'Access Feasibility')}
+                                                {dictionary?.list?.access_feasibility || (lang?.startsWith('pt') ? 'Acessar Viabilidade' : 'Access Feasibility')}
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                                             </div>
                                         </div>
@@ -540,7 +517,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                     >
                         <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 shadow-inner">
                             <svg className="w-12 h-12 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                             </svg>
                         </div>
                         <p className="text-2xl font-black text-gray-300 tracking-tight text-center px-4">
