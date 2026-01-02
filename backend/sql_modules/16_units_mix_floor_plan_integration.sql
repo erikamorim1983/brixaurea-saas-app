@@ -43,6 +43,7 @@ BEGIN
             plan_name,
             bedrooms,
             bathrooms,
+            half_baths,
             suites,
             garages,
             area_sqft,
@@ -65,6 +66,10 @@ BEGIN
         
         IF NEW.bathrooms IS NULL OR NEW.bathrooms = 0 THEN
             NEW.bathrooms := fp_record.bathrooms;
+        END IF;
+
+        IF NEW.half_baths IS NULL OR NEW.half_baths = 0 THEN
+            NEW.half_baths := fp_record.half_baths;
         END IF;
         
         IF NEW.suites IS NULL OR NEW.suites = 0 THEN

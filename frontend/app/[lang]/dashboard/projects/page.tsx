@@ -24,6 +24,12 @@ export default async function ProjectsPage({
         `)
         .order('updated_at', { ascending: false });
 
+    if (error) {
+        console.error('Error fetching projects:', error);
+    }
+
+    const safeProjects = projects || [];
+
     // Fallback if join fails or empty - handle gracefully
     // Note: Supabase 'locations:project_locations(...)' syntax relies on foreign key detection.
 
@@ -36,17 +42,16 @@ export default async function ProjectsPage({
     // The query returns an array 'locations' by default unless we specify single.
 
     // Post-processing to flatten if needed
-    const processedProjects = projects?.map(p => ({
+    const processedProjects = safeProjects.map(p => ({
         ...p,
-        // If 1-1, locations might be an object or single array item
         locations: Array.isArray(p.locations) ? p.locations[0] : p.locations
-    })) || [];
+    }));
 
     return (
         <ProjectsListClient
             projects={processedProjects}
             lang={lang}
-            dictionary={dictionary}
+            dictionary={dictionary?.dashboard?.projects || {}}
         />
     );
 }

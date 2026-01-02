@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect, useCallback } from "react";
+import FloorPlanSelector, { FloorPlan } from "../FloorPlan/FloorPlanSelector";
 
 interface UnitMixTabProps {
     project: any;
@@ -36,9 +37,14 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
         avg_price: 0,
         bedrooms: 0,
         bathrooms: 0,
+        half_baths: 0,
         suites: 0,
         garages: 0
     });
+
+    // Editing State
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editItem, setEditItem] = useState<any>(null);
 
     const dict = dictionary.analysis.units; // Shortcut
 
@@ -166,13 +172,14 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                 avg_price: 0,
                 bedrooms: 0,
                 bathrooms: 0,
+                half_baths: 0,
                 suites: 0,
                 garages: 0
             });
             fetchUnits(baseScenarioId);
         } else {
             console.error(error);
-            alert("Error adding unit. Ensure migration is run.");
+            alert(`Error adding unit: ${error.message}. Ensure migration is run.`);
         }
     };
 
@@ -180,6 +187,30 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
     const handleDelete = async (id: string) => {
         await supabase.from('units_mix').delete().eq('id', id);
         if (baseScenarioId) fetchUnits(baseScenarioId);
+    };
+
+    // 6. Update Unit
+    const handleUpdateUnit = async () => {
+        if (!editingId || !editItem) return;
+
+        const finalTotalArea = (editItem.area_sqft || 0) + (editItem.area_outdoor || 0);
+
+        const { error } = await supabase
+            .from('units_mix')
+            .update({
+                ...editItem,
+                area_total: finalTotalArea
+            })
+            .eq('id', editingId);
+
+        if (!error) {
+            setEditingId(null);
+            setEditItem(null);
+            if (baseScenarioId) fetchUnits(baseScenarioId);
+        } else {
+            console.error(error);
+            alert("Error updating unit.");
+        }
     };
 
     if (loading) return <div className="p-8 text-center text-gray-400">Loading...</div>;
@@ -200,9 +231,22 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
     const calcPriceSqft = (priceSqft: number) => priceSqft * multiplier;
 
     // Totals logic with current multiplier applied
-    const totalRevenue = units.reduce((acc, u) => acc + (u.unit_count * calcPrice(u.avg_price)), 0);
-    const totalAreaSellable = units.reduce((acc, u) => acc + (u.unit_count * (u.area_sqft || 0)), 0);
-    const totalUnits = units.reduce((acc, u) => acc + u.unit_count, 0);
+    // IMPROVEMENT: Include newItem in totals if it has valid data to give live feedback
+    const unitsToSum = [...units];
+    const hasValidNewItem = isBase && newItem.model_name && newItem.unit_count > 0 && (newItem.avg_price > 0 || (newItem.price_sqft > 0 && newItem.area_sqft > 0));
+
+    if (hasValidNewItem) {
+        const pendingAvgPrice = newItem.avg_price || (newItem.price_sqft * newItem.area_sqft);
+        unitsToSum.push({
+            ...newItem,
+            id: 'pending',
+            avg_price: pendingAvgPrice
+        });
+    }
+
+    const totalRevenue = unitsToSum.reduce((acc, u) => acc + (u.unit_count * calcPrice(u.avg_price)), 0);
+    const totalAreaSellable = unitsToSum.reduce((acc, u) => acc + (u.unit_count * (u.area_sqft || 0)), 0);
+    const totalUnits = unitsToSum.reduce((acc, u) => acc + u.unit_count, 0);
     const avgPriceSqft = totalAreaSellable > 0 ? totalRevenue / totalAreaSellable : 0;
 
     return (
@@ -277,6 +321,7 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                             <th className="px-4 py-3 text-left text-xs font-semibold tracking-wider">{dict.table.model}</th>
                             <th className={HeaderClass}>{dict.table.beds}</th>
                             <th className={HeaderClass}>{dict.table.baths}</th>
+                            <th className={HeaderClass}>{lang === 'pt' ? 'Lav.' : 'Half'}</th>
 
                             {/* THREE COLUMNS requested */}
                             <th className={HeaderClass}>{dict.table.area_sellable}</th>
@@ -295,13 +340,38 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                         {isBase && (
                             <tr className="bg-cyan-50/30 hover:bg-cyan-50/50 transition-colors">
                                 <td className="px-4 py-2">
-                                    <input
-                                        type="text"
-                                        placeholder="Ex: Premium A"
-                                        className="bg-transparent outline-none w-full border-b border-transparent focus:border-cyan-500 font-medium"
-                                        value={newItem.model_name}
-                                        onChange={e => setNewItem({ ...newItem, model_name: e.target.value })}
-                                    />
+                                    <div className="flex flex-col gap-1">
+                                        <div className="flex items-center justify-between">
+                                            <label className="text-[10px] text-gray-400 font-bold uppercase">{dict.table.model}</label>
+                                            <FloorPlanSelector
+                                                lang={lang}
+                                                userId={project.user_id}
+                                                onSelect={(plan: FloorPlan) => {
+                                                    setNewItem({
+                                                        ...newItem,
+                                                        model_name: plan.plan_name,
+                                                        area_sqft: plan.living_area_sqft || plan.area_sqft || 0,
+                                                        area_outdoor: (plan.entry_area_sqft || 0) + (plan.lanai_area_sqft || 0) || plan.area_outdoor || 0,
+                                                        area_total: plan.total_const_area_sqft || plan.area_total || 0,
+                                                        bedrooms: plan.bedrooms || 0,
+                                                        bathrooms: plan.bathrooms || 0,
+                                                        half_baths: plan.half_baths || 0,
+                                                        suites: plan.suites || 0,
+                                                        garages: plan.garages || 0,
+                                                        price_sqft: plan.standard_price_sqft || 0,
+                                                        avg_price: (plan.standard_price_sqft || 0) * (plan.living_area_sqft || plan.area_sqft || 0)
+                                                    });
+                                                }}
+                                            />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            placeholder="Ex: Premium A"
+                                            className="bg-transparent outline-none w-full border-b border-transparent focus:border-cyan-500 font-medium"
+                                            value={newItem.model_name}
+                                            onChange={e => setNewItem({ ...newItem, model_name: e.target.value })}
+                                        />
+                                    </div>
                                 </td>
                                 <td className="px-2 py-2">
                                     <input
@@ -309,7 +379,7 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                         className={InputClass}
                                         value={newItem.bedrooms || ''}
                                         placeholder="0"
-                                        onChange={e => setNewItem({ ...newItem, bedrooms: parseFloat(e.target.value) })}
+                                        onChange={e => setNewItem({ ...newItem, bedrooms: parseFloat(e.target.value) || 0 })}
                                     />
                                 </td>
                                 <td className="px-2 py-2">
@@ -318,7 +388,16 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                         className={InputClass}
                                         value={newItem.bathrooms || ''}
                                         placeholder="0"
-                                        onChange={e => setNewItem({ ...newItem, bathrooms: parseFloat(e.target.value) })}
+                                        onChange={e => setNewItem({ ...newItem, bathrooms: parseFloat(e.target.value) || 0 })}
+                                    />
+                                </td>
+                                <td className="px-2 py-2">
+                                    <input
+                                        type="number"
+                                        className={InputClass}
+                                        value={newItem.half_baths || ''}
+                                        placeholder="0"
+                                        onChange={e => setNewItem({ ...newItem, half_baths: parseFloat(e.target.value) || 0 })}
                                     />
                                 </td>
 
@@ -329,7 +408,7 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                         className={InputClass}
                                         value={newItem.area_sqft || ''}
                                         placeholder="0"
-                                        onChange={e => setNewItem({ ...newItem, area_sqft: parseFloat(e.target.value) })}
+                                        onChange={e => setNewItem({ ...newItem, area_sqft: parseFloat(e.target.value) || 0 })}
                                     />
                                 </td>
 
@@ -340,7 +419,7 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                         className={InputClass}
                                         value={newItem.area_outdoor || ''}
                                         placeholder="0"
-                                        onChange={e => setNewItem({ ...newItem, area_outdoor: parseFloat(e.target.value) })}
+                                        onChange={e => setNewItem({ ...newItem, area_outdoor: parseFloat(e.target.value) || 0 })}
                                     />
                                 </td>
 
@@ -354,7 +433,7 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                         type="number"
                                         className={InputClass}
                                         value={newItem.unit_count}
-                                        onChange={e => setNewItem({ ...newItem, unit_count: parseFloat(e.target.value) })}
+                                        onChange={e => setNewItem({ ...newItem, unit_count: parseFloat(e.target.value) || 1 })}
                                     />
                                 </td>
                                 <td className="px-2 py-2 relative">
@@ -364,7 +443,7 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                         value={newItem.price_sqft || ''}
                                         placeholder="0"
                                         onChange={e => {
-                                            const p = parseFloat(e.target.value);
+                                            const p = parseFloat(e.target.value) || 0;
                                             setNewItem({
                                                 ...newItem,
                                                 price_sqft: p,
@@ -380,7 +459,7 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                         className={InputClass}
                                         value={newItem.avg_price || ''}
                                         placeholder="0"
-                                        onChange={e => setNewItem({ ...newItem, avg_price: parseFloat(e.target.value) })}
+                                        onChange={e => setNewItem({ ...newItem, avg_price: parseFloat(e.target.value) || 0 })}
                                     />
                                 </td>
                                 <td className="px-2 py-2 text-center font-bold text-cyan-700">
@@ -389,9 +468,10 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                 <td className="px-4 py-2 text-right">
                                     <button
                                         onClick={handleAddUnit}
-                                        className="bg-cyan-600 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-cyan-700 transition-colors shadow-sm"
+                                        className="bg-cyan-600 text-white px-4 py-1.5 rounded-lg flex items-center gap-2 hover:bg-cyan-700 transition-all shadow-sm font-bold text-xs"
                                     >
-                                        +
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
+                                        {lang === 'pt' ? 'Gravar' : 'Save'}
                                     </button>
                                 </td>
                             </tr>
@@ -399,17 +479,60 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
 
                         {/* Existing Units */}
                         {units.map((unit) => {
-                            // Apply multiplier derived from active scenario
-                            const displayAvgPrice = calcPrice(unit.avg_price);
-                            const displayPriceSqft = unit.area_sqft > 0 ? (displayAvgPrice / unit.area_sqft) : 0;
-                            // Calculate dynamic total area for display if needed, or use stored
-                            const displayTotalArea = (unit.area_sqft || 0) + (unit.area_outdoor || 0);
+                            const isEditing = editingId === unit.id;
+                            const item = isEditing ? editItem : unit;
+
+                            // Apply multiplier derived from active scenario (not for editing inputs, typically)
+                            const displayAvgPrice = isEditing ? item.avg_price : calcPrice(unit.avg_price);
+                            const displayPriceSqft = item.area_sqft > 0 ? (displayAvgPrice / item.area_sqft) : 0;
+                            const displayTotalArea = (item.area_sqft || 0) + (item.area_outdoor || 0);
+
+                            if (isEditing) {
+                                return (
+                                    <tr key={unit.id} className="bg-amber-50/50">
+                                        <td className="px-4 py-2">
+                                            <input type="text" className={InputClass} value={editItem.model_name} onChange={e => setEditItem({ ...editItem, model_name: e.target.value })} />
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            <input type="number" className={InputClass} value={editItem.bedrooms} onChange={e => setEditItem({ ...editItem, bedrooms: parseFloat(e.target.value) })} />
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            <input type="number" className={InputClass} value={editItem.bathrooms} onChange={e => setEditItem({ ...editItem, bathrooms: parseFloat(e.target.value) || 0 })} />
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            <input type="number" className={InputClass} value={editItem.half_baths || 0} onChange={e => setEditItem({ ...editItem, half_baths: parseFloat(e.target.value) || 0 })} />
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            <input type="number" className={InputClass} value={editItem.area_sqft} onChange={e => setEditItem({ ...editItem, area_sqft: parseFloat(e.target.value), avg_price: (editItem.price_sqft || 0) * parseFloat(e.target.value) })} />
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            <input type="number" className={InputClass} value={editItem.area_outdoor} onChange={e => setEditItem({ ...editItem, area_outdoor: parseFloat(e.target.value) })} />
+                                        </td>
+                                        <td className="px-2 py-2 text-center text-gray-500">{displayTotalArea}</td>
+                                        <td className="px-2 py-2">
+                                            <input type="number" className={InputClass} value={editItem.unit_count} onChange={e => setEditItem({ ...editItem, unit_count: parseFloat(e.target.value) })} />
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            <input type="number" className={InputClass} value={editItem.price_sqft} onChange={e => setEditItem({ ...editItem, price_sqft: parseFloat(e.target.value), avg_price: parseFloat(e.target.value) * (editItem.area_sqft || 0) })} />
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            <input type="number" className={InputClass} value={editItem.avg_price} onChange={e => setEditItem({ ...editItem, avg_price: parseFloat(e.target.value) })} />
+                                        </td>
+                                        <td className="px-2 py-2 text-center font-bold text-amber-700">${(editItem.unit_count * editItem.avg_price).toLocaleString()}</td>
+                                        <td className="px-4 py-2 flex gap-2 justify-end">
+                                            <button onClick={handleUpdateUnit} className="text-green-600 font-bold text-xs uppercase">OK</button>
+                                            <button onClick={() => setEditingId(null)} className="text-gray-400 font-bold text-xs uppercase">X</button>
+                                        </td>
+                                    </tr>
+                                );
+                            }
 
                             return (
-                                <tr key={unit.id} className="hover:bg-gray-50 transition-colors">
+                                <tr key={unit.id} className="hover:bg-gray-50 transition-colors group">
                                     <td className="px-4 py-3 font-medium text-gray-900">{unit.model_name}</td>
                                     <td className={CellClass}>{unit.bedrooms}</td>
                                     <td className={CellClass}>{unit.bathrooms}</td>
+                                    <td className={CellClass}>{unit.half_baths || 0}</td>
 
                                     <td className={CellClass}>{unit.area_sqft?.toLocaleString()}</td>
                                     <td className={CellClass}>{unit.area_outdoor?.toLocaleString() || '0'}</td>
@@ -427,27 +550,46 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                     </td>
                                     <td className="px-4 py-3 text-right">
                                         {isBase && (
-                                            <button
-                                                onClick={() => handleDelete(unit.id)}
-                                                className="text-gray-400 hover:text-red-500 transition-colors"
-                                            >
-                                                &times;
-                                            </button>
+                                            <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button
+                                                    onClick={() => {
+                                                        setEditingId(unit.id);
+                                                        setEditItem({ ...unit });
+                                                    }}
+                                                    className="text-cyan-600 hover:text-cyan-800 text-xs font-bold uppercase transition-colors"
+                                                >
+                                                    {lang === 'pt' ? 'Editar' : 'Edit'}
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        if (confirm(lang === 'pt' ? 'Excluir esta unidade?' : 'Delete this unit?')) {
+                                                            handleDelete(unit.id);
+                                                        }
+                                                    }}
+                                                    className="text-gray-300 hover:text-red-500 transition-colors"
+                                                >
+                                                    &times;
+                                                </button>
+                                            </div>
                                         )}
                                     </td>
                                 </tr>
                             );
                         })}
                     </tbody>
-                    <tfoot className="bg-gray-50 font-semibold text-gray-700">
+                    <tfoot className="bg-gray-50 font-bold text-gray-800 border-t-2 border-gray-100">
                         <tr>
-                            <td colSpan={5} className="px-4 py-3 text-right">Totals / Avg:</td>
-                            <td className={CellClass}>-</td>{/* Outdoor Total */}
-                            <td className={CellClass}>{/* Total Area Total - Optional */}</td>
+                            <td colSpan={4} className="px-4 py-4 text-right text-gray-400 font-bold uppercase tracking-wider text-[10px]">Totals / Avg:</td>
+                            <td className={CellClass}>{totalAreaSellable.toLocaleString()}</td>
+                            <td className={CellClass}>-</td>{/* Outdoor Total - optional sum */}
+                            <td className={CellClass}>-</td>{/* Total Area Total - optional sum */}
+
                             <td className={CellClass}>{totalUnits}</td>
                             <td className={CellClass}>${avgPriceSqft.toFixed(0)}</td>
                             <td className={CellClass}>-</td>
-                            <td className="px-2 py-3 text-center text-cyan-700">${totalRevenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
+                            <td className="px-2 py-3 text-center text-cyan-700 font-extrabold text-base">
+                                ${totalRevenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                            </td>
                             <td></td>
                         </tr>
                     </tfoot>

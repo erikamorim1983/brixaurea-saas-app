@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from 'next/link';
 import { createClient } from "@/lib/supabase/client";
 import ShareProjectModal from './ShareProjectModal';
@@ -16,6 +17,7 @@ interface Project {
         city?: string;
         state?: string;
     } | null;
+    deleted_at?: string | null;
 }
 
 interface ProjectsListClientProps {
@@ -38,10 +40,21 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
 
     // Menu State
     const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+    const [showTrash, setShowTrash] = useState(false);
+
+    // Sync state when server data changes
+    useEffect(() => {
+        setProjects(initialProjects);
+    }, [initialProjects]);
 
     // Filter Logic Helper
     const getFilteredProjects = (excludeKey?: string) => {
         return projects.filter(p => {
+            // Soft Delete Filter
+            const isDeleted = !!p.deleted_at;
+            if (showTrash && !isDeleted) return false;
+            if (!showTrash && isDeleted) return false;
+
             const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 (p.locations?.address_full || '').toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -96,11 +109,32 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
     };
 
     // Actions
-    const handleArchive = async (id: string, e: React.MouseEvent) => {
-        e.stopPropagation(); // Prevent navigation
-        const { error } = await supabase.from('projects').update({ status: 'archived' }).eq('id', id);
+    const handleMoveToTrash = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        const now = new Date().toISOString();
+        const { error } = await supabase.from('projects').update({ deleted_at: now }).eq('id', id);
         if (!error) {
-            setProjects(prev => prev.map(p => p.id === id ? { ...p, status: 'archived' } : p));
+            setProjects(prev => prev.map(p => p.id === id ? { ...p, deleted_at: now } : p));
+        }
+        setActiveMenuId(null);
+    };
+
+    const handleRestore = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        const { error } = await supabase.from('projects').update({ deleted_at: null }).eq('id', id);
+        if (!error) {
+            setProjects(prev => prev.map(p => p.id === id ? { ...p, deleted_at: null } : p));
+        }
+        setActiveMenuId(null);
+    };
+
+    const handlePermanentDelete = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!confirm(lang === 'pt' ? 'Tem certeza que deseja excluir permanentemente?' : 'Are you sure you want to permanently delete?')) return;
+
+        const { error } = await supabase.from('projects').delete().eq('id', id);
+        if (!error) {
+            setProjects(prev => prev.filter(p => p.id !== id));
         }
         setActiveMenuId(null);
     };
@@ -155,6 +189,21 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                             {lang === 'pt' ? 'Gerencie seu portfolio imobiliário' : 'Manage your real estate portfolio'}
                         </p>
                     </div>
+                    <div className="flex gap-2 bg-gray-100 p-1 rounded-xl">
+                        <button
+                            onClick={() => setShowTrash(false)}
+                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${!showTrash ? 'bg-white text-cyan-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                        >
+                            {lang === 'pt' ? 'Ativos' : 'Active'}
+                        </button>
+                        <button
+                            onClick={() => setShowTrash(true)}
+                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${showTrash ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            {lang === 'pt' ? 'Lixeira' : 'Trash'}
+                        </button>
+                    </div>
                     <Link
                         href={`/${lang}/dashboard/projects/new`}
                         className="inline-flex items-center justify-center px-4 py-2 bg-[#081F2E] text-white font-medium rounded-lg shadow-md hover:bg-opacity-90 transition-all"
@@ -166,10 +215,14 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                     </Link>
                 </div>
 
-                {/* Advanced Filter Bar */}
-                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm" onClick={e => e.stopPropagation()}>
+                {/* Advanced Filter Bar - Glassmorphism Refinement */}
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-white/80 backdrop-blur-xl p-6 rounded-2xl border border-gray-100 shadow-sm border-b-4 border-b-cyan-500/10"
+                    onClick={e => e.stopPropagation()}
+                >
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-
                         {/* Search */}
                         <div className="col-span-1">
                             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
@@ -262,106 +315,191 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                             </select>
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </div>
 
-            {/* Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredProjects.map((project) => (
-                    <div
-                        key={project.id}
-                        className="group bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col h-[380px] relative"
+            {/* Grid with Framer Motion Stagger */}
+            <AnimatePresence mode="popLayout">
+                {filteredProjects.length > 0 ? (
+                    <motion.div
+                        layout
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
                     >
-                        {/* 3 Dots Menu */}
-                        <div className="absolute top-4 right-4 z-20">
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setActiveMenuId(activeMenuId === project.id ? null : project.id);
+                        {filteredProjects.map((project, index) => (
+                            <motion.div
+                                layout
+                                key={project.id}
+                                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                                transition={{
+                                    delay: index * 0.05,
+                                    duration: 0.4,
+                                    ease: [0.23, 1, 0.32, 1]
                                 }}
-                                className="p-1 rounded-full bg-white/20 hover:bg-white text-white hover:text-gray-800 transition-all backdrop-blur-sm"
+                                className="group bg-white rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(8,112,184,0.12)] transition-all duration-500 overflow-hidden flex flex-col h-[400px] relative"
                             >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path></svg>
-                            </button>
-
-                            {/* Dropdown */}
-                            {activeMenuId === project.id && (
-                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 py-1 overflow-hidden animate-in fade-in slide-in-from-top-2">
-                                    <Link
-                                        href={`/${lang}/dashboard/projects/${project.id}/feasibility/land`}
-                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#00D9FF]"
-                                    >
-                                        ✏️ {lang === 'pt' ? 'Editar / Analisar' : 'Edit / Analyze'}
-                                    </Link>
+                                {/* 3 Dots Menu */}
+                                <div className="absolute top-5 right-5 z-20">
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            setActiveMenuId(null);
-                                            setProjectToShare(project);
+                                            setActiveMenuId(activeMenuId === project.id ? null : project.id);
                                         }}
-                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#00D9FF]"
+                                        className="p-2 rounded-full bg-white/10 hover:bg-white text-white hover:text-gray-800 transition-all backdrop-blur-md shadow-lg border border-white/20"
                                     >
-                                        🔗 {lang === 'pt' ? 'Compartilhar' : 'Share'}
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path></svg>
                                     </button>
-                                    <button
-                                        onClick={(e) => handleArchive(project.id, e)}
-                                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                                    >
-                                        🗑️ {lang === 'pt' ? 'Arquivar' : 'Archive'}
-                                    </button>
-                                </div>
-                            )}
-                        </div>
 
-                        <Link href={`/${lang}/dashboard/analysis?projectId=${project.id}`} className="flex-1 flex flex-col">
-                            {/* Card Image / Header */}
-                            <div className={`h-40 bg-gradient-to-br ${getCardGradient(project.status)} relative p-6 flex flex-col justify-end group-hover:brightness-110 transition-all duration-500`}>
-                                <div className="absolute top-4 left-4">
-                                    <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${getStatusColor(project.status)} bg-white/95 shadow-sm`}>
-                                        {translateStatus(project.status, lang)}
-                                    </span>
+                                    {/* Dropdown - Animated */}
+                                    <AnimatePresence>
+                                        {activeMenuId === project.id && (
+                                            <motion.div
+                                                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                                className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 overflow-hidden z-50 origin-top-right"
+                                            >
+                                                {project.deleted_at ? (
+                                                    <>
+                                                        <button
+                                                            onClick={(e) => handleRestore(project.id, e)}
+                                                            className="block w-full text-left px-5 py-3 text-sm text-green-600 hover:bg-green-50 flex items-center gap-3 transition-colors font-bold"
+                                                        >
+                                                            <span>🔄</span>
+                                                            {lang === 'pt' ? 'Restaurar Projeto' : 'Restore Project'}
+                                                        </button>
+                                                        <div className="h-px bg-gray-50 my-1 mx-2" />
+                                                        <button
+                                                            onClick={(e) => handlePermanentDelete(project.id, e)}
+                                                            className="block w-full text-left px-5 py-3 text-sm text-red-700 hover:bg-red-50 flex items-center gap-3 transition-colors font-black"
+                                                        >
+                                                            <span>🔥</span>
+                                                            {lang === 'pt' ? 'Excluir Permanente' : 'Delete Permanent'}
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Link
+                                                            href={`/${lang}/dashboard/projects/${project.id}/feasibility/land`}
+                                                            className="block px-5 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors font-bold"
+                                                        >
+                                                            <span>✏️</span>
+                                                            {lang === 'pt' ? 'Editar / Analisar' : 'Edit / Analyze'}
+                                                        </Link>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setActiveMenuId(null);
+                                                                setProjectToShare(project);
+                                                            }}
+                                                            className="block w-full text-left px-5 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors font-bold"
+                                                        >
+                                                            <span>🔗</span>
+                                                            {lang === 'pt' ? 'Compartilhar' : 'Share'}
+                                                        </button>
+                                                        <div className="h-px bg-gray-50 my-1 mx-2" />
+                                                        <button
+                                                            onClick={(e) => handleMoveToTrash(project.id, e)}
+                                                            className="block w-full text-left px-5 py-3 text-sm text-red-500 hover:bg-red-50 flex items-center gap-3 transition-colors font-bold"
+                                                        >
+                                                            <span>🗑️</span>
+                                                            {lang === 'pt' ? 'Mover para Lixeira' : 'Move to Trash'}
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-white mb-1 truncate">
-                                        {project.name}
-                                    </h3>
-                                    <div className="flex items-center text-gray-300 text-sm">
-                                        <svg className="w-4 h-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                        <span className="truncate">{project.locations?.address_full || 'No Address'}</span>
+
+                                <Link href={`/${lang}/dashboard/projects/${project.id}/feasibility/land`} className="flex-1 flex flex-col no-underline group shadow-none">
+                                    {/* Card Header with Improved Gradient */}
+                                    <div className={`h-44 bg-gradient-to-br ${getCardGradient(project.status)} relative p-8 flex flex-col justify-end group-hover:brightness-110 transition-all duration-700`}>
+                                        <div className="absolute inset-0 bg-black/5 mix-blend-overlay group-hover:opacity-0 transition-opacity" />
+
+                                        {project.deleted_at && (
+                                            <div className="absolute top-5 left-8 z-20">
+                                                <span className="px-4 py-1.5 bg-red-600/90 text-white text-[11px] font-black uppercase rounded-full shadow-2xl border border-white/20 backdrop-blur-sm animate-pulse flex items-center gap-1.5">
+                                                    <span className="w-2 h-2 bg-white rounded-full" />
+                                                    {lang === 'pt' ? 'Lixeira (30 dias)' : 'Trash (30 days)'}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {!project.deleted_at && (
+                                            <div className="absolute top-5 left-8">
+                                                <span className={`px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest border ${getStatusColor(project.status)} bg-white/95 shadow-lg`}>
+                                                    {translateStatus(project.status, lang)}
+                                                </span>
+                                            </div>
+                                        )}
+                                        <div className="relative z-10">
+                                            <h3 className="text-2xl font-black text-white mb-2 leading-tight tracking-tight group-hover:translate-x-1 transition-transform duration-500">
+                                                {project.name}
+                                            </h3>
+                                            <div className="flex items-center text-white/70 text-sm font-medium">
+                                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                </svg>
+                                                <span className="truncate opacity-90">{project.locations?.address_full || 'Location Pending'}</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
 
-                            {/* Simple Info (Customizable) */}
-                            <div className="p-6">
-                                <div className="flex justify-between items-center mb-4">
-                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</span>
-                                    <span className="text-sm font-medium text-gray-900 capitalize">
-                                        {project.project_type?.replace('_', ' ') || '-'}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center mb-4">
-                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">State/City</span>
-                                    <span className="text-sm font-medium text-gray-900">
-                                        {project.locations?.city || '-'}, {project.locations?.state || '-'}
-                                    </span>
-                                </div>
-                                <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
-                                    <span className="text-xs text-gray-400">
-                                        Updated {new Date(project.updated_at).toLocaleDateString()}
-                                    </span>
-                                    <span className="text-xs font-bold text-[#00D9FF] opacity-0 group-hover:opacity-100 transition-opacity">
-                                        View Analysis &rarr;
-                                    </span>
-                                </div>
-                            </div>
-                        </Link>
-                    </div>
-                ))}
-            </div>
+                                    {/* Project Meta Info */}
+                                    <div className="p-8 flex-1 flex flex-col justify-between bg-gradient-to-b from-white to-gray-50/50">
+                                        <div className="space-y-4">
+                                            <div className="flex justify-between items-center group/row">
+                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Typology</span>
+                                                <span className="text-sm font-bold text-gray-800 capitalize bg-gray-100/50 px-3 py-1 rounded-lg">
+                                                    {project.project_type?.replace('_', ' ') || '-'}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between items-center group/row">
+                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Market Area</span>
+                                                <span className="text-sm font-bold text-gray-800">
+                                                    {(project.locations?.city || project.locations?.state) ? `${project.locations?.city || ''}, ${project.locations?.state || ''}` : '-'}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-8 pt-6 border-t border-gray-100 flex justify-between items-center">
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] font-bold text-gray-300 uppercase">Last Activity</span>
+                                                <span className="text-xs font-bold text-gray-500">
+                                                    {new Date(project.updated_at).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-[#00D9FF] font-black text-xs uppercase tracking-tighter group-hover:gap-4 transition-all duration-500">
+                                                {lang === 'pt' ? 'Acessar Viabilidade' : 'Access Feasibility'}
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex flex-col items-center justify-center py-32 bg-white/50 backdrop-blur-sm rounded-[3rem] border-4 border-dashed border-gray-50"
+                    >
+                        <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                            <svg className="w-12 h-12 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                        </div>
+                        <p className="text-2xl font-black text-gray-300 tracking-tight text-center px-4">
+                            {showTrash ? (lang === 'pt' ? 'Sua lixeira está vazia' : 'Your trash is empty') : (lang === 'pt' ? 'Nenhum projeto encontrado' : 'No projects found')}
+                        </p>
+                        <p className="text-sm font-bold text-gray-400/60 mt-2 uppercase tracking-[0.2em] text-center px-4">
+                            {showTrash ? (lang === 'pt' ? 'Tudo limpo por aqui' : 'Your trash is clear') : (lang === 'pt' ? 'Clique no botão acima para criar o primeiro' : 'Click the button above to start')}
+                        </p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <ShareProjectModal
                 project={projectToShare}
@@ -369,6 +507,6 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                 onClose={() => setProjectToShare(null)}
                 lang={lang}
             />
-        </div >
+        </div>
     );
 }
