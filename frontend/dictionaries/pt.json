@@ -417,6 +417,22 @@
         "deleting": "Excluindo..."
     },
     "projects": {
+        "list": {
+            "active": "Ativos",
+            "trash": "Lixeira",
+            "trash_full": "Lixeira (30 dias)",
+            "empty_trash": "Sua lixeira está vazia",
+            "empty_projects": "Nenhum projeto encontrado",
+            "clear_trash": "Tudo limpo por aqui",
+            "click_to_create": "Clique no botão acima para criar o primeiro",
+            "restore": "Restaurar Projeto",
+            "delete_permanent": "Excluir Permanente",
+            "move_to_trash": "Mover para Lixeira",
+            "edit_analyze": "Editar / Analisar",
+            "share": "Compartilhar",
+            "access_feasibility": "Acessar Viabilidade",
+            "new_project_btn": "Novo Projeto"
+        },
         "new": {
             "title": "Novo Projeto",
             "subtitle": "Inicie um novo estudo de viabilidade imobiliária.",

@@ -417,6 +417,22 @@
         "deleting": "Deleting..."
     },
     "projects": {
+        "list": {
+            "active": "Active",
+            "trash": "Trash",
+            "trash_full": "Trash (30 days)",
+            "empty_trash": "Your trash is empty",
+            "empty_projects": "No projects found",
+            "clear_trash": "Your trash is clear",
+            "click_to_create": "Click the button above to start",
+            "restore": "Restore Project",
+            "delete_permanent": "Delete Permanent",
+            "move_to_trash": "Move to Trash",
+            "edit_analyze": "Edit / Analyze",
+            "share": "Share",
+            "access_feasibility": "Access Feasibility",
+            "new_project_btn": "New Project"
+        },
         "new": {
             "title": "New Project",
             "subtitle": "Start a new real estate feasibility study.",

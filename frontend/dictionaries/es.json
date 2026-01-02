@@ -567,6 +567,49 @@
             }
         }
     },
+    "projects": {
+        "list": {
+            "active": "Activos",
+            "trash": "Papelera",
+            "trash_full": "Papelera (30 días)",
+            "empty_trash": "Tu papelera está vacía",
+            "empty_projects": "No se encontraron proyectos",
+            "clear_trash": "Todo despejado por aquí",
+            "click_to_create": "Haz clic en el botón de arriba para comenzar",
+            "restore": "Restaurar Proyecto",
+            "delete_permanent": "Eliminar Permanente",
+            "move_to_trash": "Mover a la Papelera",
+            "edit_analyze": "Editar / Analizar",
+            "share": "Compartir",
+            "access_feasibility": "Acceder a Viabilidad",
+            "new_project_btn": "Nuevo Proyecto"
+        },
+        "new": {
+            "title": "Nuevo Proyecto",
+            "subtitle": "Inicie un nuevo estudio de viabilidad inmobiliaria.",
+            "form": {
+                "name": "Nombre del Proyecto",
+                "name_placeholder": "Ej: Miami Beach Tower",
+                "address": "Dirección Completa",
+                "address_placeholder": "123 Ocean Dr",
+                "city": "Ciudad",
+                "state": "Estado",
+                "zip": "Código Postal",
+                "zoning": "Código de Zonificación (Opcional)",
+                "submit": "Crear Proyecto",
+                "saving": "Guardando...",
+                "success": "¡Proyecto creado con éxito!"
+            },
+            "errors": {
+                "name_min": "El nombre debe tener al menos 3 caracteres",
+                "address_required": "La dirección es obligatoria",
+                "city_required": "La ciudad es obligatoria",
+                "state_len": "Usa la abreviatura del estado (ej. FL)",
+                "zip_invalid": "Código Postal inválido",
+                "creation_failed": "Error al crear el proyecto"
+            }
+        }
+    },
     "ai": {
         "welcome_title": "¡Hola! Soy BrixAureIA",
         "welcome_subtitle": "Tu asistente de inversiones.",
