@@ -557,34 +557,35 @@ export default function LandForm({ projectId, initialData, lang }: LandFormProps
                         <span className="text-cyan-500">1.</span> {lang === 'pt' ? 'Características do Terreno' : lang === 'es' ? 'Características del Terreno' : 'Land Characteristics'}
                     </h2>
 
-                    {/* Land Area + Existing Structure Side by Side */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">{dict.landArea}</label>
+
+                    {/* Land Area - Full Width */}
+                    <div className="mb-6">
+                        <label className="text-sm font-medium text-gray-700 block mb-2">{dict.landArea}</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            onKeyDown={blockInvalidChar}
+                            {...form.register('lot_size_acres')}
+                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none"
+                            placeholder="e.g. 0.5"
+                        />
+                    </div>
+
+                    {/* Existing Structure - Below */}
+                    <div className="mb-6 p-4 border rounded-xl bg-gray-50 flex items-center justify-between">
+                        <div>
+                            <p className="font-semibold text-gray-800">{dict.existingStructure}</p>
+                            <p className="text-xs text-gray-500">{dict.existingStructureHint}</p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
                             <input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                onKeyDown={blockInvalidChar}
-                                {...form.register('lot_size_acres')}
-                                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none"
-                                placeholder="e.g. 0.5"
+                                type="checkbox"
+                                {...form.register('has_existing_structure')}
+                                className="sr-only peer"
                             />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">{dict.existingStructure}</label>
-                            <div className="p-4 border rounded-xl bg-gray-50 flex items-center justify-between">
-                                <p className="text-xs text-gray-500">{dict.existingStructureHint}</p>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        {...form.register('has_existing_structure')}
-                                        className="sr-only peer"
-                                    />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-100 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
-                                </label>
-                            </div>
-                        </div>
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-100 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+                        </label>
                     </div>
 
                     {/* Conditional Fields for Existing Structure */}
