@@ -20,7 +20,9 @@ export default async function ProjectsPage({
         .from('projects')
         .select(`
             *,
-            locations:project_locations(address_full, city, state)
+            locations:project_locations(address_full, city, state, country),
+            category:property_categories(key),
+            subtype:property_subtypes(key)
         `)
         .order('updated_at', { ascending: false });
 
@@ -30,21 +32,12 @@ export default async function ProjectsPage({
 
     const safeProjects = projects || [];
 
-    // Fallback if join fails or empty - handle gracefully
-    // Note: Supabase 'locations:project_locations(...)' syntax relies on foreign key detection.
-
-    // If the Join fails (because maybe I didn't define the constraint explicitly in the migration file I can't see),
-    // we might need to fetch separately. But let's try the relation first as it's cleaner.
-    // Actually, looking at previous schema files, project_locations references projects(id). So it should work.
-
-    // BUT 'locations' is an array in 1:M, or single object in 1:1. 
-    // project_locations is 1:1 usually. But our code allows multiple? No, unique project_id.
-    // The query returns an array 'locations' by default unless we specify single.
-
-    // Post-processing to flatten if needed
+    // Post-processing to flatten Joined objects
     const processedProjects = safeProjects.map(p => ({
         ...p,
-        locations: Array.isArray(p.locations) ? p.locations[0] : p.locations
+        locations: Array.isArray(p.locations) ? p.locations[0] : p.locations,
+        category_key: Array.isArray(p.category) ? p.category[0]?.key : (p.category as any)?.key,
+        subtype_key: Array.isArray(p.subtype) ? p.subtype[0]?.key : (p.subtype as any)?.key
     }));
 
     return (

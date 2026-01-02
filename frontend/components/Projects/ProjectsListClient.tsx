@@ -16,11 +16,14 @@ interface Project {
     project_type?: string;
     category_id?: string | null;
     subtype_id?: string | null;
+    category_key?: string | null;
+    subtype_key?: string | null;
     updated_at: string;
     locations?: {
         address_full: string;
         city?: string;
         state?: string;
+        country?: string;
     } | null;
     deleted_at?: string | null;
 }
@@ -183,10 +186,34 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
 
     const getTypologyName = (project: Project) => {
         const propDict: any = lang === 'pt' ? propertyTypesPT : lang === 'es' ? propertyTypesES : propertyTypesEN;
-        if (project.subtype_id && propDict.property_subtypes[project.subtype_id]) {
-            return propDict.property_subtypes[project.subtype_id];
+        const key = project.subtype_key || project.subtype_id; // Try key first, then fallback
+        if (key && propDict.property_subtypes[key]) {
+            return propDict.property_subtypes[key];
         }
         return project.project_type?.replace('_', ' ') || '-';
+    };
+
+    const getStateFlagUrl = (state?: string, country?: string) => {
+        if (!state) return null;
+        const s = state.toUpperCase();
+        const c = country?.toUpperCase() || 'USA';
+
+        if (c === 'USA' || c === 'UNITED STATES') {
+            return `https://cdn.jsdelivr.net/gh/kamranahmedse/gists@master/flags/US/${s.toLowerCase()}.svg`;
+        }
+        // Fallback for Brazil if possible, or just return code
+        if (c === 'BRAZIL' || c === 'BRASIL' || c === 'BR') {
+            // Some common BR flags on CDN
+            return `https://raw.githubusercontent.com/luizomf/estados-brasileiros-e-siglas/master/bandeiras/${s.toLowerCase()}.png`;
+        }
+        return null;
+    };
+
+    const getCountryFlagUrl = (country?: string) => {
+        const c = country?.toUpperCase() || 'USA';
+        if (c === 'BRAZIL' || c === 'BRASIL' || c === 'BR') return 'https://flagcdn.com/w40/br.png';
+        if (c === 'USA' || c === 'UNITED STATES' || c === 'US') return 'https://flagcdn.com/w40/us.png';
+        return 'https://flagcdn.com/w40/us.png'; // Default
     };
 
     return (
@@ -454,8 +481,19 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                                 </svg>
-                                                <span className="truncate opacity-90">{project.locations?.address_full || 'Location Pending'}</span>
+                                                <span className="truncate opacity-90">
+                                                    {project.locations?.address_full || (lang === 'pt' ? 'Localização Pendente' : lang === 'es' ? 'Ubicación Pendiente' : 'Location Pending')}
+                                                </span>
                                             </div>
+                                        </div>
+
+                                        {/* Country Flag Overlay */}
+                                        <div className="absolute bottom-5 right-8">
+                                            <img
+                                                src={getCountryFlagUrl(project.locations?.country)}
+                                                alt="Country"
+                                                className="w-6 h-auto rounded shadow-sm border border-white/20"
+                                            />
                                         </div>
                                     </div>
 
@@ -472,11 +510,21 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                             </div>
                                             <div className="flex justify-between items-center group/row">
                                                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                                                    {dictionary?.list?.market_area_label || 'Market Area'}
+                                                    {dictionary?.list?.market_area_label || (lang === 'pt' ? 'Área de Mercado' : 'Market Area')}
                                                 </span>
-                                                <span className="text-sm font-bold text-gray-800">
-                                                    {(project.locations?.city || project.locations?.state) ? `${project.locations?.city || ''}, ${project.locations?.state || ''}` : '-'}
-                                                </span>
+                                                <div className="flex items-center gap-2">
+                                                    {project.locations?.state && (
+                                                        <img
+                                                            src={getStateFlagUrl(project.locations.state, project.locations.country) || ''}
+                                                            onError={(e) => (e.currentTarget.style.display = 'none')}
+                                                            alt={project.locations.state}
+                                                            className="w-4 h-auto rounded-sm opacity-80"
+                                                        />
+                                                    )}
+                                                    <span className="text-sm font-bold text-gray-800">
+                                                        {(project.locations?.city || project.locations?.state) ? `${project.locations?.city || ''}, ${project.locations?.state || ''}` : '-'}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
 
