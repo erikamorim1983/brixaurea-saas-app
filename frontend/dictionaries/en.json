@@ -447,6 +447,7 @@
         "tabs": {
             "overview": "Overview",
             "regional": "Regional Data",
+            "project": "PROJECT",
             "land": "Land",
             "unit_mix": "Units",
             "costs": "Costs",
