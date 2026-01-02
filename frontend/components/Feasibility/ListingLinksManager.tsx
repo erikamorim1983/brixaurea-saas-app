@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 interface ListingLink {
@@ -20,6 +20,32 @@ export default function ListingLinksManager({ projectId, initialLinks = [], lang
     const [links, setLinks] = useState<ListingLink[]>(initialLinks);
     const [newLinkUrl, setNewLinkUrl] = useState('');
     const [saving, setSaving] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    // Fetch existing links on mount
+    useEffect(() => {
+        async function fetchLinks() {
+            try {
+                const { data, error } = await supabase
+                    .from('listing_links')
+                    .select('*')
+                    .eq('project_id', projectId)
+                    .order('created_at', { ascending: true });
+
+                if (error) throw error;
+
+                if (data) {
+                    setLinks(data);
+                }
+            } catch (err) {
+                console.error('Error fetching links:', err);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchLinks();
+    }, [projectId, supabase]);
 
     const texts = {
         pt: {
