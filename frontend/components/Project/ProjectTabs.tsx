@@ -23,8 +23,8 @@ export default function ProjectTabs({ lang, projectId, dictionary }: ProjectTabs
 
     // 2. Sub Tabs (Only for Feasibility Group)
     const feasibilityTabs = [
-        { key: 'project', label: dictionary.analysis.tabs.project || 'PROJETO', path: '/feasibility/project' },
         { key: 'land', label: dictionary.analysis.tabs.land, path: '/feasibility/land' },
+        { key: 'project', label: dictionary.analysis.tabs.project || 'PROJETO', path: '/feasibility/project' },
         { key: 'unit_mix', label: dictionary.analysis.tabs.unit_mix, path: '/feasibility/units' },
         { key: 'costs', label: dictionary.analysis.tabs.costs, path: '/feasibility/costs' },
         { key: 'financials', label: dictionary.analysis.tabs.financials, path: '/feasibility/financial' },

@@ -11,7 +11,7 @@ interface ProjectTypeSelectorProps {
     initialCategoryId?: string | null;
     initialSubtypeId?: string | null;
     lang: string;
-    onSave?: (categoryId: string, subtypeId: string) => void;
+    onSave?: (categoryId: string, subtypeId: string) => Promise<void>;
 }
 
 export default function ProjectTypeSelector({
@@ -25,13 +25,15 @@ export default function ProjectTypeSelector({
     const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(initialCategoryId || null);
     const [selectedSubtypeId, setSelectedSubtypeId] = useState<string | null>(initialSubtypeId || null);
     const [saving, setSaving] = useState(false);
+    const [isEditing, setIsEditing] = useState(!initialCategoryId || !initialSubtypeId);
+    const [showSuccessToast, setShowSuccessToast] = useState(false);
 
     // Get translation dict based on lang
     const translations = lang === 'pt' ? propertyTypesPT : lang === 'es' ? propertyTypesES : propertyTypesEN;
 
     // Reset subtype when category changes
     useEffect(() => {
-        if (selectedCategoryId && !initialSubtypeId) {
+        if (selectedCategoryId && !initialSubtypeId && isEditing) {
             setSelectedSubtypeId(null);
         }
     }, [selectedCategoryId]);
@@ -47,16 +49,36 @@ export default function ProjectTypeSelector({
 
         setSaving(true);
         try {
-            // TODO: Save to database (projects table)
-            // For now, just call the callback
             if (onSave) {
-                onSave(selectedCategoryId, selectedSubtypeId);
+                await onSave(selectedCategoryId, selectedSubtypeId);
             }
+
+            // Show success toast
+            setShowSuccessToast(true);
+            setIsEditing(false);
+
+            // Hide toast after 3 seconds
+            setTimeout(() => {
+                setShowSuccessToast(false);
+            }, 3000);
         } catch (err) {
             console.error('Error saving project type:', err);
+            alert(lang === 'pt' ? 'Erro ao salvar tipo de projeto' : 'Error saving project type');
         } finally {
             setSaving(false);
         }
+    };
+
+    // Handle edit
+    const handleEdit = () => {
+        setIsEditing(true);
+    };
+
+    // Handle cancel
+    const handleCancel = () => {
+        setSelectedCategoryId(initialCategoryId || null);
+        setSelectedSubtypeId(initialSubtypeId || null);
+        setIsEditing(false);
     };
 
     if (loading) {
@@ -72,7 +94,9 @@ export default function ProjectTypeSelector({
     if (error) {
         return (
             <div className="bg-red-50 border border-red-200 p-4 rounded-xl">
-                <p className="text-red-700 text-sm">Error loading property types: {error}</p>
+                <p className="text-red-700 text-sm">
+                    {lang === 'pt' ? 'Erro ao carregar tipos de projeto' : 'Error loading property types'}: {error}
+                </p>
             </div>
         );
     }
@@ -82,19 +106,46 @@ export default function ProjectTypeSelector({
     };
 
     return (
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6">
+        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6 relative">
+            {/* Success Toast */}
+            {showSuccessToast && (
+                <div className="absolute top-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg animate-fadeIn flex items-center gap-2 z-10">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="font-semibold">
+                        {lang === 'pt' ? 'Projeto salvo com sucesso!' : lang === 'es' ? '¡Proyecto guardado!' : 'Project saved successfully!'}
+                    </span>
+                </div>
+            )}
+
             {/* Header */}
-            <div>
-                <h3 className="text-lg font-bold text-[#081F2E] mb-1">
-                    {lang === 'pt' ? 'Tipo de Projeto' : lang === 'es' ? 'Tipo de Proyecto' : 'Project Type'}
-                </h3>
-                <p className="text-sm text-gray-500">
-                    {lang === 'pt'
-                        ? 'Selecione a categoria e o subtipo do projeto para configurar métricas adequadas.'
-                        : lang === 'es'
-                            ? 'Seleccione la categoría y el subtipo del proyecto para configurar métricas adecuadas.'
-                            : 'Select the project category and subtype to configure appropriate metrics.'}
-                </p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h3 className="text-lg font-bold text-[#081F2E] mb-1">
+                        {lang === 'pt' ? 'Tipo de Projeto' : lang === 'es' ? 'Tipo de Proyecto' : 'Project Type'}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                        {lang === 'pt'
+                            ? 'Define o tipo de empreendimento e configura as métricas adequadas.'
+                            : lang === 'es'
+                                ? 'Define el tipo de desarrollo y configura las métricas adecuadas.'
+                                : 'Define the development type and configure appropriate metrics.'}
+                    </p>
+                </div>
+
+                {/* Edit Button (when saved) */}
+                {!isEditing && selectedCategoryId && selectedSubtypeId && (
+                    <button
+                        onClick={handleEdit}
+                        className="flex items-center gap-2 px-4 py-2 text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors border border-cyan-200"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        {lang === 'pt' ? 'Editar' : lang === 'es' ? 'Editar' : 'Edit'}
+                    </button>
+                )}
             </div>
 
             {/* Category Selector */}
@@ -105,7 +156,9 @@ export default function ProjectTypeSelector({
                 <select
                     value={selectedCategoryId || ''}
                     onChange={(e) => setSelectedCategoryId(e.target.value || null)}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
+                    disabled={!isEditing}
+                    className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''
+                        }`}
                 >
                     <option value="">
                         {lang === 'pt' ? 'Selecione a Categoria' : lang === 'es' ? 'Seleccione la Categoría' : 'Select Category'}
@@ -132,7 +185,9 @@ export default function ProjectTypeSelector({
                     <select
                         value={selectedSubtypeId || ''}
                         onChange={(e) => setSelectedSubtypeId(e.target.value || null)}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
+                        disabled={!isEditing}
+                        className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''
+                            }`}
                     >
                         <option value="">
                             {lang === 'pt' ? 'Selecione o Subtipo' : lang === 'es' ? 'Seleccione el Subtipo' : 'Select Subtype'}
@@ -198,18 +253,52 @@ export default function ProjectTypeSelector({
                 </div>
             )}
 
-            {/* Save Button */}
-            {selectedCategoryId && selectedSubtypeId && onSave && (
-                <div className="pt-4 border-t border-gray-100">
+            {/* Action Buttons */}
+            {isEditing && selectedCategoryId && selectedSubtypeId && (
+                <div className="flex gap-3 pt-4 border-t border-gray-100">
+                    {initialCategoryId && initialSubtypeId && (
+                        <button
+                            onClick={handleCancel}
+                            disabled={saving}
+                            className="flex-1 bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-lg hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {lang === 'pt' ? 'Cancelar' : lang === 'es' ? 'Cancelar' : 'Cancel'}
+                        </button>
+                    )}
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                        {saving
-                            ? (lang === 'pt' ? 'Salvando...' : lang === 'es' ? 'Guardando...' : 'Saving...')
-                            : (lang === 'pt' ? 'Salvar Tipo de Projeto' : lang === 'es' ? 'Guardar Tipo de Proyecto' : 'Save Project Type')}
+                        {saving ? (
+                            <>
+                                <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                {lang === 'pt' ? 'Salvando...' : lang === 'es' ? 'Guardando...' : 'Saving...'}
+                            </>
+                        ) : (
+                            <>
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                {lang === 'pt' ? 'Salvar Tipo de Projeto' : lang === 'es' ? 'Guardar Tipo de Proyecto' : 'Save Project Type'}
+                            </>
+                        )}
                     </button>
+                </div>
+            )}
+
+            {/* Saved State Indicator */}
+            {!isEditing && selectedCategoryId && selectedSubtypeId && (
+                <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-lg border border-green-200">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-sm font-semibold">
+                        {lang === 'pt' ? 'Tipo de projeto salvo' : lang === 'es' ? 'Tipo de proyecto guardado' : 'Project type saved'}
+                    </span>
                 </div>
             )}
         </div>
