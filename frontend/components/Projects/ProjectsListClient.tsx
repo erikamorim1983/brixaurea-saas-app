@@ -180,29 +180,6 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
         return project.project_type?.replace('_', ' ') || '-';
     };
 
-    const getStateFlagUrl = (state?: string, country?: string) => {
-        if (!state) return null;
-        let s = state.trim().toLowerCase();
-        const c = country?.trim().toUpperCase() || 'USA';
-
-        const stateMap: Record<string, string> = {
-            'florida': 'fl', 'sp': 'sp', 'sao paulo': 'sp', 'são paulo': 'sp',
-            'rio de janeiro': 'rj', 'rj': 'rj', 'texas': 'tx', 'tx': 'tx',
-            'california': 'ca', 'ca': 'ca', 'ny': 'ny', 'new york': 'ny',
-            'mg': 'mg', 'minas gerais': 'mg', 'sc': 'sc', 'santa catarina': 'sc',
-            'fl': 'fl', 'ga': 'ga', 'georgia': 'ga'
-        };
-
-        const code = stateMap[s] || s;
-
-        if (c === 'USA' || c === 'UNITED STATES' || c === 'US') {
-            return `https://flagcdn.com/w40/us-${code}.png`;
-        }
-        if (c === 'BRAZIL' || c === 'BRASIL' || c === 'BR') {
-            return `https://flagcdn.com/w40/br-${code}.png`;
-        }
-        return `https://flagcdn.com/w40/us-${code}.png`; // Safe US fallback
-    };
 
     return (
         <div className="space-y-8" onClick={() => setActiveMenuId(null)}>
@@ -217,19 +194,17 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                             {dictionary?.list?.subtitle || (lang?.startsWith('pt') ? 'Gerencie seu portfolio imobiliário' : 'Manage your real estate portfolio')}
                         </p>
                     </div>
-                    <div className="flex gap-2 bg-gray-100 p-1.5 rounded-2xl shadow-inner">
+                    <div className="flex gap-2 bg-gray-100 p-1 rounded-xl">
                         <button
                             onClick={() => setShowTrash(false)}
-                            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${!showTrash ? 'bg-white text-cyan-600 shadow-md' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${!showTrash ? 'bg-white text-cyan-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                         >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" /></svg>
                             {dictionary?.list?.active || (lang?.startsWith('pt') ? 'Ativos' : 'Active')}
                         </button>
                         <button
                             onClick={() => setShowTrash(true)}
-                            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${showTrash ? 'bg-white text-red-600 shadow-md' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${showTrash ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                         >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                             {dictionary?.list?.trash || (lang?.startsWith('pt') ? 'Lixeira' : 'Trash')}
                         </button>
                     </div>
@@ -436,22 +411,9 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                                     {dictionary?.list?.trash_full || (lang?.startsWith('pt') ? 'Lixeira (30 dias)' : 'Trash (30 days)')}
                                                 </span>
                                             ) : (
-                                                <>
-                                                    <span className={`px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest border ${getStatusColor(project.status)} bg-white/95 shadow-lg`}>
-                                                        {translateStatus(project.status, lang)}
-                                                    </span>
-
-                                                    {project.locations?.state && (
-                                                        <div className="flex items-center bg-white/90 backdrop-blur-sm p-1 rounded-md border border-white/20 shadow-sm overflow-hidden min-w-[32px] justify-center">
-                                                            <img
-                                                                src={getStateFlagUrl(project.locations.state, project.locations.country) || ''}
-                                                                onError={(e) => (e.currentTarget.style.display = 'none')}
-                                                                alt={project.locations.state}
-                                                                className="h-4 w-auto object-contain"
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </>
+                                                <span className={`px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest border ${getStatusColor(project.status)} bg-white/95 shadow-lg`}>
+                                                    {translateStatus(project.status, lang)}
+                                                </span>
                                             )}
                                         </div>
 
