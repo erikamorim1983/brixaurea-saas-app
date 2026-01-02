@@ -10,6 +10,7 @@ import PropertyMap from '@/components/Maps/PropertyMap';
 import GoogleMapWrapper from '@/components/Maps/GoogleMapWrapper';
 import CurrencyInput from '@/components/ui/CurrencyInput';
 import PaymentSchedulePreview from './PaymentSchedulePreview';
+import ListingLinksManager from './ListingLinksManager';
 import { useRouter } from 'next/navigation';
 
 // --- Zod Schema ---
@@ -555,20 +556,7 @@ export default function LandForm({ projectId, initialData, lang }: LandFormProps
                     <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                         {dict.configTitle}
                     </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">{dict.projectType}</label>
-                            <select
-                                {...form.register('project_type')}
-                                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none bg-white"
-                            >
-                                <option value="">{dict.selectType}</option>
-                                <option value="multifamily">Multifamily</option>
-                                <option value="commercial">Commercial</option>
-                                <option value="mixed_use">Mixed Use</option>
-                                <option value="single_family">Single Family</option>
-                            </select>
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">{dict.landArea}</label>
                             <input
@@ -631,14 +619,8 @@ export default function LandForm({ projectId, initialData, lang }: LandFormProps
                         <span className="text-cyan-500">1.</span> {dict.acquisitionTitle}
                     </h2>
 
-                    <div className="mb-6 space-y-2">
-                        <label className="text-sm font-medium text-gray-700">{dict.listingLink}</label>
-                        <input
-                            type="url"
-                            {...form.register('listing_link')}
-                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none placeholder:text-gray-300"
-                            placeholder={dict.listingLinkPlaceholder}
-                        />
+                    <div className="mb-6">
+                        <ListingLinksManager projectId={projectId} lang={lang} />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
