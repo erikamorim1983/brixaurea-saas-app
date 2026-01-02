@@ -51,7 +51,7 @@ export default async function ProjectsPage({
         <ProjectsListClient
             projects={processedProjects}
             lang={lang}
-            dictionary={dictionary?.dashboard?.projects || {}}
+            dictionary={dictionary?.projects || {}}
         />
     );
 }

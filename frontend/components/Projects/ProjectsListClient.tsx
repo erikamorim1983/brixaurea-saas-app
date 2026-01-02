@@ -130,7 +130,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
 
     const handlePermanentDelete = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (!confirm(dictionary.projects.list.confirm_permanent || (lang === 'pt' ? 'Tem certeza que deseja excluir permanentemente?' : 'Are you sure you want to permanently delete?'))) return;
+        if (!confirm(dictionary?.list?.confirm_permanent || (lang === 'pt' ? 'Tem certeza que deseja excluir permanentemente?' : 'Are you sure you want to permanently delete?'))) return;
 
         const { error } = await supabase.from('projects').delete().eq('id', id);
         if (!error) {
@@ -183,10 +183,10 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900">
-                            {dictionary.projects.list.title || (lang === 'pt' ? 'Meus Projetos' : 'My Projects')}
+                            {dictionary?.list?.title || (lang === 'pt' ? 'Meus Projetos' : 'My Projects')}
                         </h1>
                         <p className="text-gray-500">
-                            {dictionary.projects.list.subtitle || (lang === 'pt' ? 'Gerencie seu portfolio imobiliário' : 'Manage your real estate portfolio')}
+                            {dictionary?.list?.subtitle || (lang === 'pt' ? 'Gerencie seu portfolio imobiliário' : 'Manage your real estate portfolio')}
                         </p>
                     </div>
                     <div className="flex gap-2 bg-gray-100 p-1 rounded-xl">
@@ -194,14 +194,14 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                             onClick={() => setShowTrash(false)}
                             className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${!showTrash ? 'bg-white text-cyan-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                         >
-                            {dictionary.projects.list.active}
+                            {dictionary?.list?.active || (lang === 'pt' ? 'Ativos' : 'Active')}
                         </button>
                         <button
                             onClick={() => setShowTrash(true)}
                             className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${showTrash ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                            {dictionary.projects.list.trash}
+                            {dictionary?.list?.trash || (lang === 'pt' ? 'Lixeira' : 'Trash')}
                         </button>
                     </div>
                     <Link
@@ -211,7 +211,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                         </svg>
-                        {dictionary.projects.list.new_project_btn}
+                        {dictionary?.list?.new_project_btn || (lang === 'pt' ? 'Novo Projeto' : 'New Project')}
                     </Link>
                 </div>
 
@@ -367,7 +367,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                                             className="block w-full text-left px-5 py-3 text-sm text-green-600 hover:bg-green-50 flex items-center gap-3 transition-colors font-bold"
                                                         >
                                                             <span>🔄</span>
-                                                            {dictionary.projects.list.restore}
+                                                            {dictionary?.list?.restore || (lang === 'pt' ? 'Restaurar Projeto' : 'Restore Project')}
                                                         </button>
                                                         <div className="h-px bg-gray-50 my-1 mx-2" />
                                                         <button
@@ -375,7 +375,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                                             className="block w-full text-left px-5 py-3 text-sm text-red-700 hover:bg-red-50 flex items-center gap-3 transition-colors font-black"
                                                         >
                                                             <span>🔥</span>
-                                                            {dictionary.projects.list.delete_permanent}
+                                                            {dictionary?.list?.delete_permanent || (lang === 'pt' ? 'Excluir Permanente' : 'Delete Permanent')}
                                                         </button>
                                                     </>
                                                 ) : (
@@ -385,7 +385,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                                             className="block px-5 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors font-bold"
                                                         >
                                                             <span>✏️</span>
-                                                            {dictionary.projects.list.edit_analyze}
+                                                            {dictionary?.list?.edit_analyze || (lang === 'pt' ? 'Editar / Analisar' : 'Edit / Analyze')}
                                                         </Link>
                                                         <button
                                                             onClick={(e) => {
@@ -396,7 +396,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                                             className="block w-full text-left px-5 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors font-bold"
                                                         >
                                                             <span>🔗</span>
-                                                            {dictionary.projects.list.share}
+                                                            {dictionary?.list?.share || (lang === 'pt' ? 'Compartilhar' : 'Share')}
                                                         </button>
                                                         <div className="h-px bg-gray-50 my-1 mx-2" />
                                                         <button
@@ -404,7 +404,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                                             className="block w-full text-left px-5 py-3 text-sm text-red-500 hover:bg-red-50 flex items-center gap-3 transition-colors font-bold"
                                                         >
                                                             <span>🗑️</span>
-                                                            {dictionary.projects.list.move_to_trash}
+                                                            {dictionary?.list?.move_to_trash || (lang === 'pt' ? 'Mover para Lixeira' : 'Move to Trash')}
                                                         </button>
                                                     </>
                                                 )}
@@ -422,7 +422,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                             <div className="absolute top-5 left-8 z-20">
                                                 <span className="px-4 py-1.5 bg-red-600/90 text-white text-[11px] font-black uppercase rounded-full shadow-2xl border border-white/20 backdrop-blur-sm animate-pulse flex items-center gap-1.5">
                                                     <span className="w-2 h-2 bg-white rounded-full" />
-                                                    {dictionary.projects.list.trash_full}
+                                                    {dictionary?.list?.trash_full || (lang === 'pt' ? 'Lixeira (30 dias)' : 'Trash (30 days)')}
                                                 </span>
                                             </div>
                                         )}
@@ -471,7 +471,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-2 text-[#00D9FF] font-black text-xs uppercase tracking-tighter group-hover:gap-4 transition-all duration-500">
-                                                {dictionary.projects.list.access_feasibility}
+                                                {dictionary?.list?.access_feasibility || (lang === 'pt' ? 'Acessar Viabilidade' : 'Access Feasibility')}
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                                             </div>
                                         </div>
@@ -492,10 +492,10 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                             </svg>
                         </div>
                         <p className="text-2xl font-black text-gray-300 tracking-tight text-center px-4">
-                            {showTrash ? dictionary.projects.list.empty_trash : dictionary.projects.list.empty_projects}
+                            {showTrash ? dictionary?.list?.empty_trash : dictionary?.list?.empty_projects}
                         </p>
                         <p className="text-sm font-bold text-gray-400/60 mt-2 uppercase tracking-[0.2em] text-center px-4">
-                            {showTrash ? dictionary.projects.list.clear_trash : dictionary.projects.list.click_to_create}
+                            {showTrash ? dictionary?.list?.clear_trash : dictionary?.list?.click_to_create}
                         </p>
                     </motion.div>
                 )}
