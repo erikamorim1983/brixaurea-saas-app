@@ -463,6 +463,13 @@
         "units": {
             "title": "Mezcla de Unidades",
             "subtitle": "Defina los productos inmobiliarios y precios.",
+            "scenarios": {
+                "optimistic": "Optimista",
+                "base": "Caso Base",
+                "pessimistic": "Pesimista"
+            },
+            "variation_notice": "Valores ajustados por",
+            "from_base": "del Caso Base",
             "table": {
                 "model": "Modelo / Tipo",
                 "beds": "Hab.",

@@ -477,6 +477,13 @@
         "units": {
             "title": "Unit Mix",
             "subtitle": "Define real estate products and pricing.",
+            "scenarios": {
+                "optimistic": "Optimistic",
+                "base": "Base Case",
+                "pessimistic": "Pessimistic"
+            },
+            "variation_notice": "Values adjusted by",
+            "from_base": "from Base Case",
             "table": {
                 "model": "Model / Type",
                 "beds": "Beds",

@@ -478,6 +478,13 @@
         "units": {
             "title": "Mix de Unidades",
             "subtitle": "Defina os produtos imobiliários e preços.",
+            "scenarios": {
+                "optimistic": "Otimista",
+                "base": "Caso Base",
+                "pessimistic": "Pessimista"
+            },
+            "variation_notice": "Valores ajustados por",
+            "from_base": "do Caso Base",
             "table": {
                 "model": "Modelo / Tipo",
                 "beds": "Quartos",

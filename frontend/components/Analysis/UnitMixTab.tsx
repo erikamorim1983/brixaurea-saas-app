@@ -53,9 +53,9 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                 .order('created_at');
 
             const keys: { key: 'optimistic' | 'base' | 'pessimistic', name: string }[] = [
-                { key: 'optimistic', name: 'Optimistic' },
-                { key: 'base', name: 'Base Case' },
-                { key: 'pessimistic', name: 'Pessimistic' }
+                { key: 'optimistic', name: dict.scenarios?.optimistic || 'Optimistic' },
+                { key: 'base', name: dict.scenarios?.base || 'Base Case' },
+                { key: 'pessimistic', name: dict.scenarios?.pessimistic || 'Pessimistic' }
             ];
 
             const finalScenarios: Scenario[] = [];
@@ -251,7 +251,7 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                     <p className="text-sm text-gray-500">{dict.subtitle}</p>
                     {!isBase && (
                         <div className="mt-2 text-xs bg-cyan-50 text-cyan-800 px-2 py-1 rounded inline-block">
-                            Values adjusted by <strong>{variation > 0 ? '+' : ''}{variation}%</strong> from Base Case.
+                            {dict.variation_notice || 'Values adjusted by'} <strong>{variation > 0 ? '+' : ''}{variation}%</strong> {dict.from_base || 'from Base Case'}.
                         </div>
                     )}
                 </div>

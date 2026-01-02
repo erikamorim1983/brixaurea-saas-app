@@ -1,0 +1,93 @@
+{
+    "property_categories": {
+        "residential_for_sale": {
+            "name": "Residential – For Sale",
+            "description": "Traditional real estate development for sale: townhomes, condos, single-family homes. Focus on GDV, absorption, and gross margin."
+        },
+        "residential_for_rent": {
+            "name": "Residential – For Rent",
+            "description": "Multifamily income-producing assets: apartments, BTR communities. Focus on NOI, Cap Rate, and DSCR."
+        },
+        "commercial": {
+            "name": "Commercial",
+            "description": "Commercial real estate: retail, office, industrial, self-storage. Focus on lease rates, tenant mix, and yield."
+        },
+        "mixed_use": {
+            "name": "Mixed Use",
+            "description": "Combined-use developments: residential + retail, residential + office. Each component analyzed independently."
+        },
+        "hospitality": {
+            "name": "Hospitality",
+            "description": "Short-term rental and hotel properties. Focus on ADR, occupancy, and RevPAR."
+        },
+        "specialty": {
+            "name": "Specialty / Niche",
+            "description": "Specialized housing: affordable, senior living, assisted living, mobile home parks. High barriers, specific financing."
+        }
+    },
+    "property_subtypes": {
+        "townhomes": "Townhomes",
+        "condos_low_rise": "Condos (Low-Rise)",
+        "condos_mid_rise": "Condos (Mid-Rise)",
+        "condos_high_rise": "Condos (High-Rise)",
+        "single_family_spec": "Single Family – Spec Homes",
+        "single_family_bto": "Single Family – Build to Order",
+        "villas_patio_homes": "Villas / Patio Homes",
+        "duplex": "Duplex",
+        "fourplex": "Triplex / Fourplex",
+        "planned_community": "Planned Communities",
+        "master_planned_community": "Master-Planned Community (MPC)",
+        "garden_style_apartments": "Garden Style Apartments",
+        "mid_rise_multifamily": "Mid-Rise Multifamily",
+        "high_rise_multifamily": "High-Rise Multifamily",
+        "build_to_rent": "Build-to-Rent (BTR) Communities",
+        "student_housing": "Student Housing",
+        "senior_housing_55plus": "Senior Housing / 55+",
+        "co_living": "Co-Living",
+        "retail_strip_mall": "Retail Strip Mall",
+        "standalone_retail": "Standalone Retail (Pad-Ready)",
+        "office_low_rise": "Office – Low Rise",
+        "medical_office_building": "Medical Office Building (MOB)",
+        "warehouse_industrial": "Warehouse / Industrial",
+        "flex_space": "Flex Space",
+        "self_storage": "Self-Storage",
+        "data_center": "Data Center",
+        "vacation_homes": "Vacation Homes",
+        "str_communities": "Short-Term Rental Communities",
+        "condo_hotel": "Condo-Hotel",
+        "boutique_hotel": "Boutique Hotel",
+        "extended_stay": "Extended Stay",
+        "residential_retail": "Residential + Retail",
+        "residential_office": "Residential + Office",
+        "residential_hotel": "Residential + Hotel",
+        "live_work_play": "Live-Work-Play Developments",
+        "tod": "Transit-Oriented Developments (TOD)",
+        "affordable_housing": "Affordable Housing",
+        "workforce_housing": "Workforce Housing",
+        "senior_living": "Senior Living",
+        "assisted_living": "Assisted Living",
+        "memory_care": "Memory Care",
+        "mobile_home_park": "Mobile Home Park (MHP)",
+        "rv_park": "RV Park"
+    },
+    "market_characteristics": {
+        "income_level": "Income Level",
+        "liquidity": "Liquidity",
+        "complexity": "Complexity",
+        "primary_metric": "Primary Metric",
+        "levels": {
+            "very_low": "Very Low",
+            "low": "Low",
+            "medium": "Medium",
+            "high": "High",
+            "very_high": "Very High"
+        },
+        "metrics": {
+            "vgv": "GDV (Gross Development Value)",
+            "noi": "NOI (Net Operating Income)",
+            "revpar": "RevPAR (Revenue Per Available Room)",
+            "lease_rate": "Lease Rate",
+            "blended": "Blended (per component)"
+        }
+    }
+}

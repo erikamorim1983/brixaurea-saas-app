@@ -1,0 +1,93 @@
+{
+    "property_categories": {
+        "residential_for_sale": {
+            "name": "Residencial – En Venta",
+            "description": "Desarrollo inmobiliario tradicional para venta: adosados, condos, casas unifamiliares. Enfoque en VGV, absorción y margen bruto."
+        },
+        "residential_for_rent": {
+            "name": "Residencial – En Alquiler",
+            "description": "Activos multifamiliares generadores de ingresos: apartamentos, comunidades BTR. Enfoque en NOI, Cap Rate y DSCR."
+        },
+        "commercial": {
+            "name": "Comercial",
+            "description": "Bienes raíces comerciales: retail, oficinas, industrial, self-storage. Enfoque en tarifas de arrendamiento, mix de inquilinos y yield."
+        },
+        "mixed_use": {
+            "name": "Uso Mixto",
+            "description": "Desarrollos de uso mixto: residencial + retail, residencial + oficinas. Cada componente analizado independientemente."
+        },
+        "hospitality": {
+            "name": "Hospitalidad",
+            "description": "Propiedades de alquiler a corto plazo y hoteles. Enfoque en ADR, ocupación y RevPAR."
+        },
+        "specialty": {
+            "name": "Especialidad / Nicho",
+            "description": "Viviendas especializadas: asequible, residencias para mayores, assisted living, parques de casas móviles. Altas barreras, financiamiento específico."
+        }
+    },
+    "property_subtypes": {
+        "townhomes": "Adosados",
+        "condos_low_rise": "Condos (Baja Altura)",
+        "condos_mid_rise": "Condos (Media Altura)",
+        "condos_high_rise": "Condos (Alta Altura)",
+        "single_family_spec": "Casa Unifamiliar – Spec",
+        "single_family_bto": "Casa Unifamiliar – A Pedido",
+        "villas_patio_homes": "Villas / Casas Patio",
+        "duplex": "Duplex",
+        "fourplex": "Triplex / Fourplex",
+        "planned_community": "Comunidades Planificadas",
+        "master_planned_community": "Comunidad Master-Planificada (MPC)",
+        "garden_style_apartments": "Apartamentos Estilo Jardín",
+        "mid_rise_multifamily": "Multifamiliar Media Altura",
+        "high_rise_multifamily": "Multifamiliar Alta Altura",
+        "build_to_rent": "Comunidades Build-to-Rent (BTR)",
+        "student_housing": "Vivienda Estudiantil",
+        "senior_housing_55plus": "Vivienda para Mayores / 55+",
+        "co_living": "Co-Living",
+        "retail_strip_mall": "Strip Mall Comercial",
+        "standalone_retail": "Comercio Independiente (Pad-Ready)",
+        "office_low_rise": "Oficina – Baja Altura",
+        "medical_office_building": "Edificio Médico (MOB)",
+        "warehouse_industrial": "Almacén / Industrial",
+        "flex_space": "Espacio Flexible",
+        "self_storage": "Almacenamiento",
+        "data_center": "Centro de Datos",
+        "vacation_homes": "Casas Vacacionales",
+        "str_communities": "Comunidades de Alquiler a Corto Plazo",
+        "condo_hotel": "Condo-Hotel",
+        "boutique_hotel": "Hotel Boutique",
+        "extended_stay": "Estadía Prolongada",
+        "residential_retail": "Residencial + Comercial",
+        "residential_office": "Residencial + Oficina",
+        "residential_hotel": "Residencial + Hotel",
+        "live_work_play": "Desarrollos Live-Work-Play",
+        "tod": "Desarrollos Orientados al Transporte (TOD)",
+        "affordable_housing": "Vivienda Asequible",
+        "workforce_housing": "Vivienda para Trabajadores",
+        "senior_living": "Residencia para Mayores",
+        "assisted_living": "Residencia Asistida",
+        "memory_care": "Cuidado de Memoria",
+        "mobile_home_park": "Parque de Casas Móviles (MHP)",
+        "rv_park": "Parque de RVs"
+    },
+    "market_characteristics": {
+        "income_level": "Nivel de Ingresos",
+        "liquidity": "Liquidez",
+        "complexity": "Complejidad",
+        "primary_metric": "Métrica Principal",
+        "levels": {
+            "very_low": "Muy Baja",
+            "low": "Baja",
+            "medium": "Media",
+            "high": "Alta",
+            "very_high": "Muy Alta"
+        },
+        "metrics": {
+            "vgv": "VGV (Valor General de Ventas)",
+            "noi": "NOI (Ingreso Operativo Neto)",
+            "revpar": "RevPAR (Ingreso por Habitación Disponible)",
+            "lease_rate": "Tarifa de Arrendamiento",
+            "blended": "Mixto (por componente)"
+        }
+    }
+}
