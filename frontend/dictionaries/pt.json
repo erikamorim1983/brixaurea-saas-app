@@ -438,7 +438,10 @@
             "type_label": "Tipo",
             "state_label": "Estado",
             "city_label": "Cidade",
-            "all_option": "Todos"
+            "all_option": "Todos",
+            "typology_label": "Tipologia",
+            "market_area_label": "Área de Mercado",
+            "last_activity_label": "Última Atividade"
         },
         "new": {
             "title": "Novo Projeto",

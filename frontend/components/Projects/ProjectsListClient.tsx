@@ -5,12 +5,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from 'next/link';
 import { createClient } from "@/lib/supabase/client";
 import ShareProjectModal from './ShareProjectModal';
+import propertyTypesPT from '@/dictionaries/property-types-pt.json';
+import propertyTypesEN from '@/dictionaries/property-types-en.json';
+import propertyTypesES from '@/dictionaries/property-types-es.json';
 
 interface Project {
     id: string;
     name: string;
     status: string;
     project_type?: string;
+    category_id?: string | null;
+    subtype_id?: string | null;
     updated_at: string;
     locations?: {
         address_full: string;
@@ -174,6 +179,14 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
             archived: { pt: 'Arquivado', es: 'Archivado', en: 'Archived' },
         };
         return map[status]?.[lang === 'pt' || lang === 'es' ? lang : 'en'] || status;
+    };
+
+    const getTypologyName = (project: Project) => {
+        const propDict: any = lang === 'pt' ? propertyTypesPT : lang === 'es' ? propertyTypesES : propertyTypesEN;
+        if (project.subtype_id && propDict.property_subtypes[project.subtype_id]) {
+            return propDict.property_subtypes[project.subtype_id];
+        }
+        return project.project_type?.replace('_', ' ') || '-';
     };
 
     return (
@@ -450,13 +463,17 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                     <div className="p-8 flex-1 flex flex-col justify-between bg-gradient-to-b from-white to-gray-50/50">
                                         <div className="space-y-4">
                                             <div className="flex justify-between items-center group/row">
-                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Typology</span>
+                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                                                    {dictionary?.list?.typology_label || 'Typology'}
+                                                </span>
                                                 <span className="text-sm font-bold text-gray-800 capitalize bg-gray-100/50 px-3 py-1 rounded-lg">
-                                                    {project.project_type?.replace('_', ' ') || '-'}
+                                                    {getTypologyName(project)}
                                                 </span>
                                             </div>
                                             <div className="flex justify-between items-center group/row">
-                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Market Area</span>
+                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                                                    {dictionary?.list?.market_area_label || 'Market Area'}
+                                                </span>
                                                 <span className="text-sm font-bold text-gray-800">
                                                     {(project.locations?.city || project.locations?.state) ? `${project.locations?.city || ''}, ${project.locations?.state || ''}` : '-'}
                                                 </span>
@@ -465,9 +482,11 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
 
                                         <div className="mt-8 pt-6 border-t border-gray-100 flex justify-between items-center">
                                             <div className="flex flex-col">
-                                                <span className="text-[10px] font-bold text-gray-300 uppercase">Last Activity</span>
+                                                <span className="text-[10px] font-bold text-gray-300 uppercase">
+                                                    {dictionary?.list?.last_activity_label || 'Last Activity'}
+                                                </span>
                                                 <span className="text-xs font-bold text-gray-500">
-                                                    {new Date(project.updated_at).toLocaleDateString()}
+                                                    {new Date(project.updated_at).toLocaleDateString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US')}
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-2 text-[#00D9FF] font-black text-xs uppercase tracking-tighter group-hover:gap-4 transition-all duration-500">
