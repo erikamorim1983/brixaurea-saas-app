@@ -551,12 +551,14 @@ export default function LandForm({ projectId, initialData, lang }: LandFormProps
 
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-5xl mx-auto">
 
-                {/* 0. PROJECT CONFIGURATION */}
+                {/* 1. LAND CHARACTERISTICS */}
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                        {dict.configTitle}
+                        <span className="text-cyan-500">1.</span> {lang === 'pt' ? 'Características do Terreno' : lang === 'es' ? 'Características del Terreno' : 'Land Characteristics'}
                     </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+
+                    {/* Land Area + Existing Structure Side by Side */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">{dict.landArea}</label>
                             <input
@@ -569,25 +571,25 @@ export default function LandForm({ projectId, initialData, lang }: LandFormProps
                                 placeholder="e.g. 0.5"
                             />
                         </div>
-                    </div>
-                    <div className="mt-6 p-4 border rounded-xl bg-gray-50 flex items-center justify-between">
-                        <div>
-                            <p className="font-semibold text-gray-800">{dict.existingStructure}</p>
-                            <p className="text-xs text-gray-500">{dict.existingStructureHint}</p>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700">{dict.existingStructure}</label>
+                            <div className="p-4 border rounded-xl bg-gray-50 flex items-center justify-between">
+                                <p className="text-xs text-gray-500">{dict.existingStructureHint}</p>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        {...form.register('has_existing_structure')}
+                                        className="sr-only peer"
+                                    />
+                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-100 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+                                </label>
+                            </div>
                         </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                                type="checkbox"
-                                {...form.register('has_existing_structure')}
-                                className="sr-only peer"
-                            />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-100 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
-                        </label>
                     </div>
 
                     {/* Conditional Fields for Existing Structure */}
                     {form.watch('has_existing_structure') && (
-                        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeIn">
+                        <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeIn">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-700">{dict.structureDescription}</label>
                                 <textarea
@@ -611,17 +613,18 @@ export default function LandForm({ projectId, initialData, lang }: LandFormProps
                             </div>
                         </div>
                     )}
-                </div>
 
-                {/* 2. PROJECT ACQUISITION HEADER */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                        <span className="text-cyan-500">1.</span> {dict.acquisitionTitle}
-                    </h2>
-
-                    <div className="mb-6">
+                    {/* Listing Links */}
+                    <div className="pt-6 border-t border-gray-100">
                         <ListingLinksManager projectId={projectId} lang={lang} />
                     </div>
+                </div>
+
+                {/* 2. LAND ACQUISITION & VALUE */}
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                        <span className="text-cyan-500">2.</span> {dict.acquisitionTitle}
+                    </h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="space-y-2">
@@ -785,7 +788,7 @@ export default function LandForm({ projectId, initialData, lang }: LandFormProps
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                            <span className="text-cyan-500">2.</span> {dict.ownersTitle}
+                            <span className="text-cyan-500">3.</span> {dict.ownersTitle}
                         </h2>
 
                         <div className="flex items-center gap-2 text-sm bg-gray-50 border border-gray-200 rounded-lg p-1">
@@ -939,10 +942,10 @@ export default function LandForm({ projectId, initialData, lang }: LandFormProps
                     </div>
                 </div>
 
-                {/* 3. TIMELINE & DEPOSITS (Global Risk Analysis) */}
+                {/* 4. TIMELINE & DEPOSITS (Global Risk Analysis) */}
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 animate-fadeIn">
                     <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                        <span className="text-cyan-500">3.</span> {dict.timelineTitle}
+                        <span className="text-cyan-500">4.</span> {dict.timelineTitle}
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
@@ -980,7 +983,7 @@ export default function LandForm({ projectId, initialData, lang }: LandFormProps
                 {/* 5. BROKERAGE */}
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                        <span className="text-cyan-500">4.</span> {dict.brokerageTitle}
+                        <span className="text-cyan-500">5.</span> {dict.brokerageTitle}
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
