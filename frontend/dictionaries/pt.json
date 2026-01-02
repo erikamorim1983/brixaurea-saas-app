@@ -431,7 +431,14 @@
             "edit_analyze": "Editar / Analisar",
             "share": "Compartilhar",
             "access_feasibility": "Acessar Viabilidade",
-            "new_project_btn": "Novo Projeto"
+            "new_project_btn": "Novo Projeto",
+            "search_label": "Buscar",
+            "search_placeholder": "Nome ou endereço...",
+            "status_label": "Status",
+            "type_label": "Tipo",
+            "state_label": "Estado",
+            "city_label": "Cidade",
+            "all_option": "Todos"
         },
         "new": {
             "title": "Novo Projeto",

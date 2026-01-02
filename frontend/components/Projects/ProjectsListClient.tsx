@@ -226,12 +226,12 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                         {/* Search */}
                         <div className="col-span-1">
                             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                                {lang === 'pt' ? 'Buscar' : lang === 'es' ? 'Buscar' : 'Search'}
+                                {dictionary?.list?.search_label || (lang === 'pt' ? 'Buscar' : 'Search')}
                             </label>
                             <div className="relative">
                                 <input
                                     type="text"
-                                    placeholder={lang === 'pt' ? 'Nome ou endereço...' : lang === 'es' ? 'Nombre o dirección...' : 'Name or address...'}
+                                    placeholder={dictionary?.list?.search_placeholder || (lang === 'pt' ? 'Nome ou endereço...' : 'Name or address...')}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     className="pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg w-full text-sm focus:ring-2 focus:ring-[#00D9FF] outline-none transition-all placeholder:text-gray-400"
@@ -245,14 +245,14 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                         {/* Status Filter */}
                         <div>
                             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                                Status
+                                {dictionary?.list?.status_label || 'Status'}
                             </label>
                             <select
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
                                 className="w-full px-3 py-2.5 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-[#00D9FF] outline-none cursor-pointer hover:border-gray-300 transition-colors"
                             >
-                                <option value="all">{lang === 'pt' ? 'Todos' : lang === 'es' ? 'Todos' : 'All'}</option>
+                                <option value="all">{dictionary?.list?.all_option || (lang === 'pt' ? 'Todos' : 'All')}</option>
                                 {['draft', 'feasibility', 'approved', 'execution', 'rejected', 'completed', 'archived']
                                     .filter(s => statusOptions.includes(s))
                                     .map(s => (
@@ -267,14 +267,14 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                         {/* Type Filter */}
                         <div>
                             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                                {lang === 'pt' ? 'Tipo' : lang === 'es' ? 'Tipo' : 'Type'}
+                                {dictionary?.list?.type_label || (lang === 'pt' ? 'Tipo' : 'Type')}
                             </label>
                             <select
                                 value={typeFilter}
                                 onChange={(e) => setTypeFilter(e.target.value)}
                                 className="w-full px-3 py-2.5 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-[#00D9FF] outline-none cursor-pointer hover:border-gray-300 transition-colors capitalize"
                             >
-                                <option value="all">{lang === 'pt' ? 'Todos' : lang === 'es' ? 'Todos' : 'All'}</option>
+                                <option value="all">{dictionary?.list?.all_option || (lang === 'pt' ? 'Todos' : 'All')}</option>
                                 {typeOptions.map(t => (
                                     <option key={t} value={t as string}>{t?.toString().replace('_', ' ')}</option>
                                 ))}
@@ -284,14 +284,14 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                         {/* State Filter */}
                         <div>
                             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                                {lang === 'pt' ? 'Estado' : lang === 'es' ? 'Estado' : 'State'}
+                                {dictionary?.list?.state_label || (lang === 'pt' ? 'Estado' : 'State')}
                             </label>
                             <select
                                 value={stateFilter}
                                 onChange={(e) => handleStateChange(e.target.value)}
                                 className="w-full px-3 py-2.5 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-[#00D9FF] outline-none cursor-pointer hover:border-gray-300 transition-colors"
                             >
-                                <option value="all">{lang === 'pt' ? 'Todos' : lang === 'es' ? 'Todos' : 'All'}</option>
+                                <option value="all">{dictionary?.list?.all_option || (lang === 'pt' ? 'Todos' : 'All')}</option>
                                 {stateOptions.map(s => (
                                     <option key={s} value={s as string}>{s}</option>
                                 ))}
@@ -301,14 +301,14 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                         {/* City Filter */}
                         <div>
                             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                                {lang === 'pt' ? 'Cidade' : lang === 'es' ? 'Ciudad' : 'City'}
+                                {dictionary?.list?.city_label || (lang === 'pt' ? 'Cidade' : 'City')}
                             </label>
                             <select
                                 value={cityFilter}
                                 onChange={(e) => setCityFilter(e.target.value)}
                                 className="w-full px-3 py-2.5 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-[#00D9FF] outline-none cursor-pointer hover:border-gray-300 transition-colors"
                             >
-                                <option value="all">{lang === 'pt' ? 'Todas' : lang === 'es' ? 'Todas' : 'All'}</option>
+                                <option value="all">{dictionary?.list?.all_option || (lang === 'pt' ? 'Todas' : 'All')}</option>
                                 {cityOptions.map(c => (
                                     <option key={c} value={c as string}>{c}</option>
                                 ))}
