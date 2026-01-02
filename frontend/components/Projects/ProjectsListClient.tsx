@@ -209,13 +209,6 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
         return null;
     };
 
-    const getCountryFlagUrl = (country?: string) => {
-        const c = country?.toUpperCase() || 'USA';
-        if (c === 'BRAZIL' || c === 'BRASIL' || c === 'BR') return 'https://flagcdn.com/w40/br.png';
-        if (c === 'USA' || c === 'UNITED STATES' || c === 'US') return 'https://flagcdn.com/w40/us.png';
-        return 'https://flagcdn.com/w40/us.png'; // Default
-    };
-
     return (
         <div className="space-y-8" onClick={() => setActiveMenuId(null)}>
             {/* Header + Controls */}
@@ -487,14 +480,6 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                             </div>
                                         </div>
 
-                                        {/* Country Flag Overlay */}
-                                        <div className="absolute bottom-5 right-8">
-                                            <img
-                                                src={getCountryFlagUrl(project.locations?.country)}
-                                                alt="Country"
-                                                className="w-6 h-auto rounded shadow-sm border border-white/20"
-                                            />
-                                        </div>
                                     </div>
 
                                     {/* Project Meta Info */}
@@ -502,7 +487,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                         <div className="space-y-4">
                                             <div className="flex justify-between items-center group/row">
                                                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                                                    {dictionary?.list?.typology_label || 'Typology'}
+                                                    {dictionary?.list?.typology_label || (lang === 'pt' ? 'Tipologia' : 'Typology')}
                                                 </span>
                                                 <span className="text-sm font-bold text-gray-800 capitalize bg-gray-100/50 px-3 py-1 rounded-lg">
                                                     {getTypologyName(project)}
@@ -531,7 +516,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                         <div className="mt-8 pt-6 border-t border-gray-100 flex justify-between items-center">
                                             <div className="flex flex-col">
                                                 <span className="text-[10px] font-bold text-gray-300 uppercase">
-                                                    {dictionary?.list?.last_activity_label || 'Last Activity'}
+                                                    {dictionary?.list?.last_activity_label || (lang === 'pt' ? 'Última Atividade' : 'Last Activity')}
                                                 </span>
                                                 <span className="text-xs font-bold text-gray-500">
                                                     {new Date(project.updated_at).toLocaleDateString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US')}
