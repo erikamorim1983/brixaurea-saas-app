@@ -284,7 +284,10 @@ const PaymentSchedulePreview: React.FC<PaymentSchedulePreviewProps> = ({
             <div className="flex justify-between items-start mb-2">
                 <div>
                     <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                        <span className="text-cyan-600 bg-white w-8 h-8 flex items-center justify-center rounded-full shadow-sm text-sm">5</span> {dict.title}
+                        <svg className="w-6 h-6 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                        {dict.title}
                     </h2>
                     <p className="text-sm text-gray-500 mb-4">{dict.subtitle}</p>
                 </div>
