@@ -15,18 +15,22 @@ export default function RegionalTab({ location, lang, dict }: RegionalTabProps) 
 
     useEffect(() => {
         const fetchData = async () => {
-            if (location?.zip_code) {
-                // Construct a location string if available, e.g. "Orlando, FL"
-                const locationString = location.city && location.state_code
-                    ? `${location.city}, ${location.state_code}`
-                    : (location.address_full || 'Florida');
+            const hasLocationInfo = location?.zip_code || location?.city || location?.address_full;
 
-                const addressParam = location.address_full ? encodeURIComponent(location.address_full) : location.zip_code;
+            if (hasLocationInfo) {
+                // Construct a location string if available, e.g. "Orlando, FL"
+                const locationString = location.city && (location.state_code || location.state)
+                    ? `${location.city}, ${location.state_code || location.state}`
+                    : (location.address_full || location.zip_code || 'Florida');
+
+                const params = new URLSearchParams();
+                if (location.zip_code) params.append('zipCode', location.zip_code);
+                params.append('locationName', locationString);
+                if (location.address_full) params.append('address', location.address_full);
+                if (location.state_code || location.state) params.append('stateCode', location.state_code || location.state);
 
                 try {
-                    // Call our new Server-Side API Route
-                    // We pass 'address' for Civic API precision
-                    const res = await fetch(`/api/regional-data?zipCode=${location.zip_code}&locationName=${encodeURIComponent(locationString)}&address=${addressParam}`);
+                    const res = await fetch(`/api/regional-data?${params.toString()}`);
                     if (res.ok) {
                         const data = await res.json();
                         setRegionalData(data);
@@ -35,7 +39,7 @@ export default function RegionalTab({ location, lang, dict }: RegionalTabProps) 
                     console.error("Failed to load regional data", e);
                 }
             } else {
-                // Fallback for demo
+                // Last resort fallback (only if absolutely no info)
                 fetch(`/api/regional-data?zipCode=33901&locationName=Fort%20Myers,%20FL`)
                     .then(res => res.json())
                     .then(setRegionalData);
@@ -46,7 +50,13 @@ export default function RegionalTab({ location, lang, dict }: RegionalTabProps) 
 
     return (
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-            <RegionalDataSection data={regionalData!} lang={lang} dict={dict} />
+            <RegionalDataSection
+                data={regionalData!}
+                lang={lang}
+                dict={dict}
+                stateCode={location?.state || location?.state_code || (regionalData ? 'FL' : undefined)}
+                address={location?.address_full || (location?.city && (location?.state || location?.state_code) ? `${location.city}, ${location.state || location.state_code}` : (regionalData ? 'Fort Myers, FL' : undefined))}
+            />
         </div>
     );
 }

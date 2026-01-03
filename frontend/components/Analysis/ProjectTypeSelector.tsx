@@ -10,20 +10,23 @@ interface ProjectTypeSelectorProps {
     projectId: string;
     initialCategoryId?: string | null;
     initialSubtypeId?: string | null;
+    initialStandardId?: string | null;
     lang: string;
-    onSave?: (categoryId: string, subtypeId: string) => Promise<void>;
+    onSave?: (categoryId: string, subtypeId: string, standardId?: string | null) => Promise<void>;
 }
 
 export default function ProjectTypeSelector({
     projectId,
     initialCategoryId,
     initialSubtypeId,
+    initialStandardId,
     lang,
     onSave
 }: ProjectTypeSelectorProps) {
-    const { categories, subtypes, loading, error, getLocalizedName, getSubtypesByCategory } = usePropertyTypes(lang);
+    const { categories, subtypes, standards, loading, error, getLocalizedName, getSubtypesByCategory } = usePropertyTypes(lang);
     const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(initialCategoryId || null);
     const [selectedSubtypeId, setSelectedSubtypeId] = useState<string | null>(initialSubtypeId || null);
+    const [selectedStandardId, setSelectedStandardId] = useState<string | null>(initialStandardId || null);
     const [saving, setSaving] = useState(false);
     const [isEditing, setIsEditing] = useState(!initialCategoryId || !initialSubtypeId);
     const [showSuccessToast, setShowSuccessToast] = useState(false);
@@ -50,7 +53,7 @@ export default function ProjectTypeSelector({
         setSaving(true);
         try {
             if (onSave) {
-                await onSave(selectedCategoryId, selectedSubtypeId);
+                await onSave(selectedCategoryId, selectedSubtypeId, selectedStandardId);
             }
 
             // Show success toast
@@ -78,6 +81,7 @@ export default function ProjectTypeSelector({
     const handleCancel = () => {
         setSelectedCategoryId(initialCategoryId || null);
         setSelectedSubtypeId(initialSubtypeId || null);
+        setSelectedStandardId(initialStandardId || null);
         setIsEditing(false);
     };
 
@@ -104,6 +108,42 @@ export default function ProjectTypeSelector({
     const getTranslatedLevel = (level: string): string => {
         return translations.market_characteristics.levels[level as keyof typeof translations.market_characteristics.levels] || level;
     };
+
+    // Dynamic Logic for Market Characteristics
+    const getRefinedCharacteristics = () => {
+        if (!currentSubtype) return null;
+
+        let income = currentSubtype.typical_income_level;
+        let liquidity = currentSubtype.typical_liquidity;
+        let complexity = currentSubtype.typical_complexity;
+
+        const standard = standards.find(s => s.id === selectedStandardId);
+        const standardKey = standard?.key;
+
+        // 1. Refine based on Standard
+        if (standardKey === 'luxury') {
+            income = 'very_high';
+            liquidity = ['high_rise_multifamily', 'condos_high_rise'].includes(currentSubtype.key) ? 'low' : 'medium';
+            complexity = 'very_high';
+        } else if (standardKey === 'high_end') {
+            income = 'high';
+            liquidity = 'medium';
+            complexity = complexity === 'very_high' ? 'very_high' : 'high';
+        } else if (standardKey === 'entry_level' || standardKey === 'affordable') {
+            income = standardKey === 'affordable' ? 'low' : 'medium';
+            liquidity = 'very_high';
+            complexity = complexity === 'low' ? 'low' : 'medium';
+        }
+
+        // 2. Refine based on Building Type (Subtype Specifics)
+        if (currentSubtype.key.includes('high_rise') || currentSubtype.key.includes('master_planned')) {
+            complexity = 'very_high';
+        }
+
+        return { income, liquidity, complexity };
+    };
+
+    const refined = getRefinedCharacteristics();
 
     return (
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6 relative">
@@ -201,11 +241,36 @@ export default function ProjectTypeSelector({
                 </div>
             )}
 
+            {/* Standard (Tier) Selector */}
+            {selectedSubtypeId && (
+                <div className="animate-fadeIn">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        {lang === 'pt' ? 'Padrão / Classificação' : lang === 'es' ? 'Nivel / Estándar' : 'Standard / Market Tier'}
+                    </label>
+                    <select
+                        value={selectedStandardId || ''}
+                        onChange={(e) => setSelectedStandardId(e.target.value || null)}
+                        disabled={!isEditing}
+                        className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''
+                            }`}
+                    >
+                        <option value="">
+                            {lang === 'pt' ? 'Selecione o Padrão' : lang === 'es' ? 'Seleccione el Nivel' : 'Select Standard'}
+                        </option>
+                        {standards.map((standard) => (
+                            <option key={standard.id} value={standard.id}>
+                                {getLocalizedName(standard)}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )}
+
             {/* Market Characteristics */}
-            {currentSubtype && (
+            {refined && (
                 <div className="bg-gradient-to-br from-cyan-50 to-blue-50 p-5 rounded-xl border border-cyan-100 animate-fadeIn">
                     <h4 className="text-sm font-bold text-cyan-900 mb-3">
-                        {lang === 'pt' ? 'Características de Mercado' : lang === 'es' ? 'Características de Mercado' : 'Market Characteristics'}
+                        {lang === 'pt' ? 'Características de Mercado (Perfil Sugerido)' : lang === 'es' ? 'Características de Mercado' : 'Market Characteristics (Suggested Profile)'}
                     </h4>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         {/* Income Level */}
@@ -213,9 +278,14 @@ export default function ProjectTypeSelector({
                             <p className="text-xs text-gray-600 mb-1">
                                 {translations.market_characteristics.income_level}
                             </p>
-                            <p className="text-sm font-bold text-gray-900 capitalize">
-                                {getTranslatedLevel(currentSubtype.typical_income_level)}
-                            </p>
+                            <div className="flex items-center gap-2">
+                                <p className="text-sm font-bold text-gray-900 capitalize">
+                                    {getTranslatedLevel(refined.income)}
+                                </p>
+                                {refined.income !== currentSubtype.typical_income_level && (
+                                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                                )}
+                            </div>
                         </div>
 
                         {/* Liquidity */}
@@ -223,9 +293,14 @@ export default function ProjectTypeSelector({
                             <p className="text-xs text-gray-600 mb-1">
                                 {translations.market_characteristics.liquidity}
                             </p>
-                            <p className="text-sm font-bold text-gray-900 capitalize">
-                                {getTranslatedLevel(currentSubtype.typical_liquidity)}
-                            </p>
+                            <div className="flex items-center gap-2">
+                                <p className="text-sm font-bold text-gray-900 capitalize">
+                                    {getTranslatedLevel(refined.liquidity)}
+                                </p>
+                                {refined.liquidity !== currentSubtype.typical_liquidity && (
+                                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                                )}
+                            </div>
                         </div>
 
                         {/* Complexity */}
@@ -233,9 +308,14 @@ export default function ProjectTypeSelector({
                             <p className="text-xs text-gray-600 mb-1">
                                 {translations.market_characteristics.complexity}
                             </p>
-                            <p className="text-sm font-bold text-gray-900 capitalize">
-                                {getTranslatedLevel(currentSubtype.typical_complexity)}
-                            </p>
+                            <div className="flex items-center gap-2">
+                                <p className="text-sm font-bold text-gray-900 capitalize">
+                                    {getTranslatedLevel(refined.complexity)}
+                                </p>
+                                {refined.complexity !== currentSubtype.typical_complexity && (
+                                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                                )}
+                            </div>
                         </div>
                     </div>
 

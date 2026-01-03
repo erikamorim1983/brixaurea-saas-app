@@ -5,6 +5,8 @@ export interface RegionalData {
     };
     demographics: {
         population: number;
+        metroPopulation?: number; // Metropolitan area population
+        metroName?: string; // Name of metro area (e.g., "Miami-Dade County")
         medianIncome: number;
         medianAge: number;
         unemploymentRate: number;
@@ -28,6 +30,7 @@ export interface RegionalData {
         headline: string;
         source: string;
         date: string;
+        url?: string;
     }[];
 }
 
@@ -63,14 +66,44 @@ export const MockRegionalData: Record<string, RegionalData> = {
             {
                 headline: 'Fort Myers Downtown Revitalization Project Approved',
                 source: 'News-Press',
-                date: '2025-05-12'
+                date: '2025-05-12',
+                url: 'https://www.news-press.com/story/news/local/fort-myers/2023/05/12/fort-myers-downtown-revitalization-project-approved/702123456/'
             },
             {
                 headline: 'New Waterfront Park Opens to Public',
                 source: 'WINK News',
-                date: '2025-05-10'
+                date: '2025-05-10',
+                url: 'https://www.winknews.com/2023/05/10/new-waterfront-park-opens-to-public-in-fort-myers/'
             }
         ]
+    },
+    'empty': {
+        politicians: {
+            mayor: { name: 'Loading...', party: '', photoUrl: '' },
+            governor: { name: 'Loading...', party: '', photoUrl: '' }
+        },
+        demographics: {
+            population: 0,
+            medianIncome: 0,
+            medianAge: 0,
+            unemploymentRate: 0,
+            foundingDate: undefined
+        },
+        economics: {
+            medianHomeValue: 0,
+            rentTrend: 0,
+            crimeIndex: 0,
+            jobGrowth: 0,
+            interestRate: 0,
+            inventoryLevel: 0,
+            capRate: 0
+        },
+        schools: {
+            elementary: 0,
+            middle: 0,
+            high: 0
+        },
+        news: []
     }
 };
 

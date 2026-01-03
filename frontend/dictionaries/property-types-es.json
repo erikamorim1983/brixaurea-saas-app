@@ -18,7 +18,7 @@
         },
         "hospitality": {
             "name": "Hospitalidad",
-            "description": "Propiedades de alquiler a corto plazo y hoteles. Enfoque en ADR, ocupación y RevPAR."
+            "description": "Propriedades de alquiler a corto plazo y hoteles. Enfoque en ADR, ocupación y RevPAR."
         },
         "specialty": {
             "name": "Especialidad / Nicho",
@@ -32,6 +32,7 @@
         "condos_high_rise": "Condos (Alta Altura)",
         "single_family_spec": "Casa Unifamiliar – Spec",
         "single_family_bto": "Casa Unifamiliar – A Pedido",
+        "single_family_generic": "Casa Unifamiliar",
         "villas_patio_homes": "Villas / Casas Patio",
         "duplex": "Duplex",
         "fourplex": "Triplex / Fourplex",
@@ -89,5 +90,12 @@
             "lease_rate": "Tarifa de Arrendamiento",
             "blended": "Mixto (por componente)"
         }
+    },
+    "property_standards": {
+        "luxury": "Lujo / Alto Nivel",
+        "high_end": "Alto Nivel / Premium",
+        "mid_market": "Nivel Medio",
+        "entry_level": "Nivel Inicial / Económico",
+        "affordable": "Asequible / Social"
     }
 }

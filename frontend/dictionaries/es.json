@@ -552,7 +552,7 @@
                 "home_value": "Valor Vivienda",
                 "rent_trend": "Tend. Alquiler",
                 "job_growth": "Crec. Empleo",
-                "interest_rate": "Tasa Interés",
+                "interest_rate": "Tasa de Interés (anual)",
                 "inventory": "Inventario",
                 "cap_rate": "Cap Rate Prom"
             },

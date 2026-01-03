@@ -110,6 +110,18 @@ const dictionary = {
         mapHint: "",
         initialRent: "Initial Monthly Rent ($)",
         leaseTerm: "Lease Term (Years)",
+        dimensions: "Dimensions (Feet)",
+        parcelNumber: "Parcel Number (APN)",
+        subdivisionLabel: "Subdivision",
+        zoningLabel: "Zoning",
+        sewerLabel: "Sewer",
+        waterLabel: "Water",
+        hoaFees: "HOA Monthly Fees ($)",
+        specialConditions: "Special Conditions",
+        widthLabel: "Width (Feet)",
+        lengthLabel: "Length (Feet)",
+        propertyDimensionsTitle: "Property & Dimensions",
+        zoningUtilitiesTitle: "Zoning & Utilities"
     },
     pt: {
         configTitle: "Configuração do Projeto",
@@ -191,6 +203,18 @@ const dictionary = {
         mapHint: "Arraste o pino para ajustar (Em Breve)",
         initialRent: "Aluguel Inicial Mensal (R$)",
         leaseTerm: "Prazo do Contrato (Anos)",
+        dimensions: "Dimensões (Feet)",
+        parcelNumber: "Número da Parcela (APN)",
+        subdivisionLabel: "Loteamento / Subdivisão",
+        zoningLabel: "Zoneamento",
+        sewerLabel: "Esgoto (Sewer)",
+        waterLabel: "Água (Water)",
+        hoaFees: "Taxa Mensal HOA ($)",
+        specialConditions: "Condições Especiais",
+        widthLabel: "Largura (Feet)",
+        lengthLabel: "Comprimento (Feet)",
+        propertyDimensionsTitle: "Propriedade e Dimensões",
+        zoningUtilitiesTitle: "Zoneamento e Utilidades"
     },
     es: {
         configTitle: "Configuración del Proyecto",
@@ -272,16 +296,37 @@ const dictionary = {
         mapHint: "Arrastre el pin para ajustar (Próximamente)",
         initialRent: "Renta Inicial Mensual ($)",
         leaseTerm: "Plazo del Contrato (Años)",
+        dimensions: "Dimensiones (Feet)",
+        parcelNumber: "Número de Parcela",
+        subdivisionLabel: "Subdivisión",
+        zoningLabel: "Zonificación",
+        sewerLabel: "Alcantarillado",
+        waterLabel: "Agua",
+        hoaFees: "Cuota Mensual HOA ($)",
+        specialConditions: "Condiciones Especiales",
+        widthLabel: "Ancho (Feet)",
+        lengthLabel: "Largo (Feet)",
+        propertyDimensionsTitle: "Propiedad y Dimensiones",
+        zoningUtilitiesTitle: "Zonificación y Servicios"
     }
 };
 
 const landDetailsSchema = z.object({
     // Config & Project Data
     lot_size_acres: z.coerce.number().min(0, 'Area must be positive').optional(),
+    lot_width: z.coerce.number().optional(),
+    lot_length: z.coerce.number().optional(),
+    parcel_number: z.string().optional(),
+    subdivision: z.string().optional(),
+    zoning_code: z.string().optional(),
     project_type: z.string().optional(),
     has_existing_structure: z.boolean().default(false),
     existing_structure_description: z.string().optional(),
     demolition_cost_estimate: z.coerce.number().min(0).optional(),
+    sewer_type: z.string().optional(),
+    water_type: z.string().optional(),
+    hoa_fees_monthly: z.coerce.number().min(0).optional(),
+    special_conditions: z.string().optional(),
 
     // Valuation
     land_value: z.coerce.number().min(0, 'Value must be positive'),
@@ -407,6 +452,17 @@ export default function LandForm({ projectId, initialData, lang }: LandFormProps
                 ownership_share_percent: o.ownership_share_percent ?? 100
             }))
             : [],
+
+        // New fields
+        lot_width: initialData?.land?.lot_width,
+        lot_length: initialData?.land?.lot_length,
+        parcel_number: initialData?.land?.parcel_number || '',
+        subdivision: initialData?.land?.subdivision || '',
+        zoning_code: initialData?.land?.zoning_code || '',
+        sewer_type: initialData?.land?.sewer_type || '',
+        water_type: initialData?.land?.water_type || '',
+        hoa_fees_monthly: initialData?.land?.hoa_fees_monthly || 0,
+        special_conditions: initialData?.land?.special_conditions || '',
     };
 
     const form = useForm<FormSchema>({
@@ -517,7 +573,18 @@ export default function LandForm({ projectId, initialData, lang }: LandFormProps
                     far_utilization: data.far_utilization,
                     notes: data.notes,
                     listing_link: data.listing_link,
-                    contract_structuring_preference: data.contract_structuring_preference
+                    contract_structuring_preference: data.contract_structuring_preference,
+
+                    // New Fields
+                    lot_width: data.lot_width,
+                    lot_length: data.lot_length,
+                    parcel_number: data.parcel_number,
+                    subdivision: data.subdivision,
+                    zoning_code: data.zoning_code,
+                    sewer_type: data.sewer_type,
+                    water_type: data.water_type,
+                    hoa_fees_monthly: data.hoa_fees_monthly,
+                    special_conditions: data.special_conditions,
                 };
 
                 // Add explicit acquisition method
@@ -557,66 +624,204 @@ export default function LandForm({ projectId, initialData, lang }: LandFormProps
                         <span className="text-cyan-500">1.</span> {lang === 'pt' ? 'Características do Terreno' : lang === 'es' ? 'Características del Terreno' : 'Land Characteristics'}
                     </h2>
 
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* Physical Facts */}
+                        <div className="space-y-6">
+                            <h3 className="text-sm font-bold text-cyan-900 border-b pb-2 uppercase tracking-wider">
+                                {lang === 'pt' ? 'Propriedade e Dimensões' : lang === 'es' ? 'Propiedad y Dimensiones' : 'Property & Dimensions'}
+                            </h3>
 
-                    {/* Land Area - Full Width */}
-                    <div className="mb-6">
-                        <label className="text-sm font-medium text-gray-700 block mb-2">{dict.landArea}</label>
-                        <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            onKeyDown={blockInvalidChar}
-                            {...form.register('lot_size_acres')}
-                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none"
-                            placeholder="e.g. 0.5"
-                        />
-                    </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="col-span-2">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-tight block mb-1">{dict.landArea}</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        onKeyDown={blockInvalidChar}
+                                        {...form.register('lot_size_acres')}
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none text-sm"
+                                        placeholder="e.g. 2.48"
+                                    />
+                                </div>
 
-                    {/* Existing Structure - Below */}
-                    <div className="mb-6 p-4 border rounded-xl bg-gray-50 flex items-center justify-between">
-                        <div>
-                            <p className="font-semibold text-gray-800">{dict.existingStructure}</p>
-                            <p className="text-xs text-gray-500">{dict.existingStructureHint}</p>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                                type="checkbox"
-                                {...form.register('has_existing_structure')}
-                                className="sr-only peer"
-                            />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-100 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
-                        </label>
-                    </div>
+                                <div>
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-tight block mb-1">
+                                        {lang === 'pt' ? 'Largura (Feet)' : lang === 'es' ? 'Ancho (Feet)' : 'Width (Feet)'}
+                                    </label>
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        {...form.register('lot_width')}
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none text-sm"
+                                        placeholder="165"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-tight block mb-1">
+                                        {lang === 'pt' ? 'Comprimento (Feet)' : lang === 'es' ? 'Largo (Feet)' : 'Length (Feet)'}
+                                    </label>
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        {...form.register('lot_length')}
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none text-sm"
+                                        placeholder="661"
+                                    />
+                                </div>
 
-                    {/* Conditional Fields for Existing Structure */}
-                    {form.watch('has_existing_structure') && (
-                        <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeIn">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">{dict.structureDescription}</label>
-                                <textarea
-                                    {...form.register('existing_structure_description')}
-                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none resize-none h-[100px]"
-                                    placeholder={dict.structureDescriptionPlaceholder}
-                                />
+                                <div className="col-span-2">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-tight block mb-1">
+                                        {lang === 'pt' ? 'Número da Parcela (APN)' : lang === 'es' ? 'Número de Parcela' : 'Parcel Number (APN)'}
+                                    </label>
+                                    <input
+                                        {...form.register('parcel_number')}
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none text-sm"
+                                        placeholder="2527310000311..."
+                                    />
+                                </div>
+
+                                <div className="col-span-2">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-tight block mb-1">
+                                        {lang === 'pt' ? 'Loteamento / Subdivisão' : lang === 'es' ? 'Subdivisión' : 'Subdivision'}
+                                    </label>
+                                    <input
+                                        {...form.register('subdivision')}
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none text-sm"
+                                        placeholder="ACREAGE & UNREC"
+                                    />
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">{dict.demoCost}</label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-2 text-gray-400">$</span>
+                        </div>
+
+                        {/* Zoning & Utilities */}
+                        <div className="space-y-6">
+                            <h3 className="text-sm font-bold text-cyan-900 border-b pb-2 uppercase tracking-wider">
+                                {lang === 'pt' ? 'Zoneamento e Utilidades' : lang === 'es' ? 'Zonificación y Servicios' : 'Zoning & Utilities'}
+                            </h3>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="col-span-2">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-tight block mb-1">
+                                        {lang === 'pt' ? 'Zoneamento' : lang === 'es' ? 'Zonificación' : 'Zoning'}
+                                    </label>
+                                    <input
+                                        {...form.register('zoning_code')}
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none text-sm"
+                                        placeholder="OAC / ZM"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-tight block mb-1">
+                                        {lang === 'pt' ? 'Esgoto (Sewer)' : lang === 'es' ? 'Alcantarillado' : 'Sewer'}
+                                    </label>
+                                    <select
+                                        {...form.register('sewer_type')}
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none text-sm bg-white"
+                                    >
+                                        <option value="">Select</option>
+                                        <option value="public">{lang === 'pt' ? 'Público' : 'Public'}</option>
+                                        <option value="septic">{lang === 'pt' ? 'Fossa (Septic)' : 'Septic'}</option>
+                                        <option value="none">{lang === 'pt' ? 'Nenhum' : 'None'}</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-tight block mb-1">
+                                        {lang === 'pt' ? 'Água (Water)' : lang === 'es' ? 'Agua' : 'Water'}
+                                    </label>
+                                    <select
+                                        {...form.register('water_type')}
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none text-sm bg-white"
+                                    >
+                                        <option value="">Select</option>
+                                        <option value="public">{lang === 'pt' ? 'Público' : 'Public'}</option>
+                                        <option value="well">{lang === 'pt' ? 'Poço (Well)' : 'Well'}</option>
+                                        <option value="none">{lang === 'pt' ? 'Nenhum' : 'None'}</option>
+                                    </select>
+                                </div>
+
+                                <div className="col-span-2">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-tight block mb-1">
+                                        {lang === 'pt' ? 'Taxa Mensal HOA ($)' : 'HOA Monthly Fees ($)'}
+                                    </label>
                                     <CurrencyInput
-                                        value={form.watch('demolition_cost_estimate')}
-                                        onChange={(val) => form.setValue('demolition_cost_estimate', val)}
-                                        className="w-full pl-8 pr-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none"
+                                        value={form.watch('hoa_fees_monthly')}
+                                        onChange={(val) => form.setValue('hoa_fees_monthly', val)}
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none text-sm"
                                         placeholder="0.00"
                                     />
                                 </div>
-                                <p className="text-xs text-gray-500">{dict.demoCostHint}</p>
+
+                                <div className="col-span-2">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-tight block mb-1">
+                                        {lang === 'pt' ? 'Condições Especiais' : lang === 'es' ? 'Condiciones Especiales' : 'Special Conditions'}
+                                    </label>
+                                    <textarea
+                                        {...form.register('special_conditions')}
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none text-sm resize-none h-16"
+                                        placeholder="None / Easements / Wetlands..."
+                                    />
+                                </div>
                             </div>
                         </div>
-                    )}
+                    </div>
+
+                    {/* Existing Structure - Horizontal Toggle */}
+                    <div className="mt-8 pt-8 border-t border-gray-100 pb-2">
+                        <div className="p-4 border rounded-xl bg-gray-50/50 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600">
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p className="font-bold text-gray-800">{dict.existingStructure}</p>
+                                    <p className="text-xs text-gray-500">{dict.existingStructureHint}</p>
+                                </div>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    {...form.register('has_existing_structure')}
+                                    className="sr-only peer"
+                                />
+                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-100 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500 transition-all"></div>
+                            </label>
+                        </div>
+
+                        {/* Conditional Fields for Existing Structure */}
+                        {form.watch('has_existing_structure') && (
+                            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeIn">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-tight">{dict.structureDescription}</label>
+                                    <textarea
+                                        {...form.register('existing_structure_description')}
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none resize-none h-[80px] text-sm"
+                                        placeholder={dict.structureDescriptionPlaceholder}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-tight">{dict.demoCost}</label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-2 text-gray-400 text-sm">$</span>
+                                        <CurrencyInput
+                                            value={form.watch('demolition_cost_estimate')}
+                                            onChange={(val) => form.setValue('demolition_cost_estimate', val)}
+                                            className="w-full pl-8 pr-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none text-sm"
+                                            placeholder="0.00"
+                                        />
+                                    </div>
+                                    <p className="text-[10px] text-gray-400 font-medium italic mt-1">{dict.demoCostHint}</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
 
                     {/* Listing Links */}
-                    <div className="pt-6 border-t border-gray-100">
+                    <div className="mt-8 pt-6 border-t border-gray-100">
                         <ListingLinksManager projectId={projectId} lang={lang} />
                     </div>
                 </div>

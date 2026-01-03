@@ -620,7 +620,7 @@
                 "home_value": "Valor Médio",
                 "rent_trend": "Tend. Aluguel",
                 "job_growth": "Cresc. Emprego",
-                "interest_rate": "Taxa de Juros",
+                "interest_rate": "Juros (ao ano)",
                 "inventory": "Meses Estoque",
                 "cap_rate": "Cap Rate Médio"
             },

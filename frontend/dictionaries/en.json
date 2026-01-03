@@ -619,7 +619,7 @@
                 "home_value": "Home Value",
                 "rent_trend": "Rent Trend",
                 "job_growth": "Job Growth",
-                "interest_rate": "Interest Rate",
+                "interest_rate": "Interest Rate (annual)",
                 "inventory": "Inventory",
                 "cap_rate": "Avg Cap Rate"
             },

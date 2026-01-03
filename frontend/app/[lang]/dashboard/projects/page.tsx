@@ -22,7 +22,8 @@ export default async function ProjectsPage({
             *,
             locations:project_locations(address_full, city, state, country),
             category:property_categories(key),
-            subtype:property_subtypes(key)
+            subtype:property_subtypes(key),
+            standard:property_standards(key)
         `)
         .order('updated_at', { ascending: false });
 
@@ -37,7 +38,8 @@ export default async function ProjectsPage({
         ...p,
         locations: Array.isArray(p.locations) ? p.locations[0] : p.locations,
         category_key: Array.isArray(p.category) ? p.category[0]?.key : (p.category as any)?.key,
-        subtype_key: Array.isArray(p.subtype) ? p.subtype[0]?.key : (p.subtype as any)?.key
+        subtype_key: Array.isArray(p.subtype) ? p.subtype[0]?.key : (p.subtype as any)?.key,
+        standard_key: Array.isArray(p.standard) ? p.standard[0]?.key : (p.standard as any)?.key
     }));
 
     return (

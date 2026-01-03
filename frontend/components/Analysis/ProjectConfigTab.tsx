@@ -14,14 +14,15 @@ export default function ProjectConfigTab({ project, lang, dict }: ProjectConfigT
     const supabase = createClient();
     const [saving, setSaving] = useState(false);
 
-    const handleSaveProjectType = async (categoryId: string, subtypeId: string) => {
+    const handleSaveProjectType = async (categoryId: string, subtypeId: string, standardId?: string | null) => {
         setSaving(true);
         try {
             const { error } = await supabase
                 .from('projects')
                 .update({
                     category_id: categoryId,
-                    subtype_id: subtypeId
+                    subtype_id: subtypeId,
+                    standard_id: standardId || null
                 })
                 .eq('id', project.id);
 
@@ -45,6 +46,7 @@ export default function ProjectConfigTab({ project, lang, dict }: ProjectConfigT
                 projectId={project.id}
                 initialCategoryId={project.category_id}
                 initialSubtypeId={project.subtype_id}
+                initialStandardId={project.standard_id}
                 lang={lang}
                 onSave={handleSaveProjectType}
             />

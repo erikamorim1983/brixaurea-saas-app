@@ -94,12 +94,21 @@ export interface LandDetails {
 
     // Zoning & Condition
     far_utilization?: number;
+    zoning_code?: string;
     project_type?: string;
     has_existing_structure?: boolean;
     demolition_cost_estimate?: number;
+    parcel_number?: string;
+    subdivision?: string;
+    sewer_type?: string;
+    water_type?: string;
+    hoa_fees_monthly?: number;
+    special_conditions?: string;
 
     // Linked from project_locations (Read/Write)
     lot_size_acres?: number;
+    lot_width?: number;
+    lot_length?: number;
     latitude?: number;
     longitude?: number;
     address_full?: string;

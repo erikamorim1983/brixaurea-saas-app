@@ -27,11 +27,12 @@
     },
     "property_subtypes": {
         "townhomes": "Townhomes",
-        "condos_low_rise": "Condos (Baixo)",
-        "condos_mid_rise": "Condos (Médio)",
-        "condos_high_rise": "Condos (Alto)",
+        "condos_low_rise": "Condos (Low-Rise)",
+        "condos_mid_rise": "Condos (Mid-Rise)",
+        "condos_high_rise": "Condos (High-Rise / Torre)",
         "single_family_spec": "Casa Unifamiliar – Spec",
         "single_family_bto": "Casa Unifamiliar – Sob Encomenda",
+        "single_family_generic": "Casa Unifamiliar",
         "villas_patio_homes": "Villas / Casas Pátio",
         "duplex": "Duplex",
         "fourplex": "Triplex / Fourplex",
@@ -89,5 +90,12 @@
             "lease_rate": "Taxa de Locação",
             "blended": "Misto (por componente)"
         }
+    },
+    "property_standards": {
+        "luxury": "Luxo / Alto Padrão",
+        "high_end": "Alto Padrão",
+        "mid_market": "Médio Padrão",
+        "entry_level": "Baixo Padrão / Econômico",
+        "affordable": "Acessível / Social"
     }
 }

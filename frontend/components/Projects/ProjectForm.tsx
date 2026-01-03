@@ -12,9 +12,10 @@ import Autocomplete from 'react-google-autocomplete';
 const projectSchema = z.object({
     name: z.string().min(3, "min_3_chars"),
     address_full: z.string().min(5, "required"),
-    city: z.string().min(2, "required"),
-    state: z.string().length(2, "state_len"),
-    zip_code: z.string().min(5, "zip_invalid"),
+    city: z.string().optional(),
+    state: z.string().optional(),
+    state_code: z.string().optional(), // 2-letter state code
+    zip_code: z.string().optional(),
     lot_size_sqft: z.number().optional(),
     zoning_code: z.string().optional(),
     // Hidden fields for precise location
@@ -56,16 +57,12 @@ export default function ProjectForm({ userId, lang, dictionary }: ProjectFormPro
     // if the user types Zip first instead of using Autocomplete
     const zipCode = watch('zip_code');
 
-    // Auto-fetch address from Zip Code
+    // Debug: Log validation errors
     useEffect(() => {
-        const fetchAddress = async () => {
-            if (!zipCode) return;
-            // Only run this if we don't have a city yet (avoid overwriting Autocomplete data)
-            // or if the user explicitly is typing into Zip field.
-            // Ideally Autocomplete fills everything.
-        };
-        // Leaving the Zip watcher active for manual entry cases, but logic resides in onPlaceSelected primarily.
-    }, [zipCode]);
+        if (Object.keys(errors).length > 0) {
+            console.warn("Project Form Validation Errors:", errors);
+        }
+    }, [errors]);
 
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -78,7 +75,8 @@ export default function ProjectForm({ userId, lang, dictionary }: ProjectFormPro
 
         // 2. Parse Components
         let city = '';
-        let state = '';
+        let stateFullName = '';
+        let stateCode = ''; // 2-letter abbreviation
         let zip = '';
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -87,15 +85,30 @@ export default function ProjectForm({ userId, lang, dictionary }: ProjectFormPro
                 if (comp.types.includes('locality')) city = comp.long_name;
                 if (!city && comp.types.includes('sublocality')) city = comp.long_name; // Fallback
 
-                if (comp.types.includes('administrative_area_level_1')) state = comp.short_name;
+                if (comp.types.includes('administrative_area_level_1')) {
+                    stateFullName = comp.long_name; // "Florida"
+                    stateCode = comp.short_name;   // "FL"
+                }
 
                 if (comp.types.includes('postal_code')) zip = comp.long_name;
             });
         }
 
+        // Save all extracted data
         if (city) setValue('city', city, { shouldValidate: true });
-        if (state) setValue('state', state, { shouldValidate: true });
+        if (stateFullName) setValue('state', stateFullName, { shouldValidate: true });
+        if (stateCode) setValue('state_code', stateCode, { shouldValidate: true });
         if (zip) setValue('zip_code', zip, { shouldValidate: true });
+
+        // Log for debugging
+        console.log('[ProjectForm] Extracted Address Data:', {
+            address_full: address,
+            city,
+            state: stateFullName,
+            state_code: stateCode,
+            zip_code: zip,
+            place_id: place.place_id
+        });
 
         // 3. Coordinates & Place ID
         if (place.geometry && place.geometry.location) {
@@ -140,9 +153,10 @@ export default function ProjectForm({ userId, lang, dictionary }: ProjectFormPro
                     project_id: projectData.id,
                     address_full: data.address_full,
                     city: data.city,
-                    state: data.state ? data.state.toUpperCase() : '',
+                    state: data.state,
+                    state_code: data.state_code, // 2-letter code for API queries
                     zip_code: data.zip_code,
-                    country: lang === 'pt' ? 'Brazil' : 'USA',
+                    country: 'USA',
                     zoning_code: data.zoning_code,
                     latitude: data.latitude,
                     longitude: data.longitude,
@@ -203,67 +217,25 @@ export default function ProjectForm({ userId, lang, dictionary }: ProjectFormPro
                         onPlaceSelected={onPlaceSelected}
                         options={{
                             types: ["address"],
-                            fields: ["formatted_address", "address_components", "geometry", "place_id", "name"]
+                            fields: ["formatted_address", "address_components", "geometry", "place_id", "name"],
+                            componentRestrictions: { country: "us" }
                         }}
+                        defaultValue={watch('address_full')}
                         placeholder={t.address_placeholder}
                         className={`w-full px-4 py-3 rounded-xl border-2 transition-all ${errors.address_full ? 'border-red-400' : 'border-gray-200 focus:border-[#00D9FF]'} focus:outline-none focus:ring-2 focus:ring-[#00D9FF]/50`}
-                        // We register this manually via onPlaceSelected, but also link it to validation
-                        // However, react-google-autocomplete manages its own ref. 
-                        // Strategy: We use setValue in onPlaceSelected, but also can bind onChange to validation if needed.
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setValue('address_full', e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setValue('address_full', e.target.value, { shouldValidate: true })}
                     />
+                    {/* Invisible register for address_full since Autocomplete doesn't use the ref easily */}
+                    <input type="hidden" {...register('address_full')} />
                     {errors.address_full && <p className="text-red-500 text-sm mt-1">{getErrorMessage(errors.address_full.message)}</p>}
                 </div>
 
-                {/* 3. Zip & Zoning */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Zip Code</label>
-                        <input
-                            {...register('zip_code')}
-                            type="text"
-                            placeholder="33139"
-                            readOnly
-                            className={`w-full px-4 py-3 rounded-xl border-2 transition-all bg-gray-100 cursor-not-allowed ${errors.zip_code ? 'border-red-400' : 'border-gray-200'} focus:outline-none`}
-                        />
-                        {errors.zip_code && <p className="text-red-500 text-sm mt-1">{getErrorMessage(errors.zip_code.message)}</p>}
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">{t.zoning || 'Zoneamento'}</label>
-                        <input
-                            {...register('zoning_code')}
-                            type="text"
-                            placeholder="ZM"
-                            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#00D9FF] focus:outline-none focus:ring-2 focus:ring-[#00D9FF]/50"
-                        />
-                    </div>
-                </div>
-
-                {/* 4. City & State */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">{t.city || 'Cidade'}</label>
-                        <input
-                            {...register('city')}
-                            type="text"
-                            placeholder="Miami"
-                            readOnly
-                            className={`w-full px-4 py-3 rounded-xl border-2 transition-all bg-gray-100 cursor-not-allowed ${errors.city ? 'border-red-400' : 'border-gray-200'} focus:outline-none`}
-                        />
-                        {errors.city && <p className="text-red-500 text-sm mt-1">{getErrorMessage(errors.city.message)}</p>}
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">{t.state || 'Estado'}</label>
-                        <input
-                            {...register('state')}
-                            type="text"
-                            placeholder="FL"
-                            readOnly
-                            className={`w-full px-4 py-3 rounded-xl border-2 transition-all bg-gray-100 cursor-not-allowed ${errors.state ? 'border-red-400' : 'border-gray-200'} focus:outline-none uppercase`}
-                        />
-                        {errors.state && <p className="text-red-500 text-sm mt-1">{getErrorMessage(errors.state.message)}</p>}
-                    </div>
+                {/* 3. Hidden Location Details (Auto-filled) */}
+                <div className="hidden">
+                    <input {...register('zip_code')} type="hidden" />
+                    <input {...register('city')} type="hidden" />
+                    <input {...register('state')} type="hidden" />
+                    <input {...register('zoning_code')} type="hidden" />
                 </div>
 
 

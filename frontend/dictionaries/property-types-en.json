@@ -32,6 +32,7 @@
         "condos_high_rise": "Condos (High-Rise)",
         "single_family_spec": "Single Family – Spec Homes",
         "single_family_bto": "Single Family – Build to Order",
+        "single_family_generic": "Single Family Home",
         "villas_patio_homes": "Villas / Patio Homes",
         "duplex": "Duplex",
         "fourplex": "Triplex / Fourplex",
@@ -89,5 +90,12 @@
             "lease_rate": "Lease Rate",
             "blended": "Blended (per component)"
         }
+    },
+    "property_standards": {
+        "luxury": "Luxury",
+        "high_end": "High-end / Premium",
+        "mid_market": "Mid-market",
+        "entry_level": "Entry-level / Workforce",
+        "affordable": "Affordable"
     }
 }

@@ -1,10 +1,10 @@
 # BrixAurea Backlog - Tarefas Pendentes
 
 ## UI/UX & Visual
-- [ ] **Bandeiras de Estado/Cidade nos Cartões de Projeto**: Implementar um sistema robusto para exibição das bandeiras. Atualmente o sistema usa FlagCDN mas as imagens não estão carregando Consistentemente (mostrando apenas o placeholder branco). Considerar armazenamento local das bandeiras ou uma API de mapas mais integrada.
+- [x] **Bandeiras de Estado nos Cartões de Projeto**: Implementado usando FlagCDN e corrigido erro de CSP (Content Security Policy) no `next.config.ts`. Adicionado contexto de endereço na aba Regional.
 
 ## Database & Backend
-- [ ] **Configuração de Cron no Supabase**: O usuário deve executar o comando SQL para agendar a limpeza automática da lixeira (`cleanup-trash-daily`).
+- [x] **Configuração de Cron no Supabase**: Migração `19_enable_cron.sql` executada com sucesso. Limpeza automática da lixeira agendada para meia-noite.
 
 ## Deployment
 - [ ] Monitorar logs de produção após o deploy das novas animações do Framer Motion.

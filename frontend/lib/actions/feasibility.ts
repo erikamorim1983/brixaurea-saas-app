@@ -36,11 +36,16 @@ export async function getLandFeasibilityData(projectId: string) {
     // Let's just do a separate fetch for project_type if it's on 'projects' table relative to project_locations on separate table
 
     const { data: project } = await supabase.from('projects').select('name, project_type').eq('id', projectId).single();
-    const { data: location } = await supabase.from('project_locations').select('lot_size_acres, latitude, longitude, address_full').eq('project_id', projectId).single();
+    const { data: location } = await supabase.from('project_locations').select('lot_size_acres, lot_width, lot_length, parcel_number, subdivision, zoning_code, latitude, longitude, address_full').eq('project_id', projectId).single();
 
     const mergedLand = {
         ...(land || {}),
         lot_size_acres: location?.lot_size_acres,
+        lot_width: location?.lot_width,
+        lot_length: location?.lot_length,
+        parcel_number: location?.parcel_number,
+        subdivision: location?.subdivision,
+        zoning_code: location?.zoning_code,
         latitude: location?.latitude,
         longitude: location?.longitude,
         address_full: location?.address_full,
@@ -73,13 +78,21 @@ export async function saveLandFeasibility(
     const supabase = await createClient();
 
     // Separate external fields
-    const { lot_size_acres, project_type, ...landDetailsPayload } = landData;
+    const { lot_size_acres, lot_width, lot_length, parcel_number, subdivision, zoning_code, project_type, ...landDetailsPayload } = landData;
 
-    // 1a. Update Project Locations (Acres)
-    if (lot_size_acres !== undefined) {
+    // 1a. Update Project Locations (Acres & Dimensions)
+    if (lot_size_acres !== undefined || lot_width !== undefined || lot_length !== undefined || parcel_number !== undefined || subdivision !== undefined || zoning_code !== undefined) {
         await supabase
             .from('project_locations')
-            .upsert({ project_id: projectId, lot_size_acres }); // Upsert to be safe
+            .upsert({
+                project_id: projectId,
+                lot_size_acres,
+                lot_width,
+                lot_length,
+                parcel_number,
+                subdivision,
+                zoning_code
+            });
     }
 
     // 1b. Update Project Type
@@ -99,7 +112,7 @@ export async function saveLandFeasibility(
         'land_value', 'amount_cash', 'amount_seller_financing', 'amount_swap_monetary',
         'broker_commission_percent', 'broker_commission_amount', 'earnest_money_deposit',
         'due_diligence_period_days', 'closing_period_days', 'pursuit_budget',
-        'far_utilization', 'demolition_cost_estimate', 'market_valuation'
+        'far_utilization', 'demolition_cost_estimate', 'market_valuation', 'hoa_fees_monthly'
     ];
 
     const cleanedLandPayload = { ...landDetailsPayload };

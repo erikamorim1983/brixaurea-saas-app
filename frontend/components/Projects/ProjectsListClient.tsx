@@ -18,6 +18,8 @@ interface Project {
     subtype_id?: string | null;
     category_key?: string | null;
     subtype_key?: string | null;
+    standard_id?: string | null;
+    standard_key?: string | null;
     updated_at: string;
     locations?: {
         address_full: string;
@@ -46,9 +48,78 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
     const [stateFilter, setStateFilter] = useState('all');
     const [cityFilter, setCityFilter] = useState('all');
 
-    // Menu State
     const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
     const [showTrash, setShowTrash] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    // Helpers (moved up to avoid initialization errors)
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'approved': return 'text-emerald-600 border-emerald-100 bg-emerald-50';
+            case 'feasibility': return 'text-blue-600 border-blue-100 bg-blue-50';
+            case 'execution': return 'text-cyan-600 border-cyan-100 bg-cyan-50';
+            case 'rejected': return 'text-red-600 border-red-100 bg-red-50';
+            case 'draft': return 'text-slate-500 border-slate-100 bg-slate-50';
+            default: return 'text-gray-600 border-gray-100 bg-gray-50';
+        }
+    };
+
+    const getCardGradient = (status: string) => {
+        switch (status) {
+            case 'approved': return 'from-[#059669] to-[#047857]';
+            case 'feasibility': return 'from-[#2563eb] to-[#1d4ed8]';
+            case 'execution': return 'from-[#06b6d4] to-[#0891b2]';
+            case 'rejected': return 'from-red-900/80 to-slate-900';
+            case 'draft': return 'from-slate-600 to-slate-800';
+            default: return 'from-[#081F2E] to-[#113a52]';
+        }
+    };
+
+    const translateStatus = (status: string, currentLang: string) => {
+        const isPt = currentLang?.startsWith('pt') || dictionary?.list?.typology_label === 'Tipologia';
+        const isEs = currentLang?.startsWith('es') || dictionary?.list?.typology_label === 'Tipología';
+        const targetLang = isPt ? 'pt' : (isEs ? 'es' : 'en');
+
+        const map: Record<string, any> = {
+            draft: { pt: 'Rascunho', es: 'Borrador', en: 'Draft' },
+            feasibility: { pt: 'Estudo de Viabilidade', es: 'Estudio de Viabilidad', en: 'Feasibility Study' },
+            approved: { pt: 'Aprovado', es: 'Aprovado', en: 'Approved' },
+            execution: { pt: 'Acompanhamento', es: 'Ejecución', en: 'Execution' },
+            rejected: { pt: 'Não Viável', es: 'No Viable', en: 'Not Viable' },
+            completed: { pt: 'Concluído', es: 'Completado', en: 'Completed' },
+            archived: { pt: 'Arquivado', es: 'Archivado', en: 'Archived' },
+        };
+        return map[status]?.[targetLang] || status;
+    };
+
+    const getTypologyName = (project: Project) => {
+        const isPt = lang?.startsWith('pt') || dictionary?.list?.typology_label === 'Tipologia';
+        const isEs = lang?.startsWith('es') || dictionary?.list?.typology_label === 'Tipología';
+        const propDict: any = isPt ? propertyTypesPT : (isEs ? propertyTypesES : propertyTypesEN);
+
+        const subtypeKey = project.subtype_key || project.subtype_id;
+        const standardKey = project.standard_key || project.standard_id;
+
+        let name = '-';
+
+        if (subtypeKey && propDict.property_subtypes[subtypeKey]) {
+            name = propDict.property_subtypes[subtypeKey];
+        } else if (project.project_type) {
+            name = project.project_type.replace('_', ' ');
+        }
+
+        // Append standard if available
+        if (standardKey && propDict.property_standards?.[standardKey]) {
+            const standardName = propDict.property_standards[standardKey];
+            name = `${name} (${standardName})`;
+        }
+
+        return name;
+    };
 
     // Sync state when server data changes
     useEffect(() => {
@@ -66,7 +137,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                 (p.locations?.address_full || '').toLowerCase().includes(searchTerm.toLowerCase());
 
             const matchesStatus = excludeKey === 'status' || statusFilter === 'all' || p.status === statusFilter;
-            const matchesType = excludeKey === 'type' || typeFilter === 'all' || p.project_type === typeFilter;
+            const matchesType = excludeKey === 'type' || typeFilter === 'all' || getTypologyName(p) === typeFilter;
             const matchesState = excludeKey === 'state' || stateFilter === 'all' || p.locations?.state === stateFilter;
             const matchesCity = excludeKey === 'city' || cityFilter === 'all' || p.locations?.city === cityFilter;
 
@@ -81,7 +152,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
 
     const typeOptions = useMemo(() => {
         const relevantProjects = getFilteredProjects('type');
-        return Array.from(new Set(relevantProjects.map(p => p.project_type).filter(Boolean)));
+        return Array.from(new Set(relevantProjects.map(p => getTypologyName(p)).filter(t => t !== '-')));
     }, [projects, searchTerm, statusFilter, stateFilter, cityFilter, showTrash]);
 
     const stateOptions = useMemo(() => {
@@ -127,66 +198,15 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
         setActiveMenuId(null);
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'approved': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-            case 'feasibility': return 'bg-blue-100 text-blue-700 border-blue-200';
-            case 'execution': return 'bg-cyan-100 text-cyan-700 border-cyan-200';
-            case 'rejected': return 'bg-red-50 text-red-600 border-red-100';
-            case 'draft': return 'bg-gray-100 text-gray-600 border-gray-200';
-            case 'completed': return 'bg-indigo-100 text-indigo-700 border-indigo-200';
-            case 'archived': return 'bg-gray-100 text-gray-500 border-gray-200';
-            default: return 'bg-gray-100 text-gray-600 border-gray-200';
-        }
-    };
-
-    const getCardGradient = (status: string) => {
-        switch (status) {
-            case 'approved': return 'from-[#059669] to-[#047857]';
-            case 'feasibility': return 'from-[#2563eb] to-[#1d4ed8]';
-            case 'execution': return 'from-[#06b6d4] to-[#0891b2]';
-            case 'rejected': return 'from-red-900/80 to-slate-900';
-            case 'draft': return 'from-slate-600 to-slate-800';
-            default: return 'from-[#081F2E] to-[#113a52]';
-        }
-    };
-
-    const translateStatus = (status: string, currentLang: string) => {
-        const isPt = currentLang?.startsWith('pt') || dictionary?.list?.typology_label === 'Tipologia';
-        const isEs = currentLang?.startsWith('es') || dictionary?.list?.typology_label === 'Tipología';
-        const targetLang = isPt ? 'pt' : (isEs ? 'es' : 'en');
-
-        const map: Record<string, any> = {
-            draft: { pt: 'Rascunho', es: 'Borrador', en: 'Draft' },
-            feasibility: { pt: 'Estudo de Viabilidade', es: 'Estudio de Viabilidad', en: 'Feasibility Study' },
-            approved: { pt: 'Aprovado', es: 'Aprovado', en: 'Approved' },
-            execution: { pt: 'Acompanhamento', es: 'Ejecución', en: 'Execution' },
-            rejected: { pt: 'Não Viável', es: 'No Viable', en: 'Not Viable' },
-            completed: { pt: 'Concluído', es: 'Completado', en: 'Completed' },
-            archived: { pt: 'Arquivado', es: 'Archivado', en: 'Archived' },
-        };
-        return map[status]?.[targetLang] || status;
-    };
-
-    const getTypologyName = (project: Project) => {
-        const isPt = lang?.startsWith('pt') || dictionary?.list?.typology_label === 'Tipologia';
-        const isEs = lang?.startsWith('es') || dictionary?.list?.typology_label === 'Tipología';
-        const propDict: any = isPt ? propertyTypesPT : (isEs ? propertyTypesES : propertyTypesEN);
-
-        const key = project.subtype_key || project.subtype_id;
-        if (key && propDict.property_subtypes[key]) {
-            return propDict.property_subtypes[key];
-        }
-        return project.project_type?.replace('_', ' ') || '-';
-    };
 
 
     return (
         <div className="space-y-8" onClick={() => setActiveMenuId(null)}>
             {/* Header + Controls */}
             <div className="flex flex-col gap-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
+                <div className="flex flex-col md:grid md:grid-cols-3 md:items-center gap-6">
+                    {/* Title Section */}
+                    <div className="flex flex-col">
                         <h1 className="text-3xl font-bold text-gray-900">
                             {dictionary?.list?.title || (lang?.startsWith('pt') ? 'Meus Projetos' : 'My Projects')}
                         </h1>
@@ -194,19 +214,38 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                             {dictionary?.list?.subtitle || (lang?.startsWith('pt') ? 'Gerencie seu portfolio imobiliário' : 'Manage your real estate portfolio')}
                         </p>
                     </div>
-                    <div className="flex gap-2 bg-gray-100 p-1 rounded-xl">
-                        <button
-                            onClick={() => setShowTrash(false)}
-                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${!showTrash ? 'bg-white text-cyan-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+
+                    {/* Centered Toggle */}
+                    <div className="flex justify-center">
+                        <div className="flex gap-2 bg-gray-100 p-1.5 rounded-2xl shadow-inner w-fit">
+                            <button
+                                onClick={() => setShowTrash(false)}
+                                className={`px-6 py-2.5 rounded-xl text-sm font-black uppercase tracking-wider transition-all duration-300 ${!showTrash ? 'bg-white text-cyan-600 shadow-md transform scale-105' : 'text-gray-400 hover:text-gray-600'}`}
+                            >
+                                {dictionary?.list?.active || (lang?.startsWith('pt') ? 'Ativos' : 'Active')}
+                            </button>
+                            <button
+                                onClick={() => setShowTrash(true)}
+                                className={`px-6 py-2.5 rounded-xl text-sm font-black uppercase tracking-wider transition-all duration-300 ${showTrash ? 'bg-white text-red-600 shadow-md transform scale-105' : 'text-gray-400 hover:text-gray-600'}`}
+                            >
+                                {dictionary?.list?.trash || (lang?.startsWith('pt') ? 'Lixeira' : 'Trash')}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* New Project Button */}
+                    <div className="flex justify-end">
+                        <Link
+                            href={`/${lang}/dashboard/projects/new`}
+                            className="group flex items-center gap-3 px-6 py-3.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg hover:shadow-cyan-200/50 hover:scale-105 active:scale-95 transition-all duration-300"
                         >
-                            {dictionary?.list?.active || (lang?.startsWith('pt') ? 'Ativos' : 'Active')}
-                        </button>
-                        <button
-                            onClick={() => setShowTrash(true)}
-                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${showTrash ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                        >
-                            {dictionary?.list?.trash || (lang?.startsWith('pt') ? 'Lixeira' : 'Trash')}
-                        </button>
+                            <span className="flex items-center justify-center w-6 h-6 bg-white/20 rounded-full group-hover:bg-white/30 transition-colors">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                            </span>
+                            {dictionary?.list?.new_project_btn || (lang?.startsWith('pt') ? 'Novo Projeto' : 'New Project')}
+                        </Link>
                     </div>
                 </div>
 
@@ -246,7 +285,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                 className="w-full px-3 py-2.5 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-[#00D9FF] outline-none cursor-pointer hover:border-gray-300 transition-colors"
                             >
                                 <option value="all">{dictionary?.list?.all_option || (lang?.startsWith('pt') ? 'Todos' : 'All')}</option>
-                                {statusOptions.map(opt => (
+                                {mounted && statusOptions.map(opt => (
                                     <option key={opt} value={opt}>{translateStatus(opt, lang)}</option>
                                 ))}
                             </select>
@@ -263,7 +302,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                 className="w-full px-3 py-2.5 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-[#00D9FF] outline-none cursor-pointer hover:border-gray-300 transition-colors"
                             >
                                 <option value="all">{dictionary?.list?.all_option || (lang?.startsWith('pt') ? 'Todos' : 'All')}</option>
-                                {typeOptions.map(t => (
+                                {mounted && typeOptions.map(t => (
                                     <option key={t as string} value={t as string}>{t as string}</option>
                                 ))}
                             </select>
@@ -280,7 +319,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                 className="w-full px-3 py-2.5 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-[#00D9FF] outline-none cursor-pointer hover:border-gray-300 transition-colors"
                             >
                                 <option value="all">{dictionary?.list?.all_option || (lang?.startsWith('pt') ? 'Todos' : 'All')}</option>
-                                {stateOptions.map(s => (
+                                {mounted && stateOptions.map(s => (
                                     <option key={s as string} value={s as string}>{s as string}</option>
                                 ))}
                             </select>
@@ -297,7 +336,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                 className="w-full px-3 py-2.5 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-[#00D9FF] outline-none cursor-pointer hover:border-gray-300 transition-colors"
                             >
                                 <option value="all">{dictionary?.list?.all_option || (lang?.startsWith('pt') ? 'Todos' : 'All')}</option>
-                                {cityOptions.map(c => (
+                                {mounted && cityOptions.map(c => (
                                     <option key={c as string} value={c as string}>{c as string}</option>
                                 ))}
                             </select>
@@ -446,9 +485,32 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
                                                     {dictionary?.list?.market_area_label || (lang?.startsWith('pt') ? 'Área de Mercado' : 'Market Area')}
                                                 </span>
-                                                <span className="text-sm font-bold text-gray-800">
-                                                    {(project.locations?.city || project.locations?.state) ? `${project.locations?.city || ''}, ${project.locations?.state || ''}` : '-'}
-                                                </span>
+                                                <div className="flex items-center gap-2">
+                                                    {(() => {
+                                                        const state = project.locations?.state?.trim();
+                                                        if (!state) return null;
+
+                                                        // Extract 2-letter code if it's "FL", "NY", or "Miami, FL"
+                                                        const stateCode = state.length > 2 ? state.split(',').pop()?.trim() : state;
+
+                                                        if (stateCode && stateCode.length === 2) {
+                                                            return (
+                                                                <img
+                                                                    src={`https://flagcdn.com/w40/us-${stateCode.toLowerCase()}.png`}
+                                                                    alt={stateCode}
+                                                                    className="w-5 h-3.5 object-cover rounded-[2px] shadow-sm border border-gray-100"
+                                                                    onError={(e) => {
+                                                                        e.currentTarget.style.display = 'none';
+                                                                    }}
+                                                                />
+                                                            );
+                                                        }
+                                                        return null;
+                                                    })()}
+                                                    <span className="text-sm font-bold text-gray-800">
+                                                        {(project.locations?.city || project.locations?.state) ? `${project.locations?.city || ''}, ${project.locations?.state || ''}` : '-'}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -461,7 +523,7 @@ export default function ProjectsListClient({ projects: initialProjects, lang, di
                                                     {new Date(project.updated_at).toLocaleDateString(lang?.startsWith('pt') ? 'pt-BR' : 'en-US')}
                                                 </span>
                                             </div>
-                                            <div className="flex items-center gap-2 text-[#00D9FF] font-black text-xs uppercase tracking-tighter group-hover:gap-4 transition-all duration-500">
+                                            <div className="flex items-center gap-2 text-[#0284c7] font-bold text-sm uppercase tracking-normal group-hover:gap-4 transition-all duration-500">
                                                 {dictionary?.list?.access_feasibility || (lang?.startsWith('pt') ? 'Acessar Viabilidade' : 'Access Feasibility')}
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                                             </div>
