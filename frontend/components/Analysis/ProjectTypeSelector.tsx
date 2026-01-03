@@ -282,7 +282,7 @@ export default function ProjectTypeSelector({
                                 <p className="text-sm font-bold text-gray-900 capitalize">
                                     {getTranslatedLevel(refined.income)}
                                 </p>
-                                {refined.income !== currentSubtype.typical_income_level && (
+                                {refined.income !== currentSubtype?.typical_income_level && (
                                     <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
                                 )}
                             </div>
@@ -297,7 +297,7 @@ export default function ProjectTypeSelector({
                                 <p className="text-sm font-bold text-gray-900 capitalize">
                                     {getTranslatedLevel(refined.liquidity)}
                                 </p>
-                                {refined.liquidity !== currentSubtype.typical_liquidity && (
+                                {refined.liquidity !== currentSubtype?.typical_liquidity && (
                                     <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
                                 )}
                             </div>
@@ -312,7 +312,7 @@ export default function ProjectTypeSelector({
                                 <p className="text-sm font-bold text-gray-900 capitalize">
                                     {getTranslatedLevel(refined.complexity)}
                                 </p>
-                                {refined.complexity !== currentSubtype.typical_complexity && (
+                                {refined.complexity !== currentSubtype?.typical_complexity && (
                                     <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
                                 )}
                             </div>
@@ -325,7 +325,7 @@ export default function ProjectTypeSelector({
                             {translations.market_characteristics.primary_metric}
                         </p>
                         <p className="text-sm font-bold text-cyan-700 uppercase">
-                            {currentSubtype.relevant_fields?.primary_metric ?
+                            {currentSubtype?.relevant_fields?.primary_metric ?
                                 translations.market_characteristics.metrics[currentSubtype.relevant_fields.primary_metric as keyof typeof translations.market_characteristics.metrics]
                                 : 'N/A'}
                         </p>
