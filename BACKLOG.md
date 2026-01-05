@@ -8,3 +8,9 @@
 
 ## Deployment
 - [ ] Monitorar logs de produção após o deploy das novas animações do Framer Motion.
+
+## Segurança e Infraestrutura (Fase Comercial)
+- [ ] **Migração Cloudflare**: Mover DNS para Cloudflare quando o projeto for comercial.
+  - Configurar WAF.
+  - Ativar Rate Limiting Global.
+  - Ativar Modo Full (Strict) SSL.

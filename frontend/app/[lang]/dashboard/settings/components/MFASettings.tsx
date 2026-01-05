@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 export default function MFASettings({ lang }: { lang: string }) {
     const [enabled, setEnabled] = useState(false);
@@ -10,6 +11,8 @@ export default function MFASettings({ lang }: { lang: string }) {
     const [verifyCode, setVerifyCode] = useState('');
     const [error, setError] = useState('');
     const [setupStep, setSetupStep] = useState<'idle' | 'qr' | 'success'>('idle');
+    const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+
     const supabase = createClient();
 
     const t = {
@@ -27,6 +30,10 @@ export default function MFASettings({ lang }: { lang: string }) {
             secret: 'Segredo (se não conseguir scanear):',
             success: '2FA Ativado com sucesso!',
             error_verify: 'Código inválido. Tente novamente.',
+            modal_title: 'Desativar 2FA',
+            modal_message: 'Tem certeza que deseja desativar a autenticação de dois fatores? Isso reduzirá a segurança da sua conta.',
+            modal_confirm: 'Desativar',
+            modal_cancel: 'Cancelar',
         },
         en: {
             title: 'Two-Factor Authentication (2FA)',
@@ -42,6 +49,10 @@ export default function MFASettings({ lang }: { lang: string }) {
             secret: 'Secret (if you cannot scan):',
             success: '2FA Enabled successfully!',
             error_verify: 'Invalid code. Please try again.',
+            modal_title: 'Disable 2FA',
+            modal_message: 'Are you sure you want to disable Two-Factor Authentication? This will reduce your account security.',
+            modal_confirm: 'Disable',
+            modal_cancel: 'Cancel',
         }
     };
 
@@ -137,7 +148,11 @@ export default function MFASettings({ lang }: { lang: string }) {
         }
     };
 
-    const handleDisable = async () => {
+    const handleDisableClick = () => {
+        setConfirmModalOpen(true);
+    };
+
+    const confirmDisable = async () => {
         const { data: factors } = await supabase.auth.mfa.listFactors();
         const totpFactor = factors?.all?.find(f => f.factor_type === 'totp' && f.status === 'verified');
 
@@ -145,6 +160,7 @@ export default function MFASettings({ lang }: { lang: string }) {
             await supabase.auth.mfa.unenroll({ factorId: totpFactor.id });
             setEnabled(false);
         }
+        setConfirmModalOpen(false);
     };
 
     return (
@@ -171,7 +187,7 @@ export default function MFASettings({ lang }: { lang: string }) {
                 )}
                 {enabled && (
                     <button
-                        onClick={handleDisable}
+                        onClick={handleDisableClick}
                         className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
                     >
                         {text.disable}
@@ -241,6 +257,17 @@ export default function MFASettings({ lang }: { lang: string }) {
                     {text.success}
                 </div>
             )}
+
+            <ConfirmModal
+                isOpen={confirmModalOpen}
+                onClose={() => setConfirmModalOpen(false)}
+                onConfirm={confirmDisable}
+                title={text.modal_title}
+                message={text.modal_message}
+                confirmText={text.modal_confirm}
+                cancelText={text.modal_cancel}
+                isDestructive={true}
+            />
         </div>
     );
 }

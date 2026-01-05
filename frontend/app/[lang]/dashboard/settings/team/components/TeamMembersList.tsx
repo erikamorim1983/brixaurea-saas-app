@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import InviteMemberModal from './InviteMemberModal';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 interface TeamMembersListProps {
     lang: string;
@@ -14,6 +15,11 @@ export default function TeamMembersList({ lang, user, maxUsers }: TeamMembersLis
     const [members, setMembers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isInviteOpen, setIsInviteOpen] = useState(false);
+
+    // Modal State
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [memberToDelete, setMemberToDelete] = useState<string | null>(null);
+
     const supabase = createClient();
 
     const fetchMembers = async () => {
@@ -42,19 +48,26 @@ export default function TeamMembersList({ lang, user, maxUsers }: TeamMembersLis
         fetchMembers();
     }, [user.id]);
 
-    const handleRemove = async (memberId: string) => {
-        if (!confirm('Are you sure you want to remove this member?')) return;
+    const handleRemoveClick = (memberId: string) => {
+        setMemberToDelete(memberId);
+        setDeleteModalOpen(true);
+    };
+
+    const confirmRemove = async () => {
+        if (!memberToDelete) return;
 
         const { error } = await supabase
             .from('organization_members')
             .delete()
-            .eq('id', memberId);
+            .eq('id', memberToDelete);
 
         if (!error) {
             fetchMembers();
         } else {
-            alert('Error removing member');
+            alert(lang === 'pt' ? 'Erro ao remover membro' : 'Error removing member');
         }
+        setDeleteModalOpen(false);
+        setMemberToDelete(null);
     };
 
     const currentCount = members.length + 1; // +1 for owner
@@ -175,7 +188,7 @@ export default function TeamMembersList({ lang, user, maxUsers }: TeamMembersLis
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <button
-                                                onClick={() => handleRemove(member.id)}
+                                                onClick={() => handleRemoveClick(member.id)}
                                                 className="text-red-500 hover:text-red-700 text-sm font-medium"
                                             >
                                                 {lang === 'pt' ? 'Remover' : 'Remove'}
@@ -194,6 +207,17 @@ export default function TeamMembersList({ lang, user, maxUsers }: TeamMembersLis
                 onClose={() => setIsInviteOpen(false)}
                 lang={lang}
                 onSuccess={fetchMembers}
+            />
+
+            <ConfirmModal
+                isOpen={deleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                onConfirm={confirmRemove}
+                title="BrixAurea"
+                message={lang === 'pt' ? 'Tem certeza que deseja remover este membro?' : 'Are you sure you want to remove this member?'}
+                confirmText={lang === 'pt' ? 'Remover' : 'Remove'}
+                cancelText={lang === 'pt' ? 'Cancelar' : 'Cancel'}
+                isDestructive={true}
             />
         </div>
     );

@@ -24,7 +24,7 @@ if (!process.env.DATABASE_URL) {
     process.exit(1);
 }
 
-const migrationPath = path.resolve(__dirname, '../../backend/sql_modules/ADD_SELLER_SPLITS.sql');
+const migrationPath = path.resolve(__dirname, '../../backend/sql_modules/23_add_unit_variations.sql');
 
 if (!fs.existsSync(migrationPath)) {
     console.error("❌ Migration file not found:", migrationPath);
@@ -34,7 +34,7 @@ if (!fs.existsSync(migrationPath)) {
 const sql = fs.readFileSync(migrationPath, 'utf8');
 
 async function runMigration() {
-    console.log("🚀 Starting Migration: ADD_LISTING_LINK.sql");
+    console.log("🚀 Starting Migration: 23_add_unit_variations.sql");
     console.log("Using DATABASE_URL from .env.local");
 
     const client = new Client({

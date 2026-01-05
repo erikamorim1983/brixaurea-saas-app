@@ -3,6 +3,8 @@
 import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect, useCallback } from "react";
 import FloorPlanSelector, { FloorPlan } from "../FloorPlan/FloorPlanSelector";
+import ConfirmModal from "../ui/ConfirmModal";
+import UnitMixScenarios from "./UnitMixScenarios";
 
 interface UnitMixTabProps {
     project: any;
@@ -22,9 +24,15 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
     const supabase = createClient();
     const [loading, setLoading] = useState(true);
     const [scenarios, setScenarios] = useState<Scenario[]>([]);
-    const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
     const [baseScenarioId, setBaseScenarioId] = useState<string | null>(null);
     const [units, setUnits] = useState<any[]>([]); // Always stores BASE units
+
+    // View State
+    const [viewMode, setViewMode] = useState<'editor' | 'scenarios'>('editor');
+
+    // Modal State
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [unitToDelete, setUnitToDelete] = useState<string | null>(null);
 
     // Form Input State
     const [newItem, setNewItem] = useState({
@@ -99,15 +107,13 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
 
             if (baseId) {
                 setBaseScenarioId(baseId);
-                // Default active to Base if not set
-                if (!activeScenarioId) setActiveScenarioId(baseId);
                 // ALWAYS fetch units from Base
                 fetchUnits(baseId);
             }
         } catch (err) {
             console.error('Error initializing scenarios:', err);
         }
-    }, [project.id, supabase, activeScenarioId]);
+    }, [project.id, supabase]);
 
     // 2. Fetch Units (Always from Base)
     const fetchUnits = async (baseId: string) => {
@@ -183,10 +189,19 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
         }
     };
 
-    // 5. Delete Unit
-    const handleDelete = async (id: string) => {
-        await supabase.from('units_mix').delete().eq('id', id);
+    // 5. Delete Unit Logic
+    const confirmDelete = (id: string) => {
+        setUnitToDelete(id);
+        setDeleteModalOpen(true);
+    };
+
+    const handleDelete = async () => {
+        if (!unitToDelete) return;
+
+        await supabase.from('units_mix').delete().eq('id', unitToDelete);
+
         if (baseScenarioId) fetchUnits(baseScenarioId);
+        setUnitToDelete(null);
     };
 
     // 6. Update Unit
@@ -213,6 +228,38 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
         }
     };
 
+    // 7. Batch Save Unit Variations
+    const handleSaveVariations = async (updates: any[]) => {
+        // Optimistic update locally
+        setUnits(prev => {
+            const newUnits = [...prev];
+            updates.forEach(up => {
+                const idx = newUnits.findIndex(u => u.id === up.id);
+                if (idx !== -1) {
+                    newUnits[idx] = {
+                        ...newUnits[idx],
+                        optimistic_variation: up.optimistic_variation,
+                        pessimistic_variation: up.pessimistic_variation
+                    };
+                }
+            });
+            return newUnits;
+        });
+
+        // Batch update to Supabase
+        const promises = updates.map(up =>
+            supabase
+                .from('units_mix')
+                .update({
+                    optimistic_variation: up.optimistic_variation,
+                    pessimistic_variation: up.pessimistic_variation
+                })
+                .eq('id', up.id)
+        );
+
+        await Promise.all(promises);
+    };
+
     if (loading) return <div className="p-8 text-center text-gray-400">Loading...</div>;
 
     const InputClass = "bg-transparent outline-none w-full border-b border-transparent focus:border-cyan-500 text-center";
@@ -220,20 +267,12 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
     const CellClass = "px-2 py-3 text-center text-sm";
 
     // --- Calculation Helper ---
-    const activeScenario = scenarios.find(s => s.id === activeScenarioId);
-    const variation = activeScenario?.variation_percent || 0;
-    const isBase = activeScenario?.key === 'base';
+    // Editor is ALWAYS Base Case (multiplier 1)
+    const multiplier = 1;
 
-    const multiplier = 1 + (variation / 100);
-
-    const calcPrice = (unitPrice: number) => unitPrice * multiplier;
-    // Price Sqft is typically calculated on Sellable Area (Under Air)
-    const calcPriceSqft = (priceSqft: number) => priceSqft * multiplier;
-
-    // Totals logic with current multiplier applied
-    // IMPROVEMENT: Include newItem in totals if it has valid data to give live feedback
+    // Totals logic 
     const unitsToSum = [...units];
-    const hasValidNewItem = isBase && newItem.model_name && newItem.unit_count > 0 && (newItem.avg_price > 0 || (newItem.price_sqft > 0 && newItem.area_sqft > 0));
+    const hasValidNewItem = viewMode === 'editor' && newItem.model_name && newItem.unit_count > 0 && (newItem.avg_price > 0 || (newItem.price_sqft > 0 && newItem.area_sqft > 0));
 
     if (hasValidNewItem) {
         const pendingAvgPrice = newItem.avg_price || (newItem.price_sqft * newItem.area_sqft);
@@ -244,362 +283,363 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
         });
     }
 
-    const totalRevenue = unitsToSum.reduce((acc, u) => acc + (u.unit_count * calcPrice(u.avg_price)), 0);
+    const totalRevenue = unitsToSum.reduce((acc, u) => acc + (u.unit_count * u.avg_price), 0);
     const totalAreaSellable = unitsToSum.reduce((acc, u) => acc + (u.unit_count * (u.area_sqft || 0)), 0);
     const totalUnits = unitsToSum.reduce((acc, u) => acc + u.unit_count, 0);
     const avgPriceSqft = totalAreaSellable > 0 ? totalRevenue / totalAreaSellable : 0;
 
     return (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm animate-fadeIn">
+        <div className="space-y-6">
 
-            {/* Scenarios Tabs */}
-            <div className="border-b border-gray-100 px-6 pt-4 flex space-x-6 items-end">
-                {scenarios.map(s => {
-                    const isActive = activeScenarioId === s.id;
-                    const isBaseTab = s.key === 'base';
-
-                    return (
-                        <div key={s.id} className={`flex items-center gap-2 pb-3 border-b-2 transition-colors ${isActive ? 'border-cyan-500' : 'border-transparent'}`}>
-                            <button
-                                onClick={() => setActiveScenarioId(s.id)}
-                                className={`text-sm font-medium ${isActive ? 'text-cyan-700' : 'text-gray-400 hover:text-gray-600'}`}
-                            >
-                                {s.name}
-                            </button>
-
-                            {/* Percentage Input (Hidden for Base) */}
-                            {isActive && !isBaseTab && (
-                                <div className="flex items-center bg-gray-100 rounded px-2 py-0.5 text-xs">
-                                    <input
-                                        type="number"
-                                        value={s.variation_percent}
-                                        onChange={(e) => updateVariation(s.id, parseFloat(e.target.value) || 0)}
-                                        className="w-10 bg-transparent text-right outline-none font-bold text-gray-700"
-                                    />
-                                    <span className="text-gray-500 ml-0.5">%</span>
-                                </div>
-                            )}
-                            {/* Display Percentage for inactive non-base tabs */}
-                            {!isActive && !isBaseTab && (
-                                <span className="text-xs text-gray-300">({s.variation_percent}%)</span>
-                            )}
-                        </div>
-                    )
-                })}
+            {/* Main Tabs (View Switcher) */}
+            <div className="flex items-center gap-6 border-b border-gray-200">
+                <button
+                    onClick={() => setViewMode('editor')}
+                    className={`pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${viewMode === 'editor'
+                        ? 'border-cyan-500 text-cyan-700'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                        }`}
+                >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    {dict.scenarios?.base || 'Base Case (Editor)'}
+                </button>
+                <button
+                    onClick={() => setViewMode('scenarios')}
+                    className={`pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${viewMode === 'scenarios'
+                        ? 'border-cyan-500 text-cyan-700'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                        }`}
+                >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                    {lang === 'pt' ? 'Cenários e Comparativos' : 'Scenarios & Comparison'}
+                </button>
             </div>
 
-            {/* Header */}
-            <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h3 className="text-xl font-bold text-gray-900">{dict.title}</h3>
-                    <p className="text-sm text-gray-500">{dict.subtitle}</p>
-                    {!isBase && (
-                        <div className="mt-2 text-xs bg-cyan-50 text-cyan-800 px-2 py-1 rounded inline-block">
-                            {dict.variation_notice || 'Values adjusted by'} <strong>{variation > 0 ? '+' : ''}{variation}%</strong> {dict.from_base || 'from Base Case'}.
+            {/* View Content */}
+            {viewMode === 'scenarios' ? (
+                <UnitMixScenarios
+                    units={units}
+                    scenarios={scenarios}
+                    onUpdateScenario={updateVariation}
+                    onSaveVariations={handleSaveVariations}
+                    lang={lang}
+                    dict={dict}
+                />
+            ) : (
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm animate-fadeIn">
+
+                    {/* Header */}
+                    <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-900">{dict.title}</h3>
+                            <p className="text-sm text-gray-500">{dict.subtitle}</p>
                         </div>
-                    )}
-                </div>
-                <div className="flex gap-6 text-right">
-                    <div>
-                        <p className="text-xs text-gray-400 uppercase font-semibold">{dict.summary.total_units}</p>
-                        <p className="text-lg font-bold text-gray-700">{totalUnits}</p>
+                        <div className="flex gap-6 text-right">
+                            <div>
+                                <p className="text-xs text-gray-400 uppercase font-semibold">{dict.summary.total_units}</p>
+                                <p className="text-lg font-bold text-gray-700">{totalUnits}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-400 uppercase font-semibold">{dict.summary.gross_revenue}</p>
+                                <p className="text-2xl font-bold text-cyan-600">
+                                    ${totalRevenue.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-xs text-gray-400 uppercase font-semibold">{dict.summary.gross_revenue}</p>
-                        <p className="text-2xl font-bold text-cyan-600">
-                            ${totalRevenue.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                        </p>
-                    </div>
-                </div>
-            </div>
 
-            {/* Table */}
-            <div className="overflow-x-auto">
-                <table className="w-full text-left text-gray-600">
-                    <thead className="bg-gray-50 text-gray-700 uppercase">
-                        <tr>
-                            <th className="px-4 py-3 text-left text-xs font-semibold tracking-wider">{dict.table.model}</th>
-                            <th className={HeaderClass}>{dict.table.beds}</th>
-                            <th className={HeaderClass}>{dict.table.baths}</th>
-                            <th className={HeaderClass}>{lang === 'pt' ? 'Lav.' : 'Half'}</th>
+                    {/* Table */}
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left text-gray-600">
+                            <thead className="bg-gray-50 text-gray-700 uppercase">
+                                <tr>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold tracking-wider">{dict.table.model}</th>
+                                    <th className={HeaderClass}>{dict.table.beds}</th>
+                                    <th className={HeaderClass}>{dict.table.baths}</th>
+                                    <th className={HeaderClass}>{lang === 'pt' ? 'Lav.' : 'Half'}</th>
 
-                            {/* THREE COLUMNS requested */}
-                            <th className={HeaderClass}>{dict.table.area_sellable}</th>
-                            <th className={HeaderClass}>{dict.table.area_outdoor}</th>
-                            <th className={HeaderClass}>{dict.table.area_total}</th>
+                                    {/* THREE COLUMNS requested */}
+                                    <th className={HeaderClass}>{dict.table.area_sellable}</th>
+                                    <th className={HeaderClass}>{dict.table.area_outdoor}</th>
+                                    <th className={HeaderClass}>{dict.table.area_total}</th>
 
-                            <th className={HeaderClass}>{dict.table.count}</th>
-                            <th className={HeaderClass}>{dict.table.price_sqft}</th>
-                            <th className={HeaderClass}>{dict.table.avg_price}</th>
-                            <th className={HeaderClass}>{dict.table.total_vgv}</th>
-                            <th className="px-4 py-3"></th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                        {/* Input Row - ONLY show for Base Case */}
-                        {isBase && (
-                            <tr className="bg-cyan-50/30 hover:bg-cyan-50/50 transition-colors">
-                                <td className="px-4 py-2">
-                                    <div className="flex flex-col gap-1">
-                                        <div className="flex items-center justify-between">
-                                            <label className="text-[10px] text-gray-400 font-bold uppercase">{dict.table.model}</label>
-                                            <FloorPlanSelector
-                                                lang={lang}
-                                                userId={project.user_id}
-                                                onSelect={(plan: FloorPlan) => {
-                                                    setNewItem({
-                                                        ...newItem,
-                                                        model_name: plan.plan_name,
-                                                        area_sqft: plan.living_area_sqft || plan.area_sqft || 0,
-                                                        area_outdoor: (plan.entry_area_sqft || 0) + (plan.lanai_area_sqft || 0) || plan.area_outdoor || 0,
-                                                        area_total: plan.total_const_area_sqft || plan.area_total || 0,
-                                                        bedrooms: plan.bedrooms || 0,
-                                                        bathrooms: plan.bathrooms || 0,
-                                                        half_baths: plan.half_baths || 0,
-                                                        suites: plan.suites || 0,
-                                                        garages: plan.garages || 0,
-                                                        price_sqft: plan.standard_price_sqft || 0,
-                                                        avg_price: (plan.standard_price_sqft || 0) * (plan.living_area_sqft || plan.area_sqft || 0)
-                                                    });
-                                                }}
+                                    <th className={HeaderClass}>{dict.table.count}</th>
+                                    <th className={HeaderClass}>{dict.table.price_sqft}</th>
+                                    <th className={HeaderClass}>{dict.table.avg_price}</th>
+                                    <th className={HeaderClass}>{dict.table.total_vgv}</th>
+                                    <th className="px-4 py-3"></th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {/* Input Row - Always visible in Editor mode */}
+                                <tr className="bg-cyan-50/30 hover:bg-cyan-50/50 transition-colors">
+                                    <td className="px-4 py-2">
+                                        <div className="flex flex-col gap-1">
+                                            <div className="flex items-center justify-between">
+                                                <label className="text-[10px] text-gray-400 font-bold uppercase">{dict.table.model}</label>
+                                                <FloorPlanSelector
+                                                    lang={lang}
+                                                    userId={project.user_id}
+                                                    onSelect={(plan: FloorPlan) => {
+                                                        setNewItem({
+                                                            ...newItem,
+                                                            model_name: plan.plan_name,
+                                                            area_sqft: plan.living_area_sqft || plan.area_sqft || 0,
+                                                            area_outdoor: (plan.entry_area_sqft || 0) + (plan.lanai_area_sqft || 0) || plan.area_outdoor || 0,
+                                                            area_total: plan.total_const_area_sqft || plan.area_total || 0,
+                                                            bedrooms: plan.bedrooms || 0,
+                                                            bathrooms: plan.bathrooms || 0,
+                                                            half_baths: plan.half_baths || 0,
+                                                            suites: plan.suites || 0,
+                                                            garages: plan.garages || 0,
+                                                            price_sqft: plan.standard_price_sqft || 0,
+                                                            avg_price: (plan.standard_price_sqft || 0) * (plan.living_area_sqft || plan.area_sqft || 0)
+                                                        });
+                                                    }}
+                                                />
+                                            </div>
+                                            <input
+                                                type="text"
+                                                placeholder="Ex: Premium A"
+                                                className="bg-transparent outline-none w-full border-b border-transparent focus:border-cyan-500 font-medium"
+                                                value={newItem.model_name}
+                                                onChange={e => setNewItem({ ...newItem, model_name: e.target.value })}
                                             />
                                         </div>
+                                    </td>
+                                    <td className="px-2 py-2">
                                         <input
-                                            type="text"
-                                            placeholder="Ex: Premium A"
-                                            className="bg-transparent outline-none w-full border-b border-transparent focus:border-cyan-500 font-medium"
-                                            value={newItem.model_name}
-                                            onChange={e => setNewItem({ ...newItem, model_name: e.target.value })}
+                                            type="number"
+                                            className={InputClass}
+                                            value={newItem.bedrooms || ''}
+                                            placeholder="0"
+                                            onChange={e => setNewItem({ ...newItem, bedrooms: parseFloat(e.target.value) || 0 })}
                                         />
-                                    </div>
-                                </td>
-                                <td className="px-2 py-2">
-                                    <input
-                                        type="number"
-                                        className={InputClass}
-                                        value={newItem.bedrooms || ''}
-                                        placeholder="0"
-                                        onChange={e => setNewItem({ ...newItem, bedrooms: parseFloat(e.target.value) || 0 })}
-                                    />
-                                </td>
-                                <td className="px-2 py-2">
-                                    <input
-                                        type="number"
-                                        className={InputClass}
-                                        value={newItem.bathrooms || ''}
-                                        placeholder="0"
-                                        onChange={e => setNewItem({ ...newItem, bathrooms: parseFloat(e.target.value) || 0 })}
-                                    />
-                                </td>
-                                <td className="px-2 py-2">
-                                    <input
-                                        type="number"
-                                        className={InputClass}
-                                        value={newItem.half_baths || ''}
-                                        placeholder="0"
-                                        onChange={e => setNewItem({ ...newItem, half_baths: parseFloat(e.target.value) || 0 })}
-                                    />
-                                </td>
-
-                                {/* Area Under Air */}
-                                <td className="px-2 py-2">
-                                    <input
-                                        type="number"
-                                        className={InputClass}
-                                        value={newItem.area_sqft || ''}
-                                        placeholder="0"
-                                        onChange={e => setNewItem({ ...newItem, area_sqft: parseFloat(e.target.value) || 0 })}
-                                    />
-                                </td>
-
-                                {/* Area Outdoor (Non-Conditioned) */}
-                                <td className="px-2 py-2">
-                                    <input
-                                        type="number"
-                                        className={InputClass}
-                                        value={newItem.area_outdoor || ''}
-                                        placeholder="0"
-                                        onChange={e => setNewItem({ ...newItem, area_outdoor: parseFloat(e.target.value) || 0 })}
-                                    />
-                                </td>
-
-                                {/* Total Area (Auto-Calc Display) */}
-                                <td className="px-2 py-2 text-center text-gray-500 font-medium">
-                                    {((newItem.area_sqft || 0) + (newItem.area_outdoor || 0)).toLocaleString()}
-                                </td>
-
-                                <td className="px-2 py-2">
-                                    <input
-                                        type="number"
-                                        className={InputClass}
-                                        value={newItem.unit_count}
-                                        onChange={e => setNewItem({ ...newItem, unit_count: parseFloat(e.target.value) || 1 })}
-                                    />
-                                </td>
-                                <td className="px-2 py-2 relative">
-                                    <input
-                                        type="number"
-                                        className={InputClass}
-                                        value={newItem.price_sqft || ''}
-                                        placeholder="0"
-                                        onChange={e => {
-                                            const p = parseFloat(e.target.value) || 0;
-                                            setNewItem({
-                                                ...newItem,
-                                                price_sqft: p,
-                                                // Auto-calc avg price if area exists
-                                                avg_price: p * (newItem.area_sqft || 0)
-                                            })
-                                        }}
-                                    />
-                                </td>
-                                <td className="px-2 py-2">
-                                    <input
-                                        type="number"
-                                        className={InputClass}
-                                        value={newItem.avg_price || ''}
-                                        placeholder="0"
-                                        onChange={e => setNewItem({ ...newItem, avg_price: parseFloat(e.target.value) || 0 })}
-                                    />
-                                </td>
-                                <td className="px-2 py-2 text-center font-bold text-cyan-700">
-                                    ${(newItem.unit_count * newItem.avg_price).toLocaleString()}
-                                </td>
-                                <td className="px-4 py-2 text-right">
-                                    <button
-                                        onClick={handleAddUnit}
-                                        className="bg-cyan-600 text-white px-4 py-1.5 rounded-lg flex items-center gap-2 hover:bg-cyan-700 transition-all shadow-sm font-bold text-xs"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-                                        {lang === 'pt' ? 'Gravar' : 'Save'}
-                                    </button>
-                                </td>
-                            </tr>
-                        )}
-
-                        {/* Existing Units */}
-                        {units.map((unit) => {
-                            const isEditing = editingId === unit.id;
-                            const item = isEditing ? editItem : unit;
-
-                            // Apply multiplier derived from active scenario (not for editing inputs, typically)
-                            const displayAvgPrice = isEditing ? item.avg_price : calcPrice(unit.avg_price);
-                            const displayPriceSqft = item.area_sqft > 0 ? (displayAvgPrice / item.area_sqft) : 0;
-                            const displayTotalArea = (item.area_sqft || 0) + (item.area_outdoor || 0);
-
-                            if (isEditing) {
-                                return (
-                                    <tr key={unit.id} className="bg-amber-50/50">
-                                        <td className="px-4 py-2">
-                                            <input type="text" className={InputClass} value={editItem.model_name} onChange={e => setEditItem({ ...editItem, model_name: e.target.value })} />
-                                        </td>
-                                        <td className="px-2 py-2">
-                                            <input type="number" className={InputClass} value={editItem.bedrooms} onChange={e => setEditItem({ ...editItem, bedrooms: parseFloat(e.target.value) })} />
-                                        </td>
-                                        <td className="px-2 py-2">
-                                            <input type="number" className={InputClass} value={editItem.bathrooms} onChange={e => setEditItem({ ...editItem, bathrooms: parseFloat(e.target.value) || 0 })} />
-                                        </td>
-                                        <td className="px-2 py-2">
-                                            <input type="number" className={InputClass} value={editItem.half_baths || 0} onChange={e => setEditItem({ ...editItem, half_baths: parseFloat(e.target.value) || 0 })} />
-                                        </td>
-                                        <td className="px-2 py-2">
-                                            <input type="number" className={InputClass} value={editItem.area_sqft} onChange={e => setEditItem({ ...editItem, area_sqft: parseFloat(e.target.value), avg_price: (editItem.price_sqft || 0) * parseFloat(e.target.value) })} />
-                                        </td>
-                                        <td className="px-2 py-2">
-                                            <input type="number" className={InputClass} value={editItem.area_outdoor} onChange={e => setEditItem({ ...editItem, area_outdoor: parseFloat(e.target.value) })} />
-                                        </td>
-                                        <td className="px-2 py-2 text-center text-gray-500">{displayTotalArea}</td>
-                                        <td className="px-2 py-2">
-                                            <input type="number" className={InputClass} value={editItem.unit_count} onChange={e => setEditItem({ ...editItem, unit_count: parseFloat(e.target.value) })} />
-                                        </td>
-                                        <td className="px-2 py-2">
-                                            <input type="number" className={InputClass} value={editItem.price_sqft} onChange={e => setEditItem({ ...editItem, price_sqft: parseFloat(e.target.value), avg_price: parseFloat(e.target.value) * (editItem.area_sqft || 0) })} />
-                                        </td>
-                                        <td className="px-2 py-2">
-                                            <input type="number" className={InputClass} value={editItem.avg_price} onChange={e => setEditItem({ ...editItem, avg_price: parseFloat(e.target.value) })} />
-                                        </td>
-                                        <td className="px-2 py-2 text-center font-bold text-amber-700">${(editItem.unit_count * editItem.avg_price).toLocaleString()}</td>
-                                        <td className="px-4 py-2 flex gap-2 justify-end">
-                                            <button onClick={handleUpdateUnit} className="text-green-600 font-bold text-xs uppercase">OK</button>
-                                            <button onClick={() => setEditingId(null)} className="text-gray-400 font-bold text-xs uppercase">X</button>
-                                        </td>
-                                    </tr>
-                                );
-                            }
-
-                            return (
-                                <tr key={unit.id} className="hover:bg-gray-50 transition-colors group">
-                                    <td className="px-4 py-3 font-medium text-gray-900">{unit.model_name}</td>
-                                    <td className={CellClass}>{unit.bedrooms}</td>
-                                    <td className={CellClass}>{unit.bathrooms}</td>
-                                    <td className={CellClass}>{unit.half_baths || 0}</td>
-
-                                    <td className={CellClass}>{unit.area_sqft?.toLocaleString()}</td>
-                                    <td className={CellClass}>{unit.area_outdoor?.toLocaleString() || '0'}</td>
-                                    <td className={CellClass}>{displayTotalArea.toLocaleString()}</td>
-
-                                    <td className={CellClass}>{unit.unit_count}</td>
-                                    <td className={`${CellClass} ${!isBase ? 'text-cyan-600 font-medium' : ''}`}>
-                                        ${displayPriceSqft.toFixed(0)}
                                     </td>
-                                    <td className={`${CellClass} ${!isBase ? 'text-cyan-600 font-medium' : ''}`}>
-                                        ${displayAvgPrice.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                    <td className="px-2 py-2">
+                                        <input
+                                            type="number"
+                                            className={InputClass}
+                                            value={newItem.bathrooms || ''}
+                                            placeholder="0"
+                                            onChange={e => setNewItem({ ...newItem, bathrooms: parseFloat(e.target.value) || 0 })}
+                                        />
                                     </td>
-                                    <td className="px-2 py-3 text-center font-semibold text-gray-900">
-                                        ${(unit.unit_count * displayAvgPrice).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                    <td className="px-2 py-2">
+                                        <input
+                                            type="number"
+                                            className={InputClass}
+                                            value={newItem.half_baths || ''}
+                                            placeholder="0"
+                                            onChange={e => setNewItem({ ...newItem, half_baths: parseFloat(e.target.value) || 0 })}
+                                        />
                                     </td>
-                                    <td className="px-4 py-3 text-right">
-                                        {isBase && (
-                                            <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button
-                                                    onClick={() => {
-                                                        setEditingId(unit.id);
-                                                        setEditItem({ ...unit });
-                                                    }}
-                                                    className="text-cyan-600 hover:text-cyan-800 text-xs font-bold uppercase transition-colors"
-                                                >
-                                                    {lang === 'pt' ? 'Editar' : 'Edit'}
-                                                </button>
-                                                <button
-                                                    onClick={() => {
-                                                        if (confirm(lang === 'pt' ? 'Excluir esta unidade?' : 'Delete this unit?')) {
-                                                            handleDelete(unit.id);
-                                                        }
-                                                    }}
-                                                    className="text-gray-300 hover:text-red-500 transition-colors"
-                                                >
-                                                    &times;
-                                                </button>
-                                            </div>
-                                        )}
+
+                                    {/* Area Under Air */}
+                                    <td className="px-2 py-2">
+                                        <input
+                                            type="number"
+                                            className={InputClass}
+                                            value={newItem.area_sqft || ''}
+                                            placeholder="0"
+                                            onChange={e => setNewItem({ ...newItem, area_sqft: parseFloat(e.target.value) || 0 })}
+                                        />
+                                    </td>
+
+                                    {/* Area Outdoor (Non-Conditioned) */}
+                                    <td className="px-2 py-2">
+                                        <input
+                                            type="number"
+                                            className={InputClass}
+                                            value={newItem.area_outdoor || ''}
+                                            placeholder="0"
+                                            onChange={e => setNewItem({ ...newItem, area_outdoor: parseFloat(e.target.value) || 0 })}
+                                        />
+                                    </td>
+
+                                    {/* Total Area (Auto-Calc Display) */}
+                                    <td className="px-2 py-2 text-center text-gray-500 font-medium">
+                                        {((newItem.area_sqft || 0) + (newItem.area_outdoor || 0)).toLocaleString()}
+                                    </td>
+
+                                    <td className="px-2 py-2">
+                                        <input
+                                            type="number"
+                                            className={InputClass}
+                                            value={newItem.unit_count}
+                                            onChange={e => setNewItem({ ...newItem, unit_count: parseFloat(e.target.value) || 1 })}
+                                        />
+                                    </td>
+                                    <td className="px-2 py-2 relative">
+                                        <input
+                                            type="number"
+                                            className={InputClass}
+                                            value={newItem.price_sqft || ''}
+                                            placeholder="0"
+                                            onChange={e => {
+                                                const p = parseFloat(e.target.value) || 0;
+                                                setNewItem({
+                                                    ...newItem,
+                                                    price_sqft: p,
+                                                    // Auto-calc avg price if area exists
+                                                    avg_price: p * (newItem.area_sqft || 0)
+                                                })
+                                            }}
+                                        />
+                                    </td>
+                                    <td className="px-2 py-2">
+                                        <input
+                                            type="number"
+                                            className={InputClass}
+                                            value={newItem.avg_price || ''}
+                                            placeholder="0"
+                                            onChange={e => setNewItem({ ...newItem, avg_price: parseFloat(e.target.value) || 0 })}
+                                        />
+                                    </td>
+                                    <td className="px-2 py-2 text-center font-bold text-cyan-700">
+                                        ${(newItem.unit_count * newItem.avg_price).toLocaleString()}
+                                    </td>
+                                    <td className="px-4 py-2 text-right">
+                                        <button
+                                            onClick={handleAddUnit}
+                                            className="bg-cyan-600 text-white px-4 py-1.5 rounded-lg flex items-center gap-2 hover:bg-cyan-700 transition-all shadow-sm font-bold text-xs"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
+                                            {lang === 'pt' ? 'Gravar' : 'Save'}
+                                        </button>
                                     </td>
                                 </tr>
-                            );
-                        })}
-                    </tbody>
-                    <tfoot className="bg-gray-50 font-bold text-gray-800 border-t-2 border-gray-100">
-                        <tr>
-                            <td colSpan={4} className="px-4 py-4 text-right text-gray-400 font-bold uppercase tracking-wider text-[10px]">Totals / Avg:</td>
-                            <td className={CellClass}>{totalAreaSellable.toLocaleString()}</td>
-                            <td className={CellClass}>-</td>{/* Outdoor Total - optional sum */}
-                            <td className={CellClass}>-</td>{/* Total Area Total - optional sum */}
 
-                            <td className={CellClass}>{totalUnits}</td>
-                            <td className={CellClass}>${avgPriceSqft.toFixed(0)}</td>
-                            <td className={CellClass}>-</td>
-                            <td className="px-2 py-3 text-center text-cyan-700 font-extrabold text-base">
-                                ${totalRevenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                            </td>
-                            <td></td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
+                                {/* Existing Units */}
+                                {units.map((unit) => {
+                                    const isEditing = editingId === unit.id;
+                                    const item = isEditing ? editItem : unit;
 
-            <div className="p-4 bg-gray-50 rounded-b-xl border-t border-gray-100 flex justify-between text-xs text-gray-500">
-                <span>* {dict.table.area_sellable} used for Revenue calculation.</span>
-                <span>{dict.summary.total_area}: <strong>{totalAreaSellable.toLocaleString()} sqft</strong></span>
-            </div>
+                                    // Base Case View (No multipliers)
+                                    const displayAvgPrice = item.avg_price;
+                                    const displayPriceSqft = item.area_sqft > 0 ? (displayAvgPrice / item.area_sqft) : 0;
+                                    const displayTotalArea = (item.area_sqft || 0) + (item.area_outdoor || 0);
+
+                                    if (isEditing) {
+                                        return (
+                                            <tr key={unit.id} className="bg-amber-50/50">
+                                                <td className="px-4 py-2">
+                                                    <input type="text" className={InputClass} value={editItem.model_name} onChange={e => setEditItem({ ...editItem, model_name: e.target.value })} />
+                                                </td>
+                                                <td className="px-2 py-2">
+                                                    <input type="number" className={InputClass} value={editItem.bedrooms} onChange={e => setEditItem({ ...editItem, bedrooms: parseFloat(e.target.value) })} />
+                                                </td>
+                                                <td className="px-2 py-2">
+                                                    <input type="number" className={InputClass} value={editItem.bathrooms} onChange={e => setEditItem({ ...editItem, bathrooms: parseFloat(e.target.value) || 0 })} />
+                                                </td>
+                                                <td className="px-2 py-2">
+                                                    <input type="number" className={InputClass} value={editItem.half_baths || 0} onChange={e => setEditItem({ ...editItem, half_baths: parseFloat(e.target.value) || 0 })} />
+                                                </td>
+                                                <td className="px-2 py-2">
+                                                    <input type="number" className={InputClass} value={editItem.area_sqft} onChange={e => setEditItem({ ...editItem, area_sqft: parseFloat(e.target.value), avg_price: (editItem.price_sqft || 0) * parseFloat(e.target.value) })} />
+                                                </td>
+                                                <td className="px-2 py-2">
+                                                    <input type="number" className={InputClass} value={editItem.area_outdoor} onChange={e => setEditItem({ ...editItem, area_outdoor: parseFloat(e.target.value) })} />
+                                                </td>
+                                                <td className="px-2 py-2 text-center text-gray-500">{displayTotalArea}</td>
+                                                <td className="px-2 py-2">
+                                                    <input type="number" className={InputClass} value={editItem.unit_count} onChange={e => setEditItem({ ...editItem, unit_count: parseFloat(e.target.value) })} />
+                                                </td>
+                                                <td className="px-2 py-2">
+                                                    <input type="number" className={InputClass} value={editItem.price_sqft} onChange={e => setEditItem({ ...editItem, price_sqft: parseFloat(e.target.value), avg_price: parseFloat(e.target.value) * (editItem.area_sqft || 0) })} />
+                                                </td>
+                                                <td className="px-2 py-2">
+                                                    <input type="number" className={InputClass} value={editItem.avg_price} onChange={e => setEditItem({ ...editItem, avg_price: parseFloat(e.target.value) })} />
+                                                </td>
+                                                <td className="px-2 py-2 text-center font-bold text-amber-700">${(editItem.unit_count * editItem.avg_price).toLocaleString()}</td>
+                                                <td className="px-4 py-2 flex gap-2 justify-end">
+                                                    <button onClick={handleUpdateUnit} className="text-green-600 font-bold text-xs uppercase">OK</button>
+                                                    <button onClick={() => setEditingId(null)} className="text-gray-400 font-bold text-xs uppercase">X</button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    }
+
+                                    return (
+                                        <tr key={unit.id} className="hover:bg-gray-50 transition-colors group">
+                                            <td className="px-4 py-3 font-medium text-gray-900">{unit.model_name}</td>
+                                            <td className={CellClass}>{unit.bedrooms}</td>
+                                            <td className={CellClass}>{unit.bathrooms}</td>
+                                            <td className={CellClass}>{unit.half_baths || 0}</td>
+
+                                            <td className={CellClass}>{unit.area_sqft?.toLocaleString()}</td>
+                                            <td className={CellClass}>{unit.area_outdoor?.toLocaleString() || '0'}</td>
+                                            <td className={CellClass}>{displayTotalArea.toLocaleString()}</td>
+
+                                            <td className={CellClass}>{unit.unit_count}</td>
+                                            <td className={CellClass}>
+                                                ${displayPriceSqft.toFixed(0)}
+                                            </td>
+                                            <td className={CellClass}>
+                                                ${displayAvgPrice.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                            </td>
+                                            <td className="px-2 py-3 text-center font-semibold text-gray-900">
+                                                ${(unit.unit_count * displayAvgPrice).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                            </td>
+                                            <td className="px-4 py-3 text-right">
+                                                <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingId(unit.id);
+                                                            setEditItem({ ...unit });
+                                                        }}
+                                                        className="text-cyan-600 hover:text-cyan-800 text-xs font-bold uppercase transition-colors"
+                                                    >
+                                                        {lang === 'pt' ? 'Editar' : 'Edit'}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => confirmDelete(unit.id)}
+                                                        className="text-gray-300 hover:text-red-500 transition-colors"
+                                                    >
+                                                        &times;
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                            <tfoot className="bg-gray-50 font-bold text-gray-800 border-t-2 border-gray-100">
+                                <tr>
+                                    <td colSpan={4} className="px-4 py-4 text-right text-gray-400 font-bold uppercase tracking-wider text-[10px]">Totals / Avg:</td>
+                                    <td className={CellClass}>{totalAreaSellable.toLocaleString()}</td>
+                                    <td className={CellClass}>-</td>
+                                    <td className={CellClass}>-</td>
+
+                                    <td className={CellClass}>{totalUnits}</td>
+                                    <td className={CellClass}>${avgPriceSqft.toFixed(0)}</td>
+                                    <td className={CellClass}>-</td>
+                                    <td className="px-2 py-3 text-center text-cyan-700 font-extrabold text-base">
+                                        ${totalRevenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div className="p-4 bg-gray-50 rounded-b-xl border-t border-gray-100 flex justify-between text-xs text-gray-500">
+                        <span>* {dict.table.area_sellable} used for Revenue calculation.</span>
+                        <span>{dict.summary.total_area}: <strong>{totalAreaSellable.toLocaleString()} sqft</strong></span>
+                    </div>
+
+                    <ConfirmModal
+                        isOpen={deleteModalOpen}
+                        onClose={() => setDeleteModalOpen(false)}
+                        onConfirm={handleDelete}
+                        title="BrixAurea"
+                        message={lang === 'pt' ? 'Tem certeza que deseja excluir esta unidade?' : 'Are you sure you want to delete this unit?'}
+                        confirmText={lang === 'pt' ? 'Excluir' : 'Delete'}
+                        cancelText={lang === 'pt' ? 'Cancelar' : 'Cancel'}
+                        isDestructive={true}
+                    />
+                </div>
+            )}
         </div>
     );
 }

@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import {
     checkRateLimit,
@@ -24,14 +25,14 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json();
-        const { email, password } = body;
+        const { email, password, rememberMe } = body;
 
         // 2. Input validation (server-side)
         const sanitizedEmail = sanitizeTextField(email, 254).toLowerCase().trim();
 
         if (!sanitizedEmail || !isValidEmail(sanitizedEmail)) {
             await logLoginFailed(sanitizedEmail, 'invalid_email', request);
-            // Generic error message - don't reveal if email format is wrong
+            // Generic error message
             return NextResponse.json(
                 { message: 'Invalid credentials' },
                 {
@@ -52,7 +53,34 @@ export async function POST(request: Request) {
             );
         }
 
-        const supabase = await createClient();
+        // Custom Supabase Client Initialization for Login
+        // This allows us to handle the 'rememberMe' logic by intercepting cookie setting
+        const cookieStore = await cookies();
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+        const supabase = createServerClient(supabaseUrl, supabaseKey, {
+            cookies: {
+                getAll() {
+                    return cookieStore.getAll();
+                },
+                setAll(cookiesToSet) {
+                    try {
+                        cookiesToSet.forEach(({ name, value, options }) => {
+                            // If Remember Me is FALSE, make it a session cookie (remove expiry)
+                            // Otherwise, keep the default (which is usually persistent for Supabase)
+                            if (!rememberMe) {
+                                delete options.maxAge;
+                                delete options.expires;
+                            }
+                            cookieStore.set(name, value, options);
+                        });
+                    } catch {
+                        // Ignored
+                    }
+                },
+            },
+        });
 
         // 3. Attempt authentication
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -66,7 +94,7 @@ export async function POST(request: Request) {
             await logLoginFailed(sanitizedEmail, error.message, request);
 
             return NextResponse.json(
-                { message: 'Invalid credentials' }, // Generic message for security
+                { message: 'Invalid credentials' }, // Generic message
                 {
                     status: 401,
                     headers: getRateLimitHeaders(rateLimitResult),

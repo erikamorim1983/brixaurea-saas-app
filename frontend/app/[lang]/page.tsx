@@ -39,7 +39,7 @@ export default async function Page({
                     <div className="flex items-center gap-4">
                         <LanguageSwitcher currentLang={lang} />
 
-                        <Link href={`/${lang}/dashboard`} className="px-3 py-1.5 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-md hover:bg-yellow-200 transition-colors border-2 border-yellow-300" title="Dev: Skip to Dashboard">🚀 DEV</Link>
+
 
                         <Link
                             href={`/${lang}/auth/login`}
