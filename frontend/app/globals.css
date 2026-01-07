@@ -268,6 +268,20 @@ html {
   }
 }
 
+@keyframes shimmer {
+  0% {
+    transform: translateX(-150%) skew-X(-45deg);
+  }
+
+  100% {
+    transform: translateX(150%) skew-X(-45deg);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s infinite;
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-out forwards;
 }

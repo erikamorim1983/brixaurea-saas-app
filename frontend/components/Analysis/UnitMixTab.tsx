@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect, useCallback } from "react";
+import { format } from "date-fns";
 import FloorPlanSelector, { FloorPlan } from "../FloorPlan/FloorPlanSelector";
 import ConfirmModal from "../ui/ConfirmModal";
 import UnitMixScenarios from "./UnitMixScenarios";
@@ -47,7 +48,9 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
         bathrooms: 0,
         half_baths: 0,
         suites: 0,
-        garages: 0
+        garages: 0,
+        sale_date: '',
+        construction_start_date: ''
     });
 
     // Editing State
@@ -62,7 +65,7 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
             // Check existing
             const { data: existing } = await supabase
                 .from('financial_scenarios')
-                .select('id, name, variation_percent')
+                .select('id, name, variation_percent, scenario_type')
                 .eq('project_id', project.id)
                 .order('created_at');
 
@@ -75,20 +78,37 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
             const finalScenarios: Scenario[] = [];
 
             for (const k of keys) {
-                let found = existing?.find(e => e.name === k.name);
+                // Try to find by scenario_type first, then fallback to localized name
+                let found = existing?.find(e => e.scenario_type === k.key);
+                if (!found) {
+                    found = existing?.find(e => e.name === k.name);
+                }
+                // Global fallback for "Base Case" if it was created in another language
+                if (!found && k.key === 'base') {
+                    found = existing?.find(e => ['Base Case', 'Caso Base', 'Base Scenario'].includes(e.name));
+                }
+
                 if (!found) {
                     const { data: created } = await supabase
                         .from('financial_scenarios')
                         .insert({
                             project_id: project.id,
                             name: k.name,
+                            scenario_type: k.key,
                             gross_sales_projected: 0,
                             variation_percent: 0
                         })
                         .select()
                         .single();
                     if (created) found = created;
+                } else if (!found.scenario_type) {
+                    // Backfill the type if it was found by name
+                    await supabase
+                        .from('financial_scenarios')
+                        .update({ scenario_type: k.key })
+                        .eq('id', found.id);
                 }
+
                 if (found) {
                     finalScenarios.push({
                         id: found.id,
@@ -113,7 +133,7 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
         } catch (err) {
             console.error('Error initializing scenarios:', err);
         }
-    }, [project.id, supabase]);
+    }, [project.id, supabase, dict]);
 
     // 2. Fetch Units (Always from Base)
     const fetchUnits = async (baseId: string) => {
@@ -163,6 +183,8 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
             .insert({
                 scenario_id: baseScenarioId,
                 ...newItem,
+                sale_date: newItem.sale_date ? (newItem.sale_date.length === 7 ? `${newItem.sale_date}-01` : newItem.sale_date) : null,
+                construction_start_date: newItem.construction_start_date ? (newItem.construction_start_date.length === 7 ? `${newItem.construction_start_date}-01` : newItem.construction_start_date) : null,
                 area_total: finalTotalArea,
                 avg_price: finalAvgPrice
             });
@@ -180,7 +202,9 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                 bathrooms: 0,
                 half_baths: 0,
                 suites: 0,
-                garages: 0
+                garages: 0,
+                sale_date: '',
+                construction_start_date: ''
             });
             fetchUnits(baseScenarioId);
         } else {
@@ -206,14 +230,22 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
 
     // 6. Update Unit
     const handleUpdateUnit = async () => {
-        if (!editingId || !editItem) return;
-
         const finalTotalArea = (editItem.area_sqft || 0) + (editItem.area_outdoor || 0);
+
+        // Destructure to remove fields that shouldn't be updated or cause policy issues
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { id, created_at, scenario_id, ...updatePayload } = editItem as any;
 
         const { error } = await supabase
             .from('units_mix')
             .update({
-                ...editItem,
+                ...updatePayload,
+                sale_date: editItem.sale_date && editItem.sale_date.trim() !== ''
+                    ? (editItem.sale_date.length === 7 ? `${editItem.sale_date}-01` : editItem.sale_date)
+                    : null,
+                construction_start_date: editItem.construction_start_date && editItem.construction_start_date.trim() !== ''
+                    ? (editItem.construction_start_date.length === 7 ? `${editItem.construction_start_date}-01` : editItem.construction_start_date)
+                    : null,
                 area_total: finalTotalArea
             })
             .eq('id', editingId);
@@ -262,9 +294,9 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
 
     if (loading) return <div className="p-8 text-center text-gray-400">Loading...</div>;
 
-    const InputClass = "bg-transparent outline-none w-full border-b border-transparent focus:border-cyan-500 text-center";
-    const HeaderClass = "px-2 py-3 text-xs font-semibold tracking-wider text-center";
-    const CellClass = "px-2 py-3 text-center text-sm";
+    const InputClass = "bg-transparent outline-none w-full border-b border-transparent focus:border-cyan-500 text-center text-xs";
+    const HeaderClass = "px-1 py-2 text-[10px] font-black tracking-widest text-center uppercase";
+    const CellClass = "px-1 py-1.5 text-center text-xs";
 
     // --- Calculation Helper ---
     // Editor is ALWAYS Base Case (multiplier 1)
@@ -353,30 +385,37 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                         <table className="w-full text-left text-gray-600">
                             <thead className="bg-gray-50 text-gray-700 uppercase">
                                 <tr>
-                                    <th className="px-4 py-3 text-left text-xs font-semibold tracking-wider">{dict.table.model}</th>
-                                    <th className={HeaderClass}>{dict.table.beds}</th>
-                                    <th className={HeaderClass}>{dict.table.baths}</th>
-                                    <th className={HeaderClass}>{lang === 'pt' ? 'Lav.' : 'Half'}</th>
+                                    <th className="px-2 py-2 text-left text-[10px] font-black tracking-widest uppercase">{dict.table.model}</th>
+                                    <th className={HeaderClass} title={dict.table.beds}>{lang === 'pt' ? 'Q.' : 'Beds'}</th>
+                                    <th className={HeaderClass} title={dict.table.baths}>{lang === 'pt' ? 'B.' : 'Baths'}</th>
+                                    <th className={HeaderClass} title={lang === 'pt' ? 'Lavabos' : 'Half Baths'}>{lang === 'pt' ? 'L.' : 'H.'}</th>
 
-                                    {/* THREE COLUMNS requested */}
-                                    <th className={HeaderClass}>{dict.table.area_sellable}</th>
-                                    <th className={HeaderClass}>{dict.table.area_outdoor}</th>
-                                    <th className={HeaderClass}>{dict.table.area_total}</th>
+                                    <th className={HeaderClass} title={dict.table.area_sellable}>{lang === 'pt' ? 'Área Util' : 'Living Area'}</th>
+                                    <th className={HeaderClass} title={dict.table.area_outdoor}>{lang === 'pt' ? 'Área Ext.' : 'Outdoor'}</th>
+                                    <th className={HeaderClass} title={dict.table.area_total}>Total</th>
 
                                     <th className={HeaderClass}>{dict.table.count}</th>
-                                    <th className={HeaderClass}>{dict.table.price_sqft}</th>
+                                    <th className={HeaderClass}>$/sqft</th>
                                     <th className={HeaderClass}>{dict.table.avg_price}</th>
-                                    <th className={HeaderClass}>{dict.table.total_vgv}</th>
-                                    <th className="px-4 py-3"></th>
+                                    <th className={HeaderClass}>Total GDV</th>
+                                    <th className={HeaderClass}>{lang === 'pt' ? 'Venda' : 'Sale'}</th>
+                                    <th className={HeaderClass}>{lang === 'pt' ? 'Obra' : 'Const.'}</th>
+                                    <th className="px-2 py-2"></th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {/* Input Row - Always visible in Editor mode */}
                                 <tr className="bg-cyan-50/30 hover:bg-cyan-50/50 transition-colors">
-                                    <td className="px-4 py-2">
-                                        <div className="flex flex-col gap-1">
-                                            <div className="flex items-center justify-between">
-                                                <label className="text-[10px] text-gray-400 font-bold uppercase">{dict.table.model}</label>
+                                    <td className="px-2 py-2">
+                                        <div className="flex flex-col">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Ex: Premium A"
+                                                    className="bg-transparent outline-none flex-1 border-b border-transparent focus:border-cyan-500 font-bold text-xs"
+                                                    value={newItem.model_name}
+                                                    onChange={e => setNewItem({ ...newItem, model_name: e.target.value })}
+                                                />
                                                 <FloorPlanSelector
                                                     lang={lang}
                                                     userId={project.user_id}
@@ -398,13 +437,6 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                                     }}
                                                 />
                                             </div>
-                                            <input
-                                                type="text"
-                                                placeholder="Ex: Premium A"
-                                                className="bg-transparent outline-none w-full border-b border-transparent focus:border-cyan-500 font-medium"
-                                                value={newItem.model_name}
-                                                onChange={e => setNewItem({ ...newItem, model_name: e.target.value })}
-                                            />
                                         </div>
                                     </td>
                                     <td className="px-2 py-2">
@@ -499,6 +531,22 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                     <td className="px-2 py-2 text-center font-bold text-cyan-700">
                                         ${(newItem.unit_count * newItem.avg_price).toLocaleString()}
                                     </td>
+                                    <td className="px-2 py-2">
+                                        <input
+                                            type="month"
+                                            className="bg-transparent outline-none w-full border-b border-transparent focus:border-cyan-500 text-[10px] font-bold text-gray-400 uppercase"
+                                            value={newItem.sale_date ? newItem.sale_date.slice(0, 7) : ''}
+                                            onChange={e => setNewItem({ ...newItem, sale_date: e.target.value })}
+                                        />
+                                    </td>
+                                    <td className="px-2 py-2">
+                                        <input
+                                            type="month"
+                                            className="bg-transparent outline-none w-full border-b border-transparent focus:border-cyan-500 text-[10px] font-bold text-gray-400 uppercase"
+                                            value={newItem.construction_start_date ? newItem.construction_start_date.slice(0, 7) : ''}
+                                            onChange={e => setNewItem({ ...newItem, construction_start_date: e.target.value })}
+                                        />
+                                    </td>
                                     <td className="px-4 py-2 text-right">
                                         <button
                                             onClick={handleAddUnit}
@@ -552,6 +600,12 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                                     <input type="number" className={InputClass} value={editItem.avg_price} onChange={e => setEditItem({ ...editItem, avg_price: parseFloat(e.target.value) })} />
                                                 </td>
                                                 <td className="px-2 py-2 text-center font-bold text-amber-700">${(editItem.unit_count * editItem.avg_price).toLocaleString()}</td>
+                                                <td className="px-2 py-2">
+                                                    <input type="month" className="bg-transparent outline-none w-full text-[10px] font-bold text-gray-600 uppercase border-b border-amber-500" value={editItem.sale_date ? editItem.sale_date.slice(0, 7) : ''} onChange={e => setEditItem({ ...editItem, sale_date: e.target.value })} />
+                                                </td>
+                                                <td className="px-2 py-2">
+                                                    <input type="month" className="bg-transparent outline-none w-full text-[10px] font-bold text-gray-600 uppercase border-b border-amber-500" value={editItem.construction_start_date ? editItem.construction_start_date.slice(0, 7) : ''} onChange={e => setEditItem({ ...editItem, construction_start_date: e.target.value })} />
+                                                </td>
                                                 <td className="px-4 py-2 flex gap-2 justify-end">
                                                     <button onClick={handleUpdateUnit} className="text-green-600 font-bold text-xs uppercase">OK</button>
                                                     <button onClick={() => setEditingId(null)} className="text-gray-400 font-bold text-xs uppercase">X</button>
@@ -562,7 +616,7 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
 
                                     return (
                                         <tr key={unit.id} className="hover:bg-gray-50 transition-colors group">
-                                            <td className="px-4 py-3 font-medium text-gray-900">{unit.model_name}</td>
+                                            <td className="px-2 py-3 font-bold text-gray-900 text-xs">{unit.model_name}</td>
                                             <td className={CellClass}>{unit.bedrooms}</td>
                                             <td className={CellClass}>{unit.bathrooms}</td>
                                             <td className={CellClass}>{unit.half_baths || 0}</td>
@@ -580,6 +634,12 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                             </td>
                                             <td className="px-2 py-3 text-center font-semibold text-gray-900">
                                                 ${(unit.unit_count * displayAvgPrice).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                            </td>
+                                            <td className="px-2 py-3 text-center text-[10px] font-bold text-gray-400 uppercase">
+                                                {unit.sale_date ? format(new Date(unit.sale_date + 'T12:00:00'), 'MMM yy') : '-'}
+                                            </td>
+                                            <td className="px-2 py-3 text-center text-[10px] font-bold text-gray-400 uppercase">
+                                                {unit.construction_start_date ? format(new Date(unit.construction_start_date + 'T12:00:00'), 'MMM yy') : '-'}
                                             </td>
                                             <td className="px-4 py-3 text-right">
                                                 <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -618,13 +678,18 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                         ${totalRevenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                                     </td>
                                     <td></td>
+                                    <td></td>
+                                    <td></td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
 
-                    <div className="p-4 bg-gray-50 rounded-b-xl border-t border-gray-100 flex justify-between text-xs text-gray-500">
-                        <span>* {dict.table.area_sellable} used for Revenue calculation.</span>
+                    <div className="p-4 bg-gray-50 rounded-b-xl border-t border-gray-100 flex justify-between text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                        <div className="flex gap-4">
+                            <span>* {dict.table.area_sellable} used for Revenue calculation.</span>
+                            <span className="text-cyan-600 italic">** {lang === 'pt' ? 'Datas de venda/obra opcionais (precisão p/ unidade)' : 'Sale/Const. dates are optional (per unit precision)'}</span>
+                        </div>
                         <span>{dict.summary.total_area}: <strong>{totalAreaSellable.toLocaleString()} sqft</strong></span>
                     </div>
 

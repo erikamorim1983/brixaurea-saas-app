@@ -342,6 +342,7 @@
             "projects": "Projetos",
             "floor_plans": "Minhas Plantas",
             "reports": "Relatórios",
+            "insights": "Intelligence",
             "settings": "Configurações",
             "back_to_site": "Voltar ao Site"
         },
@@ -475,10 +476,12 @@
             "regional": "Dados Regionais",
             "project": "PROJETO",
             "land": "Terreno",
+            "schedule": "Cronograma",
             "floor_plan_library": "Biblioteca de Plantas",
             "unit_mix": "Unidades",
             "costs": "Custos",
             "financials": "Financeiro",
+            "sales": "Vendas",
             "feasibility": "Viabilidade"
         },
         "floor_plan_library": {
@@ -546,6 +549,82 @@
                 "swapHint": "O valor final do terreno será calculado com base no GDV (Receita Total) definido na aba de 'Vendas / Receita'.",
                 "unitSwapHint": "O valor final do terreno será determinado pelo valor de mercado das unidades alocadas ao proprietário na aba 'Mix de Unidades'.",
                 "installment": "Fluxo de Pagamento"
+            }
+        },
+        "sales": {
+            "title": "Estratégia de Vendas & Recebimentos",
+            "subtitle": "Configure a velocidade de vendas e o fluxo de recebimentos (Tabela de Vendas).",
+            "velocity_title": "Velocidade de Vendas (Absorção)",
+            "payment_title": "Estrutura de Pagamentos (Tabela)",
+            "start_month": "Mês de Início das Vendas",
+            "prior_sales": "Vendas Prévias (Pre-Sales)",
+            "monthly_absorption": "Absorção Mensal",
+            "units_per_month": "Unidades/Mes ou %",
+            "commission": "Comissões (%)",
+            "marketing": "Marketing (%)",
+            "deposit_initial": "Entrada (Down Payment)",
+            "deposit_construction": "Durante Obra",
+            "deposit_closing": "Nas Chaves / Financiamento",
+            "save": "Salvar Configuração",
+            "suggested_title": "BrixAurea Intelligence",
+            "suggested_desc": "Baseado na tipologia, liquidez e padrão do projeto.",
+            "apply_suggestion": "Aplicar Sugestão",
+            "scenario": "Cenário",
+            "scenarios": {
+                "optimistic": "Otimista",
+                "balanced": "Equilibrado",
+                "pessimistic": "Conservador"
+            },
+            "total_gdv": "VGV TOTAL (GDV)",
+            "total_units": "TOTAL UNIDADES",
+            "distribute_remaining": "DISTRIBUIR RESTANTE",
+            "units": "Unidades"
+        },
+        "schedule": {
+            "title": "Cronograma Macro de Atividades",
+            "subtitle": "Defina as datas principais e marcos do empreendimento.",
+            "groups": {
+                "study": "Data do Estudo",
+                "incorporation": "Incorporação",
+                "financing": "Financiamento",
+                "construction": "Construção",
+                "sales": "Vendas",
+                "delivery": "Entrega"
+            },
+            "phases": {
+                "projects": "Projetos",
+                "permits": "Licenças",
+                "dd": "Due Diligence",
+                "closing": "Escrituração / Compra",
+                "bank": "Contratação Banco",
+                "pre_construction": "Pre Construção",
+                "main_construction": "Obra",
+                "sales": "Vendas",
+                "delivery": "Entrega das Chaves"
+            },
+            "study_date": "Data do Estudo",
+            "closing_date": "Data de Compra (Closing)",
+            "pre_construction": "Pre-construction (Projetos)",
+            "construction": "Construção (Obra)",
+            "closeout": "Closeout (Entrega)",
+            "months": "meses",
+            "start_of_sales": "Início das Vendas (Mês)",
+            "save": "Salvar Cronograma",
+            "timeline_visual": "Visualização da Timeline",
+            "footer": {
+                "investment_horizon": "Horizonte de Investimento",
+                "project_start": "Início do Projeto",
+                "final_conclusion": "Conclusão Final",
+                "lifecycle_maturity": "Maturidade do Ciclo de Vida",
+                "target_reached": "Alvo Atingido"
+            },
+            "visuals": {
+                "months": "Meses",
+                "zero_ref": "Marco Zero do Empreendimento",
+                "fixed_land": "Sincronizado com Terreno",
+                "estimated_start": "Início Estimado",
+                "estimated_end": "Término Estimado",
+                "roadmap_subtitle": "Cronograma de Execução Master • Visão Vertical"
             }
         },
         "units": {

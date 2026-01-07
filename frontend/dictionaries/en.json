@@ -342,6 +342,7 @@
             "projects": "Projects",
             "floor_plans": "My Floor Plans",
             "reports": "Reports",
+            "insights": "Intelligence",
             "settings": "Settings",
             "back_to_site": "Back to Site"
         },
@@ -475,6 +476,7 @@
             "regional": "Regional Data",
             "project": "PROJECT",
             "land": "Land",
+            "schedule": "Schedule",
             "floor_plan_library": "Floor Plan Library",
             "unit_mix": "Units",
             "costs": "Costs",
@@ -545,6 +547,76 @@
                 "swapHint": "The final land value will be calculated based on the Project Revenue (VGV) defined in the 'Sales / Revenue' tab.",
                 "unitSwapHint": "The final land value will be determined by the market value of the units allocated to the land owner in the 'Unit Mix' tab.",
                 "installment": "Installment Plan"
+            }
+        },
+        "sales": {
+            "title": "Sales Strategy & Receipts",
+            "subtitle": "Configure sales velocity and receiving flow (Sales Table).",
+            "velocity_title": "Sales Velocity (Absorption)",
+            "payment_title": "Payment Structure (Table)",
+            "start_month": "Sales Start Month",
+            "prior_sales": "Pre-Sales",
+            "monthly_absorption": "Monthly Absorption",
+            "units_per_month": "Units/Month or %",
+            "commission": "Commissions (%)",
+            "marketing": "Marketing (%)",
+            "deposit_initial": "Down Payment",
+            "deposit_construction": "During Construction",
+            "deposit_closing": "On Keys / Financing",
+            "save": "Save Configuration",
+            "suggested_title": "BrixAurea Intelligence",
+            "suggested_desc": "Based on typology, liquidity, and project tier.",
+            "apply_suggestion": "Apply Suggestion",
+            "scenario": "Scenario",
+            "scenarios": {
+                "optimistic": "Optimistic",
+                "balanced": "Balanced",
+                "pessimistic": "Conservative"
+            },
+            "total_gdv": "TOTAL REVENUE (GDV)",
+            "total_units": "TOTAL UNITS",
+            "distribute_remaining": "DISTRIBUTE REMAINING",
+            "units": "Units"
+        },
+        "schedule": {
+            "title": "Macro Activity Schedule",
+            "subtitle": "Define key dates and project milestones.",
+            "groups": {
+                "study": "Study Phase",
+                "incorporation": "Development",
+                "construction": "Construction",
+                "sales": "Sales"
+            },
+            "phases": {
+                "projects": "Design",
+                "permits": "Permitting",
+                "pre_construction": "Pre-con",
+                "main_construction": "Building",
+                "sales": "Sales"
+            },
+            "study_date": "Study Date",
+            "closing_date": "Closing Date",
+            "pre_construction": "Pre-construction (Projects)",
+            "construction": "Construction (Work)",
+            "closeout": "Closeout (Delivery)",
+            "months": "months",
+            "start_of_sales": "Start of Sales (Month)",
+            "save": "Save Schedule",
+            "timeline_visual": "Timeline Visualization",
+            "footer": {
+                "investment_horizon": "Investment Horizon",
+                "project_start": "Project Start",
+                "final_conclusion": "Final Conclusion",
+                "lifecycle_maturity": "Asset Lifecycle Maturity",
+                "target_reached": "Target Reached"
+            },
+            "visuals": {
+                "months": "Months",
+                "zero_ref": "Zero Reference Point",
+                "fixed_land": "Synced from Land",
+                "estimated_start": "Estimated Start",
+                "estimated_end": "Estimated End",
+                "roadmap_subtitle": "Master Execution Roadmap • Vertical Perspective"
             }
         },
         "units": {

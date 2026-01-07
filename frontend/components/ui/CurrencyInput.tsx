@@ -96,15 +96,8 @@ export default function CurrencyInput({ value, onChange, placeholder, min = 0, c
     const handleBlur = () => {
         // Ensure proper formatting on blur (e.g., adding .00 optional or cleanup)
         // For now, keep as is or re-format strictly
-        if (value !== undefined) {
-            // Optional: Force 2 decimals? The user asked for "1,000.00" example. 
-            // If implicit behavior is desired, we can leave it. 
-            // Let's strictly format to standard US on blur if there is a value
+        if (value !== undefined && value !== null) {
             if (value !== 0) {
-                // setDisplayValue(formatCurrency(value)); 
-                // actually formatCurrency removes trailing zeros if not specified.
-                // user said "1,000.00". 
-                // Let's use toLocaleString options
                 const formatted = value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
                 setDisplayValue(formatted);
             }

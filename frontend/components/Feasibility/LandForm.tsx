@@ -634,40 +634,121 @@ export default function LandForm({ projectId, initialData, lang }: LandFormProps
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="col-span-2">
                                     <label className="text-xs font-bold text-gray-500 uppercase tracking-tight block mb-1">{dict.landArea}</label>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        onKeyDown={blockInvalidChar}
-                                        {...form.register('lot_size_acres')}
-                                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none text-sm"
-                                        placeholder="e.g. 2.48"
-                                    />
+                                    <div className="relative group/input-container">
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            onKeyDown={blockInvalidChar}
+                                            {...form.register('lot_size_acres')}
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none text-sm appearance-none hide-spinner"
+                                            placeholder="e.g. 2.48"
+                                        />
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                                            <span className="text-[10px] font-bold text-gray-300 uppercase pointer-events-none">Acres</span>
+                                            <div className="flex flex-col border-l border-gray-100 pl-1.5">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const current = Number(form.getValues('lot_size_acres')) || 0;
+                                                        form.setValue('lot_size_acres', Number((current + 0.1).toFixed(2)));
+                                                    }}
+                                                    className="text-gray-400 hover:text-cyan-500 transition-colors p-0.5"
+                                                >
+                                                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 15l7-7 7 7" /></svg>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const current = Number(form.getValues('lot_size_acres')) || 0;
+                                                        form.setValue('lot_size_acres', Math.max(0, Number((current - 0.1).toFixed(2))));
+                                                    }}
+                                                    className="text-gray-400 hover:text-cyan-500 transition-colors p-0.5"
+                                                >
+                                                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M19 9l-7 7-7-7" /></svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div>
                                     <label className="text-xs font-bold text-gray-500 uppercase tracking-tight block mb-1">
                                         {lang === 'pt' ? 'Largura (Feet)' : lang === 'es' ? 'Ancho (Feet)' : 'Width (Feet)'}
                                     </label>
-                                    <input
-                                        type="number"
-                                        step="0.1"
-                                        {...form.register('lot_width')}
-                                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none text-sm"
-                                        placeholder="165"
-                                    />
+                                    <div className="relative group/input-container">
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            {...form.register('lot_width')}
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none text-sm appearance-none hide-spinner"
+                                            placeholder="165"
+                                        />
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                                            <span className="text-[10px] font-bold text-gray-300 uppercase pointer-events-none">ft</span>
+                                            <div className="flex flex-col border-l border-gray-100 pl-1.5">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const current = Number(form.getValues('lot_width')) || 0;
+                                                        form.setValue('lot_width', Number((current + 1).toFixed(1)));
+                                                    }}
+                                                    className="text-gray-400 hover:text-cyan-500 transition-colors p-0.5"
+                                                >
+                                                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 15l7-7 7 7" /></svg>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const current = Number(form.getValues('lot_width')) || 0;
+                                                        form.setValue('lot_width', Math.max(0, Number((current - 1).toFixed(1))));
+                                                    }}
+                                                    className="text-gray-400 hover:text-cyan-500 transition-colors p-0.5"
+                                                >
+                                                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M19 9l-7 7-7-7" /></svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div>
                                     <label className="text-xs font-bold text-gray-500 uppercase tracking-tight block mb-1">
                                         {lang === 'pt' ? 'Comprimento (Feet)' : lang === 'es' ? 'Largo (Feet)' : 'Length (Feet)'}
                                     </label>
-                                    <input
-                                        type="number"
-                                        step="0.1"
-                                        {...form.register('lot_length')}
-                                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none text-sm"
-                                        placeholder="661"
-                                    />
+                                    <div className="relative group/input-container">
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            {...form.register('lot_length')}
+                                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none text-sm appearance-none hide-spinner"
+                                            placeholder="661"
+                                        />
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                                            <span className="text-[10px] font-bold text-gray-300 uppercase pointer-events-none">ft</span>
+                                            <div className="flex flex-col border-l border-gray-100 pl-1.5">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const current = Number(form.getValues('lot_length')) || 0;
+                                                        form.setValue('lot_length', Number((current + 1).toFixed(1)));
+                                                    }}
+                                                    className="text-gray-400 hover:text-cyan-500 transition-colors p-0.5"
+                                                >
+                                                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 15l7-7 7 7" /></svg>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const current = Number(form.getValues('lot_length')) || 0;
+                                                        form.setValue('lot_length', Math.max(0, Number((current - 1).toFixed(1))));
+                                                    }}
+                                                    className="text-gray-400 hover:text-cyan-500 transition-colors p-0.5"
+                                                >
+                                                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M19 9l-7 7-7-7" /></svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div className="col-span-2">
@@ -1156,16 +1237,40 @@ export default function LandForm({ projectId, initialData, lang }: LandFormProps
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">{dict.ddPeriod}</label>
-                            <div className="relative">
+                            <div className="relative group/input-container">
                                 <input
                                     type="number"
                                     min="0"
                                     onKeyDown={blockInvalidChar}
                                     {...form.register('due_diligence_period_days')}
-                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none"
+                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none appearance-none hide-spinner"
                                     placeholder="30"
                                 />
-                                <span className="absolute right-3 top-2 text-gray-400 text-sm">{dict.days}</span>
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                                    <span className="text-[10px] font-bold text-gray-300 uppercase pointer-events-none">{dict.days}</span>
+                                    <div className="flex flex-col border-l border-gray-100 pl-1.5">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const current = Number(form.getValues('due_diligence_period_days')) || 0;
+                                                form.setValue('due_diligence_period_days', current + 1);
+                                            }}
+                                            className="text-gray-400 hover:text-cyan-500 transition-colors p-0.5"
+                                        >
+                                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 15l7-7 7 7" /></svg>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const current = Number(form.getValues('due_diligence_period_days')) || 0;
+                                                form.setValue('due_diligence_period_days', Math.max(0, current - 1));
+                                            }}
+                                            className="text-gray-400 hover:text-cyan-500 transition-colors p-0.5"
+                                        >
+                                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M19 9l-7 7-7-7" /></svg>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -1234,7 +1339,7 @@ export default function LandForm({ projectId, initialData, lang }: LandFormProps
 
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">{dict.commission}</label>
-                            <div className="relative">
+                            <div className="relative group/input-container">
                                 <input
                                     type="number"
                                     min="0"
@@ -1242,10 +1347,34 @@ export default function LandForm({ projectId, initialData, lang }: LandFormProps
                                     step="0.01"
                                     onKeyDown={blockInvalidChar}
                                     {...form.register('broker_commission_percent', { valueAsNumber: true })}
-                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none"
+                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cyan-500 outline-none appearance-none hide-spinner"
                                     placeholder="e.g. 5.0"
                                 />
-                                <span className="absolute right-3 top-2 text-gray-400 text-sm">%</span>
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                                    <span className="text-[10px] font-bold text-gray-300 uppercase pointer-events-none">%</span>
+                                    <div className="flex flex-col border-l border-gray-100 pl-1.5">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const current = Number(form.getValues('broker_commission_percent')) || 0;
+                                                form.setValue('broker_commission_percent', Number((current + 0.1).toFixed(2)));
+                                            }}
+                                            className="text-gray-400 hover:text-cyan-500 transition-colors p-0.5"
+                                        >
+                                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 15l7-7 7 7" /></svg>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const current = Number(form.getValues('broker_commission_percent')) || 0;
+                                                form.setValue('broker_commission_percent', Math.max(0, Number((current - 0.1).toFixed(2))));
+                                            }}
+                                            className="text-gray-400 hover:text-cyan-500 transition-colors p-0.5"
+                                        >
+                                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M19 9l-7 7-7-7" /></svg>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -1341,6 +1470,24 @@ export default function LandForm({ projectId, initialData, lang }: LandFormProps
                     )
                 }
             </form >
+
+            <style jsx>{`
+                .animate-fadeIn {
+                    animation: fadeIn 0.3s ease-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .hide-spinner::-webkit-outer-spin-button,
+                .hide-spinner::-webkit-inner-spin-button {
+                    -webkit-appearance: none;
+                    margin: 0;
+                }
+                .hide-spinner {
+                    -moz-appearance: textfield;
+                }
+            `}</style>
         </div >
     );
 }

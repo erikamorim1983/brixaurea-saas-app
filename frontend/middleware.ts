@@ -50,11 +50,32 @@ export async function middleware(request: NextRequest) {
             data: { user },
         } = await supabase.auth.getUser();
 
-        // 3. Extraction of language
-        const langMatch = pathname.match(/^\/(en|pt|es)/);
-        const lang = langMatch ? langMatch[1] : 'en';
+        // 3. Extraction of language and path normalization
+        const segments = pathname.split('/').filter(Boolean);
+        const supportedLocales = ['en', 'pt', 'es'];
+        const firstSegment = segments[0];
 
-        // 4. Auth redirects (simplified to test stability)
+        const isSupportedLocale = supportedLocales.includes(firstSegment);
+        const lang = isSupportedLocale ? firstSegment : 'en';
+
+        // Fix for the 'onboarding' path issue
+        // If the path starts with /onboarding or contains it incorrectly, redirect to dashboard
+        if (pathname.includes('/onboarding')) {
+            const newPath = pathname.replace('/onboarding', '');
+            const finalPath = isSupportedLocale ? newPath : `/${lang}${newPath}`;
+            const url = request.nextUrl.clone();
+            url.pathname = finalPath || `/${lang}/dashboard`;
+            return NextResponse.redirect(url);
+        }
+
+        // If the URL doesn't start with a supported locale and isn't a public asset, redirect
+        if (!isSupportedLocale) {
+            const url = request.nextUrl.clone();
+            url.pathname = `/${lang}${pathname}`;
+            return NextResponse.redirect(url);
+        }
+
+        // 4. Auth redirects
         if (pathname.includes('/dashboard')) {
             if (!user) {
                 const url = request.nextUrl.clone();

@@ -342,6 +342,7 @@
             "projects": "Proyectos",
             "floor_plans": "Mis Plantas",
             "reports": "Informes",
+            "insights": "Intelligence",
             "settings": "Configuración",
             "back_to_site": "Volver al Sitio"
         },
@@ -422,6 +423,7 @@
             "regional": "Datos Regionales",
             "project": "PROYECTO",
             "land": "Terreno",
+            "schedule": "Cronograma",
             "floor_plan_library": "Biblioteca de Plantas",
             "unit_mix": "Unidades",
             "costs": "Costos",
@@ -491,6 +493,44 @@
                 "unitSwapHint": "El valor final del terreno será determinado por el valor de mercado de las unidades asignadas al propietario en la pestaña 'Mezcla de Unidades'.",
                 "installment": "Cuotas"
             }
+        },
+        "sales": {
+            "title": "Estrategia de Ventas y Cobros",
+            "subtitle": "Configure la velocidad de ventas y el flujo de cobros (Tabla de Ventas).",
+            "velocity_title": "Velocidade de Ventas (Absorción)",
+            "payment_title": "Estructura de Pagos (Tabla)",
+            "start_month": "Mes de Inicio de Ventas",
+            "prior_sales": "Ventas Previas (Pre-Sales)",
+            "monthly_absorption": "Absorción Mensual",
+            "units_per_month": "Unidades/Mes o %",
+            "commission": "Comisiones (%)",
+            "marketing": "Marketing (%)",
+            "deposit_initial": "Entrada (Down Payment)",
+            "deposit_construction": "Durante Obra",
+            "deposit_closing": "En Llaves / Financiamiento",
+            "save": "Guardar Configuración",
+            "suggested_title": "BrixAurea Intelligence",
+            "suggested_desc": "Basado en tipología, liquidez y nivel del proyecto.",
+            "apply_suggestion": "Aplicar Sugerencia",
+            "scenario": "Escenario",
+            "scenarios": {
+                "optimistic": "Optimista",
+                "balanced": "Equilibrado",
+                "pessimistic": "Conservador"
+            }
+        },
+        "schedule": {
+            "title": "Cronograma Macro de Actividades",
+            "subtitle": "Defina las fechas clave y hitos del proyecto.",
+            "study_date": "Fecha del Estudio",
+            "closing_date": "Fecha de Compra (Closing)",
+            "pre_construction": "Pre-construction (Proyectos)",
+            "construction": "Construcción (Obra)",
+            "closeout": "Closeout (Entrega)",
+            "months": "meses",
+            "start_of_sales": "Inicio de Ventas (Mes)",
+            "save": "Guardar Cronograma",
+            "timeline_visual": "Visualización de la Timeline"
         },
         "units": {
             "title": "Mezcla de Unidades",

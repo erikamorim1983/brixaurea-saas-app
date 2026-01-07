@@ -172,6 +172,7 @@ export async function saveLandFeasibility(
     await syncLandCostsToBudget(projectId, landData);
 
     revalidatePath(`/dashboard/projects/${projectId}/feasibility/land`);
+    revalidatePath(`/dashboard/projects/${projectId}/feasibility/schedule`);
 
     return { success: true };
 }
@@ -299,21 +300,162 @@ export async function getProjectCosts(projectId: string) {
     const supabase = await createClient();
 
     // 1. Get Active Scenario
-    const { data: scenarios } = await supabase
+    const { data: scenario } = await supabase
         .from('financial_scenarios')
         .select('id')
         .eq('project_id', projectId)
-        .eq('is_active', true)
+        .eq('name', 'Base Case')
         .single();
 
-    if (!scenarios) return [];
+    if (!scenario) return [];
 
     // 2. Get Costs
     const { data: costs } = await supabase
         .from('cost_line_items')
         .select('*')
-        .eq('scenario_id', scenarios.id)
-        .order('start_month_offset', { ascending: true }); // Order by timeline
+        .eq('scenario_id', scenario.id)
+        .order('category', { ascending: true })
+        .order('start_month_offset', { ascending: true });
 
     return costs || [];
+}
+
+export async function saveCostItem(projectId: string, item: any) {
+    const supabase = await createClient();
+
+    // 1. Get Base Case Scenario
+    const { data: scenario } = await supabase
+        .from('financial_scenarios')
+        .select('id')
+        .eq('project_id', projectId)
+        .eq('name', 'Base Case')
+        .single();
+
+    if (!scenario) throw new Error("Scenario not found");
+
+    const payload = {
+        scenario_id: scenario.id,
+        category: item.category,
+        item_name: item.item_name,
+        input_value: item.total_estimated, // For now simple
+        total_estimated: item.total_estimated,
+        calculation_method: item.calculation_method || 'fixed',
+        start_month_offset: item.start_month_offset || 0,
+        duration_months: item.duration_months || 1,
+        distribution_curve: item.distribution_curve || 'linear',
+        updated_at: new Date().toISOString()
+    };
+
+    if (item.id) {
+        const { error } = await supabase.from('cost_line_items').update(payload).eq('id', item.id);
+        if (error) throw error;
+    } else {
+        const { error } = await supabase.from('cost_line_items').insert(payload);
+        if (error) throw error;
+    }
+
+    revalidatePath(`/dashboard/projects/${projectId}/feasibility/costs`);
+    return { success: true };
+}
+
+export async function deleteCostItem(projectId: string, itemId: string) {
+    const supabase = await createClient();
+    const { error } = await supabase.from('cost_line_items').delete().eq('id', itemId);
+    if (error) throw error;
+
+    revalidatePath(`/dashboard/projects/${projectId}/feasibility/costs`);
+    return { success: true };
+}
+
+export async function getProjectCashFlow(projectId: string) {
+    const supabase = await createClient();
+
+    // 1. Get Scenario Data
+    const { data: scenario } = await supabase
+        .from('financial_scenarios')
+        .select('*')
+        .eq('project_id', projectId)
+        .eq('name', 'Base Case')
+        .single();
+
+    if (!scenario) return { totalGDV: 0, totalCosts: 0, months: [] };
+
+    // 2. Get All Costs
+    const { data: costs } = await supabase
+        .from('cost_line_items')
+        .select('*')
+        .eq('scenario_id', scenario.id);
+
+    // 3. Get Revenue (Units)
+    const { data: units } = await supabase
+        .from('units_mix')
+        .select('unit_count, avg_price')
+        .eq('scenario_id', scenario.id);
+
+    const totalGDV = (units || []).reduce((sum, u) => sum + (u.unit_count * u.avg_price), 0);
+
+    // 4. Calculate Timeline
+    // Determine max month from costs and sales
+    let maxMonth = 12; // Minimum view
+
+    // Check costs max month
+    (costs || []).forEach(c => {
+        const end = (c.start_month_offset || 0) + (c.duration_months || 1);
+        if (end > maxMonth) maxMonth = end;
+    });
+
+    // Check sales max month (start_offset_months + duration)
+    // For now assume sales duration is 24 months if not specified
+    const salesStart = scenario.sales_start_offset_months || 0;
+    const salesDuration = scenario.manual_absorption_curve ? scenario.manual_absorption_curve.length : 24;
+    if (salesStart + salesDuration > maxMonth) maxMonth = salesStart + salesDuration;
+
+    // 5. Build Monthly Data
+    const monthsData = Array.from({ length: maxMonth + 1 }, (_, i) => {
+        const monthIndex = i;
+
+        // Calculate Revenue for this month
+        let monthRevenue = 0;
+        if (scenario.manual_absorption_curve && monthIndex >= salesStart && monthIndex < salesStart + scenario.manual_absorption_curve.length) {
+            const curveIndex = monthIndex - salesStart;
+            const percent = scenario.manual_absorption_curve[curveIndex] / 100;
+            monthRevenue = totalGDV * percent;
+        } else if (!scenario.manual_absorption_curve && monthIndex >= salesStart) {
+            // Fallback to linear absorption if no manual curve but in sales period
+            const rate = scenario.absorption_rate_monthly || 5; // 5% default
+            const remainingGDV = totalGDV - (totalGDV * (rate / 100) * (monthIndex - salesStart));
+            if (remainingGDV > 0) {
+                monthRevenue = Math.min(remainingGDV, totalGDV * (rate / 100));
+            }
+        }
+
+        // Calculate Costs for this month
+        const monthCosts = (costs || []).reduce((sum, item) => {
+            if (monthIndex < item.start_month_offset) return sum;
+            if (monthIndex >= item.start_month_offset + (item.duration_months || 1)) return sum;
+
+            // Linear distribution
+            return sum + (item.total_estimated / (item.duration_months || 1));
+        }, 0);
+
+        return {
+            month: monthIndex,
+            revenue: monthRevenue,
+            costs: monthCosts,
+            net: monthRevenue - monthCosts
+        };
+    });
+
+    // Calculate Cumulative
+    let cumulative = 0;
+    const monthsWithCumulative = monthsData.map(m => {
+        cumulative += m.net;
+        return { ...m, cumulative };
+    });
+
+    return {
+        totalGDV,
+        totalCosts: (costs || []).reduce((sum, c) => sum + (c.total_estimated || 0), 0),
+        months: monthsWithCumulative
+    };
 }
