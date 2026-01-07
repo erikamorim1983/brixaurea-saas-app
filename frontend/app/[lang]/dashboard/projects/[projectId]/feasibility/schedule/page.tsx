@@ -16,6 +16,7 @@ export default async function ProjectSchedulePage({ params }: { params: Promise<
                 project={project}
                 lang={lang}
                 dictionary={dictionary}
+                initialLandData={null}
             />
         </div>
     );
