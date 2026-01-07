@@ -645,6 +645,8 @@
                 "garages": "Vagas",
                 "area_sellable": "Área Priv. (Int)",
                 "area_outdoor": "Área Não-Condi. / Ext.",
+                "revenue_calc_note": "utilizada para cálculo de Receita",
+                "sale_dates_note": "Datas de venda/obra opcionais (precisão p/ unidade)",
                 "area_total": "Área Total",
                 "count": "Qtd",
                 "price_sqft": "$/ft²",

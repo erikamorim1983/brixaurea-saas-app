@@ -637,6 +637,8 @@
                 "garages": "Garage",
                 "area_sellable": "Square Feet Under Air",
                 "area_outdoor": "Square Feet Non-Conditioned",
+                "revenue_calc_note": "used for Revenue calculation",
+                "sale_dates_note": "Sale/Const. dates are optional (per unit precision)",
                 "area_total": "Total Square Feet",
                 "count": "Count",
                 "price_sqft": "$/ft²",

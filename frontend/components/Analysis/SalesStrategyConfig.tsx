@@ -142,8 +142,16 @@ export default function SalesStrategyConfig({ project, location, lang, dictionar
     }, [project.id, project.subtype_id, location?.city, supabase]);
 
     // Calculate suggested absorption
+    // Calculate units with specific dates to exclude from distribution
+    const genericUnits = useMemo(() => {
+        const fixedUnits = detailedUnits
+            .filter(u => u.sale_date)
+            .reduce((sum, u) => sum + (u.unit_count || 0), 0);
+        return Math.max(0, (unitsData.totalUnits || 0) - fixedUnits);
+    }, [detailedUnits, unitsData.totalUnits]);
+
     const getSuggestedAbsorption = () => {
-        const total = unitsData.totalUnits || 0;
+        const total = genericUnits; // Use ONLY generic units for distribution
         if (total === 0) return null;
 
         // Logic requested by user:
@@ -164,8 +172,8 @@ export default function SalesStrategyConfig({ project, location, lang, dictionar
     const suggestions = getSuggestedAbsorption();
 
     const handleApplySuggestion = (unitsPerMonth: number) => {
-        const totalUnits = unitsData.totalUnits || 1;
-        const percentage = (unitsPerMonth / totalUnits) * 100;
+        const totalGeneric = genericUnits || 1;
+        const percentage = (unitsPerMonth / totalGeneric) * 100;
         setAssumptions(prev => ({
             ...prev,
             absorption_rate_monthly: parseFloat(percentage.toFixed(1)),
@@ -174,8 +182,8 @@ export default function SalesStrategyConfig({ project, location, lang, dictionar
     };
 
     const handleApplyManualUnitsPerMonth = (unitsPerMonth: number) => {
-        const totalUnits = unitsData.totalUnits || 1;
-        const percentage = (unitsPerMonth / totalUnits) * 100;
+        const totalGeneric = genericUnits || 1;
+        const percentage = (unitsPerMonth / totalGeneric) * 100;
         setAssumptions(prev => ({
             ...prev,
             absorption_rate_monthly: parseFloat(percentage.toFixed(1)),
@@ -303,11 +311,17 @@ export default function SalesStrategyConfig({ project, location, lang, dictionar
             }
         });
 
-        // Map cashIn back to data
-        return data.map((d, idx) => ({
-            ...d,
-            monthlyRevenue: Math.round(cashInProjected[idx])
-        }));
+        // Map cashIn back to data with cumulative revenue
+        let cumulativeRev = 0;
+        return data.map((d, idx) => {
+            const monthRev = Math.round(cashInProjected[idx]);
+            cumulativeRev += monthRev;
+            return {
+                ...d,
+                monthlyRevenue: monthRev,
+                cumulativeRevenue: cumulativeRev
+            };
+        });
     }, [assumptions, unitsData, detailedUnits]);
 
     // Cropped data for visual clarity in the chart (Sales Window Only)
@@ -328,6 +342,19 @@ export default function SalesStrategyConfig({ project, location, lang, dictionar
             calendarMonth: d.monthLabel.toUpperCase()
         }));
     }, [fullData]);
+
+    // Cash Flow data: from sales start to delivery (keys/financing)
+    const cashFlowData: any[] = useMemo(() => {
+        if (!fullData || fullData.length === 0) return [];
+
+        // Start from sales start offset
+        const salesStart = assumptions.sales_start_offset || 0;
+
+        // End at delivery month + 2 (to show the final closing payment clearly)
+        const deliveryEnd = (assumptions.delivery_start_offset || 24) + 2;
+
+        return fullData.slice(salesStart, Math.min(deliveryEnd, fullData.length));
+    }, [fullData, assumptions.sales_start_offset, assumptions.delivery_start_offset]);
 
     const handleManualChange = (index: number, value: number) => {
         const start = assumptions.sales_start_offset || 0;
@@ -904,37 +931,52 @@ export default function SalesStrategyConfig({ project, location, lang, dictionar
 
                             <div className="h-48 w-full">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={fullData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+                                    <ComposedChart data={cashFlowData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
                                         <defs>
-                                            <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
+                                            <linearGradient id="colorRevenueCumulative" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#10b981" stopOpacity={0.1} />
                                                 <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                                             </linearGradient>
                                         </defs>
                                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                         <XAxis dataKey="monthLabel" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#cbd5e1', fontWeight: 600 }} interval={6} />
-                                        <YAxis hide />
+                                        <YAxis yAxisId="left" hide />
+                                        <YAxis yAxisId="right" orientation="right" hide />
                                         <Tooltip
-                                            formatter={(value: any) => [`$${(value || 0).toLocaleString()}`, 'Receita']}
+                                            formatter={(value: any, name?: string) => {
+                                                if (name === 'Mensal') return [`$${(value || 0).toLocaleString()}`, 'Receita Mensal'];
+                                                return [`$${(value || 0).toLocaleString()}`, 'Acumulado'];
+                                            }}
                                             contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px' }}
                                             itemStyle={{ fontSize: '11px', fontWeight: '900', color: '#065f46' }}
                                             labelStyle={{ fontSize: '10px', fontWeight: '900', color: '#64748b', marginBottom: '4px' }}
                                         />
-                                        <Area
-                                            type="stepAfter"
+                                        <Bar
+                                            yAxisId="left"
                                             dataKey="monthlyRevenue"
+                                            fill="#d1fae5"
+                                            stroke="#10b981"
+                                            strokeWidth={1}
+                                            radius={[4, 4, 0, 0]}
+                                            name="Mensal"
+                                            animationDuration={1000}
+                                        />
+                                        <Area
+                                            yAxisId="right"
+                                            type="monotone"
+                                            dataKey="cumulativeRevenue"
                                             stroke="#10b981"
                                             strokeWidth={3}
-                                            fillOpacity={1}
-                                            fill="url(#colorRevenue)"
+                                            fill="url(#colorRevenueCumulative)"
+                                            name="Acumulado"
                                             animationDuration={1500}
                                         />
-                                    </AreaChart>
+                                    </ComposedChart>
                                 </ResponsiveContainer>
                             </div>
                             <div className="mt-4 flex justify-between items-center text-[10px] font-black text-emerald-600 uppercase tracking-widest">
                                 <span>Pico de Recebimento</span>
-                                <span>${Math.max(...fullData.map(d => d.monthlyRevenue)).toLocaleString()} / Mês</span>
+                                <span>${Math.max(...(cashFlowData.length > 0 ? cashFlowData.map(d => d.monthlyRevenue) : [0])).toLocaleString()} / Mês</span>
                             </div>
                         </div>
 
@@ -946,51 +988,73 @@ export default function SalesStrategyConfig({ project, location, lang, dictionar
                             </h4>
                             <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 space-y-4">
                                 {[
-                                    { key: 'initial_deposit', label: dict.deposit_initial, color: 'emerald', val: assumptions.deposit_structure.initial_deposit },
-                                    { key: 'second_deposit', label: dict.deposit_construction, color: 'blue', val: assumptions.deposit_structure.second_deposit },
-                                    { key: 'closing_funding', label: dict.deposit_closing, color: 'indigo', val: assumptions.deposit_structure.closing_funding }
+                                    { key: 'initial_deposit', label: dict.deposit_initial, color: 'emerald', val: assumptions.deposit_structure.initial_deposit, readonly: true },
+                                    { key: 'second_deposit', label: dict.deposit_construction, color: 'blue', val: assumptions.deposit_structure.second_deposit, readonly: false },
+                                    { key: 'closing_funding', label: dict.deposit_closing, color: 'indigo', val: assumptions.deposit_structure.closing_funding, readonly: false }
                                 ].map((step) => (
                                     <div key={step.key} className={`flex items-center justify-between p-4 bg-white border border-gray-100 rounded-xl border-l-4 border-l-${step.color}-500 shadow-sm shadow-gray-200/50`}>
                                         <span className={`text-[10px] font-black text-${step.color}-600 uppercase tracking-widest`}>{step.label}</span>
                                         <div className="relative group/input-container flex items-center gap-2">
                                             <input
                                                 type="number"
-                                                className="w-16 text-right outline-none font-black text-gray-900 border-none bg-transparent p-0 text-base appearance-none hide-spinner"
+                                                className={`w-16 text-right outline-none font-black ${step.readonly ? 'text-gray-500 bg-gray-50' : 'text-gray-900'} border-none p-0 text-base appearance-none hide-spinner`}
                                                 value={step.val}
-                                                onChange={e => setAssumptions({
-                                                    ...assumptions,
-                                                    deposit_structure: { ...assumptions.deposit_structure, [step.key]: parseFloat(e.target.value) || 0 }
-                                                })}
+                                                readOnly={step.readonly}
+                                                onChange={e => {
+                                                    if (step.readonly) return;
+                                                    const newValue = parseFloat(e.target.value) || 0;
+                                                    const updated = { ...assumptions.deposit_structure, [step.key]: newValue };
+                                                    // Auto-calculate Down Payment
+                                                    updated.initial_deposit = Math.max(0, 100 - updated.second_deposit - updated.closing_funding);
+                                                    setAssumptions({
+                                                        ...assumptions,
+                                                        deposit_structure: updated
+                                                    });
+                                                }}
                                             />
                                             <div className="flex items-center gap-2">
                                                 <span className="text-gray-400 font-bold text-xs">%</span>
-                                                <div className="flex flex-col border-l border-gray-100 pl-2">
-                                                    <button
-                                                        onClick={() => setAssumptions(prev => ({
-                                                            ...prev,
-                                                            deposit_structure: { ...prev.deposit_structure, [step.key]: (prev.deposit_structure as any)[step.key] + 1 }
-                                                        }))}
-                                                        className={`text-${step.color}-400 hover:text-${step.color}-600 transition-colors p-0.5`}
-                                                    >
-                                                        <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 15l7-7 7 7" /></svg>
-                                                    </button>
-                                                    <button
-                                                        onClick={() => setAssumptions(prev => ({
-                                                            ...prev,
-                                                            deposit_structure: { ...prev.deposit_structure, [step.key]: Math.max(0, (prev.deposit_structure as any)[step.key] - 1) }
-                                                        }))}
-                                                        className={`text-${step.color}-400 hover:text-${step.color}-600 transition-colors p-0.5`}
-                                                    >
-                                                        <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M19 9l-7 7-7-7" /></svg>
-                                                    </button>
-                                                </div>
+                                                {!step.readonly && (
+                                                    <div className="flex flex-col border-l border-gray-100 pl-2">
+                                                        <button
+                                                            onClick={() => {
+                                                                const updated = { ...assumptions.deposit_structure };
+                                                                (updated as any)[step.key] = (updated as any)[step.key] + 1;
+                                                                // Auto-calculate Down Payment
+                                                                updated.initial_deposit = Math.max(0, 100 - updated.second_deposit - updated.closing_funding);
+                                                                setAssumptions({ ...assumptions, deposit_structure: updated });
+                                                            }}
+                                                            className={`text-${step.color}-400 hover:text-${step.color}-600 transition-colors p-0.5`}
+                                                        >
+                                                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 15l7-7 7 7" /></svg>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => {
+                                                                const updated = { ...assumptions.deposit_structure };
+                                                                (updated as any)[step.key] = Math.max(0, (updated as any)[step.key] - 1);
+                                                                // Auto-calculate Down Payment
+                                                                updated.initial_deposit = Math.max(0, 100 - updated.second_deposit - updated.closing_funding);
+                                                                setAssumptions({ ...assumptions, deposit_structure: updated });
+                                                            }}
+                                                            className={`text-${step.color}-400 hover:text-${step.color}-600 transition-colors p-0.5`}
+                                                        >
+                                                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M19 9l-7 7-7-7" /></svg>
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {step.readonly && (
+                                                    <div className="w-[26px]"></div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
                                 ))}
                                 <div className={`mt-4 p-4 rounded-xl text-xs font-black flex justify-between items-center tracking-[0.2em] transition-all ${totalDeposit === 100 ? 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200' : 'bg-red-50 text-red-600 ring-1 ring-red-200 animate-pulse'}`}>
                                     <span>TOTAL:</span>
-                                    <span className="text-base">{totalDeposit}%</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-base">{totalDeposit}%</span>
+                                        <div className="w-[26px]"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

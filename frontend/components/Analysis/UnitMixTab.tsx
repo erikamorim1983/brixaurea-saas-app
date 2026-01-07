@@ -382,13 +382,29 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
 
                     {/* Table */}
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-gray-600">
+                        <table className="w-full text-left text-gray-600 table-fixed">
+                            <colgroup>
+                                <col style={{ width: '180px' }} />
+                                <col style={{ width: '45px' }} />
+                                <col style={{ width: '45px' }} />
+                                <col style={{ width: '45px' }} />
+                                <col style={{ width: '85px' }} />
+                                <col style={{ width: '85px' }} />
+                                <col style={{ width: '85px' }} />
+                                <col style={{ width: '55px' }} />
+                                <col style={{ width: '75px' }} />
+                                <col style={{ width: '95px' }} />
+                                <col style={{ width: '100px' }} />
+                                <col style={{ width: '90px' }} />
+                                <col style={{ width: '90px' }} />
+                                <col style={{ width: '80px' }} />
+                            </colgroup>
                             <thead className="bg-gray-50 text-gray-700 uppercase">
                                 <tr>
                                     <th className="px-2 py-2 text-left text-[10px] font-black tracking-widest uppercase">{dict.table.model}</th>
-                                    <th className={HeaderClass} title={dict.table.beds}>{lang === 'pt' ? 'Q.' : 'Beds'}</th>
-                                    <th className={HeaderClass} title={dict.table.baths}>{lang === 'pt' ? 'B.' : 'Baths'}</th>
-                                    <th className={HeaderClass} title={lang === 'pt' ? 'Lavabos' : 'Half Baths'}>{lang === 'pt' ? 'L.' : 'H.'}</th>
+                                    <th className={HeaderClass} title={dict.table.beds}>🛏️</th>
+                                    <th className={HeaderClass} title={dict.table.baths}>🚿</th>
+                                    <th className={HeaderClass} title={lang === 'pt' ? 'Lavabos' : 'Half Baths'}>🚽</th>
 
                                     <th className={HeaderClass} title={dict.table.area_sellable}>{lang === 'pt' ? 'Área Util' : 'Living Area'}</th>
                                     <th className={HeaderClass} title={dict.table.area_outdoor}>{lang === 'pt' ? 'Área Ext.' : 'Outdoor'}</th>
@@ -398,8 +414,8 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                     <th className={HeaderClass}>$/sqft</th>
                                     <th className={HeaderClass}>{dict.table.avg_price}</th>
                                     <th className={HeaderClass}>Total GDV</th>
-                                    <th className={HeaderClass}>{lang === 'pt' ? 'Venda' : 'Sale'}</th>
-                                    <th className={HeaderClass}>{lang === 'pt' ? 'Obra' : 'Const.'}</th>
+                                    <th className={HeaderClass} title={lang === 'pt' ? 'Data de Venda' : 'Sale Date'}>{lang === 'pt' ? 'Venda' : 'Sale'}</th>
+                                    <th className={HeaderClass} title={lang === 'pt' ? 'Início da Obra' : 'Construction Start'}>{lang === 'pt' ? 'Obra' : 'Const.'}</th>
                                     <th className="px-2 py-2"></th>
                                 </tr>
                             </thead>
@@ -407,36 +423,34 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                 {/* Input Row - Always visible in Editor mode */}
                                 <tr className="bg-cyan-50/30 hover:bg-cyan-50/50 transition-colors">
                                     <td className="px-2 py-2">
-                                        <div className="flex flex-col">
-                                            <div className="flex items-center justify-between gap-2">
-                                                <input
-                                                    type="text"
-                                                    placeholder="Ex: Premium A"
-                                                    className="bg-transparent outline-none flex-1 border-b border-transparent focus:border-cyan-500 font-bold text-xs"
-                                                    value={newItem.model_name}
-                                                    onChange={e => setNewItem({ ...newItem, model_name: e.target.value })}
-                                                />
-                                                <FloorPlanSelector
-                                                    lang={lang}
-                                                    userId={project.user_id}
-                                                    onSelect={(plan: FloorPlan) => {
-                                                        setNewItem({
-                                                            ...newItem,
-                                                            model_name: plan.plan_name,
-                                                            area_sqft: plan.living_area_sqft || plan.area_sqft || 0,
-                                                            area_outdoor: (plan.entry_area_sqft || 0) + (plan.lanai_area_sqft || 0) || plan.area_outdoor || 0,
-                                                            area_total: plan.total_const_area_sqft || plan.area_total || 0,
-                                                            bedrooms: plan.bedrooms || 0,
-                                                            bathrooms: plan.bathrooms || 0,
-                                                            half_baths: plan.half_baths || 0,
-                                                            suites: plan.suites || 0,
-                                                            garages: plan.garages || 0,
-                                                            price_sqft: plan.standard_price_sqft || 0,
-                                                            avg_price: (plan.standard_price_sqft || 0) * (plan.living_area_sqft || plan.area_sqft || 0)
-                                                        });
-                                                    }}
-                                                />
-                                            </div>
+                                        <div className="flex flex-col gap-1">
+                                            <input
+                                                type="text"
+                                                placeholder="Ex: Premium A"
+                                                className="bg-transparent outline-none w-full border-b border-transparent focus:border-cyan-500 font-bold text-xs"
+                                                value={newItem.model_name}
+                                                onChange={e => setNewItem({ ...newItem, model_name: e.target.value })}
+                                            />
+                                            <FloorPlanSelector
+                                                lang={lang}
+                                                userId={project.user_id}
+                                                onSelect={(plan: FloorPlan) => {
+                                                    setNewItem({
+                                                        ...newItem,
+                                                        model_name: plan.plan_name,
+                                                        area_sqft: plan.living_area_sqft || plan.area_sqft || 0,
+                                                        area_outdoor: (plan.entry_area_sqft || 0) + (plan.lanai_area_sqft || 0) || plan.area_outdoor || 0,
+                                                        area_total: plan.total_const_area_sqft || plan.area_total || 0,
+                                                        bedrooms: plan.bedrooms || 0,
+                                                        bathrooms: plan.bathrooms || 0,
+                                                        half_baths: plan.half_baths || 0,
+                                                        suites: plan.suites || 0,
+                                                        garages: plan.garages || 0,
+                                                        price_sqft: plan.standard_price_sqft || 0,
+                                                        avg_price: (plan.standard_price_sqft || 0) * (plan.living_area_sqft || plan.area_sqft || 0)
+                                                    });
+                                                }}
+                                            />
                                         </div>
                                     </td>
                                     <td className="px-2 py-2">
@@ -531,18 +545,20 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                     <td className="px-2 py-2 text-center font-bold text-cyan-700">
                                         ${(newItem.unit_count * newItem.avg_price).toLocaleString()}
                                     </td>
-                                    <td className="px-2 py-2">
+                                    <td className="px-1 py-2">
                                         <input
                                             type="month"
-                                            className="bg-transparent outline-none w-full border-b border-transparent focus:border-cyan-500 text-[10px] font-bold text-gray-400 uppercase"
+                                            className="bg-transparent outline-none w-full border-b border-transparent focus:border-cyan-500 text-[9px] font-bold text-gray-400 uppercase"
+                                            placeholder="--/--"
                                             value={newItem.sale_date ? newItem.sale_date.slice(0, 7) : ''}
                                             onChange={e => setNewItem({ ...newItem, sale_date: e.target.value })}
                                         />
                                     </td>
-                                    <td className="px-2 py-2">
+                                    <td className="px-1 py-2">
                                         <input
                                             type="month"
-                                            className="bg-transparent outline-none w-full border-b border-transparent focus:border-cyan-500 text-[10px] font-bold text-gray-400 uppercase"
+                                            className="bg-transparent outline-none w-full border-b border-transparent focus:border-cyan-500 text-[9px] font-bold text-gray-400 uppercase"
+                                            placeholder="--/--"
                                             value={newItem.construction_start_date ? newItem.construction_start_date.slice(0, 7) : ''}
                                             onChange={e => setNewItem({ ...newItem, construction_start_date: e.target.value })}
                                         />
@@ -687,8 +703,8 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
 
                     <div className="p-4 bg-gray-50 rounded-b-xl border-t border-gray-100 flex justify-between text-[10px] text-gray-400 font-bold uppercase tracking-wider">
                         <div className="flex gap-4">
-                            <span>* {dict.table.area_sellable} used for Revenue calculation.</span>
-                            <span className="text-cyan-600 italic">** {lang === 'pt' ? 'Datas de venda/obra opcionais (precisão p/ unidade)' : 'Sale/Const. dates are optional (per unit precision)'}</span>
+                            <span>* {dict.table.area_sellable} {dict.table.revenue_calc_note}.</span>
+                            <span className="text-cyan-600 italic">** {dict.table.sale_dates_note}</span>
                         </div>
                         <span>{dict.summary.total_area}: <strong>{totalAreaSellable.toLocaleString()} sqft</strong></span>
                     </div>
