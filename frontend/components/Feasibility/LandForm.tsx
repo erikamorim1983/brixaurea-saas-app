@@ -606,6 +606,13 @@ export default function LandForm({ projectId, initialData, lang }: LandFormProps
         });
     };
 
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return null;
+
     return (
         <div className="space-y-8 pb-20">
             {/* 1. MAP SECTION (Full Width) */}
