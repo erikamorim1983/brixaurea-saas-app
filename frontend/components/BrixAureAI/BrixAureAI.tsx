@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { sendMessageToAI, ChatMessage } from '@/app/actions/chat';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface BrixAureAIProps {
     lang: string;
@@ -12,9 +14,10 @@ interface BrixAureAIProps {
         placeholder: string;
         error_generic: string;
     };
+    projectId?: string;
 }
 
-export default function BrixAureAI({ lang, dict }: BrixAureAIProps) {
+export default function BrixAureAI({ lang, dict, projectId }: BrixAureAIProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputValue, setInputValue] = useState('');
@@ -44,8 +47,8 @@ export default function BrixAureAI({ lang, dict }: BrixAureAIProps) {
         setError(null);
 
         try {
-            // Call Server Action with Lang
-            const response = await sendMessageToAI([...messages, userMessage], lang);
+            // Call Server Action with Lang and ProjectContext
+            const response = await sendMessageToAI([...messages, userMessage], lang, projectId);
 
             if (response.success && response.message) {
                 setMessages(prev => [...prev, response.message]);
@@ -99,6 +102,27 @@ export default function BrixAureAI({ lang, dict }: BrixAureAIProps) {
                                     </div>
                                     <p dangerouslySetInnerHTML={{ __html: dict?.welcome_title || 'Olá! Sou seu assistente <strong>BrixAureIA</strong>' }} />
                                     <p className="mt-2 text-slate-500">{dict?.welcome_subtitle || 'Analiso dados, tendências e seu portfólio.'}</p>
+
+                                    {projectId && (
+                                        <div className="mt-8 w-full space-y-2 px-4">
+                                            <p className="text-[10px] uppercase font-bold text-slate-400 text-left mb-2">Sugestões para este projeto:</p>
+                                            {[
+                                                "Este projeto é viável?",
+                                                "Quais os principais riscos?",
+                                                "Como melhorar o retorno?",
+                                                "Análise do mix de unidades"
+                                            ].map((q, i) => (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => setInputValue(q)}
+                                                    className="w-full text-left px-3 py-2 bg-white border border-amber-100 rounded-xl text-xs text-slate-600 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200 transition-all shadow-sm flex items-center gap-2 group"
+                                                >
+                                                    <span className="text-amber-400 group-hover:scale-110 transition-transform">✨</span>
+                                                    {q}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
@@ -124,7 +148,20 @@ export default function BrixAureAI({ lang, dict }: BrixAureAIProps) {
                                             : 'bg-white text-slate-700 rounded-bl-none border border-slate-100 shadow-md'
                                             }`}
                                     >
-                                        <div className="markdown-content" dangerouslySetInnerHTML={{ __html: m.content.replace(/\n/g, '<br/>') }} />
+                                        <div className="prose prose-sm prose-slate max-w-none prose-p:leading-relaxed prose-li:my-1 prose-strong:text-amber-700">
+                                            <ReactMarkdown
+                                                remarkPlugins={[remarkGfm]}
+                                                components={{
+                                                    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                                                    ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
+                                                    ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 space-y-1">{children}</ol>,
+                                                    li: ({ children }) => <li className="marker:text-amber-500">{children}</li>,
+                                                    strong: ({ children }) => <strong className="font-bold text-slate-900 border-b border-amber-200/50">{children}</strong>
+                                                }}
+                                            >
+                                                {m.content}
+                                            </ReactMarkdown>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -169,25 +206,50 @@ export default function BrixAureAI({ lang, dict }: BrixAureAIProps) {
             </AnimatePresence>
 
             {/* Floating Trigger Button */}
-            <motion.button
-                onClick={() => setIsOpen(!isOpen)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 ${isOpen
-                    ? 'bg-slate-800 text-white rotate-90'
-                    : 'bg-gradient-to-br from-amber-400 to-amber-600 text-white'
-                    }`}
-            >
-                {isOpen ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
-                        <path d="M17 4a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2" />
-                        <path d="M19 11h2m-1 -1v2" />
-                    </svg>
-                )}
-            </motion.button>
+            <motion.div className="flex flex-col items-end gap-3 pointer-events-none">
+                <AnimatePresence>
+                    {!isOpen && (
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            className="bg-white px-3 py-1.5 rounded-xl shadow-lg border border-amber-100 text-[10px] font-black text-amber-600 uppercase tracking-widest whitespace-nowrap mb-1 flex items-center gap-2"
+                        >
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                            </span>
+                            {projectId ? 'Análise do Projeto Ativa' : 'BrixAureIA Online'}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                <motion.button
+                    onClick={() => setIsOpen(!isOpen)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 pointer-events-auto ${isOpen
+                        ? 'bg-slate-800 text-white rotate-90'
+                        : 'bg-gradient-to-br from-amber-400 to-amber-600 text-white'
+                        }`}
+                >
+                    {isOpen ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    ) : (
+                        <div className="relative">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 8V4H8" />
+                                <rect width="16" height="12" x="4" y="8" rx="2" />
+                                <path d="M2 14h2" />
+                                <path d="M20 14h2" />
+                                <path d="M15 13v2" />
+                                <path d="M9 13v2" />
+                            </svg>
+                            <span className="absolute -top-1 -right-1 text-xs">✨</span>
+                        </div>
+                    )}
+                </motion.button>
+            </motion.div>
         </div>
     );
 }

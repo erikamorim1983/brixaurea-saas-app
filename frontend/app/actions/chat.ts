@@ -8,7 +8,7 @@ export interface ChatMessage {
     content: string;
 }
 
-export async function sendMessageToAI(history: ChatMessage[], lang: string = 'pt') {
+export async function sendMessageToAI(history: ChatMessage[], lang: string = 'pt', projectId?: string) {
     try {
         const langInstructions = {
             pt: "Use Portuguese (Brazil) strictly.",
@@ -17,6 +17,30 @@ export async function sendMessageToAI(history: ChatMessage[], lang: string = 'pt
         };
 
         const currentLangInstruction = langInstructions[lang as keyof typeof langInstructions] || langInstructions.pt;
+
+        let projectContext = "";
+        if (projectId) {
+            const { createClient } = await import('@/lib/supabase/server');
+            const supabase = await createClient();
+
+            // Fetch project & location
+            const { data: project } = await supabase.from('projects').select('*').eq('id', projectId).single();
+            const { data: location } = await supabase.from('project_locations').select('*').eq('project_id', projectId).single();
+            const { data: scenarios } = await supabase.from('financial_scenarios').select('*').eq('project_id', projectId);
+
+            if (project) {
+                projectContext = `
+                **CURRENT PROJECT CONTEXT (CRITICAL):**
+                - Project Name: ${project.name}
+                - Location: ${location?.city}, ${location?.state_code}
+                - Land Area: ${project.land_area_sqm} m²
+                - Built Area: ${project.total_built_area_sqm} m²
+                - Current Scenarios: ${scenarios?.map(s => s.name).join(', ')}
+                
+                You should focus your answers on this specific project when appropriate.
+                `;
+            }
+        }
 
         const systemPrompt = `You are BrixAureIA, an expert, high-end real estate investment assistant for the BrixAurea platform.
         
@@ -65,6 +89,8 @@ export async function sendMessageToAI(history: ChatMessage[], lang: string = 'pt
         - Use markdown/bullet points for readability.
         - Always maintain a premium, expert tone that reflects EA Financial Advisory's standards.
         - Never be generic - be specific and actionable.
+        
+        ${projectContext}
         `;
 
         const { text } = await generateText({

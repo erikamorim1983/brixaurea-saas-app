@@ -4,7 +4,7 @@ import { getDictionary } from '@/get-dictionary';
 import DashboardSidebar from './components/DashboardSidebar';
 import DashboardHeader from './components/DashboardHeader';
 import DashboardMainContent from './components/DashboardMainContent';
-import BrixAureAI from '@/components/BrixAureAI/BrixAureAI';
+import BrixAureAIWrapper from '@/components/BrixAureAI/BrixAureAIWrapper';
 import { SidebarProvider } from './components/SidebarContext';
 
 export default async function DashboardLayout({
@@ -68,7 +68,7 @@ export default async function DashboardLayout({
                     <main className="flex-1 p-4 md:p-6">
                         {children}
                     </main>
-                    <BrixAureAI lang={lang} dict={dictionary.ai} />
+                    <BrixAureAIWrapper lang={lang} dict={dictionary.ai} />
                 </DashboardMainContent>
             </div>
         </SidebarProvider>
