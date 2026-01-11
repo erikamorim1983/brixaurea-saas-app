@@ -299,13 +299,15 @@ export async function deleteLandOwner(ownerId: string) {
 export async function getProjectCosts(projectId: string) {
     const supabase = await createClient();
 
-    // 1. Get Active Scenario
-    const { data: scenario } = await supabase
+    // 1. Get Scenario Data (Robust selection)
+    const { data: scenarios } = await supabase
         .from('financial_scenarios')
-        .select('id')
-        .eq('project_id', projectId)
-        .eq('name', 'Base Case')
-        .single();
+        .select('id, scenario_type, is_active, organization_id')
+        .eq('project_id', projectId);
+
+    const scenario = scenarios?.find(s => s.scenario_type === 'base') ||
+        scenarios?.find(s => s.is_active === true) ||
+        scenarios?.[0];
 
     if (!scenario) return [];
 
@@ -323,18 +325,58 @@ export async function getProjectCosts(projectId: string) {
 export async function saveCostItem(projectId: string, item: any) {
     const supabase = await createClient();
 
-    // 1. Get Base Case Scenario
-    const { data: scenario } = await supabase
-        .from('financial_scenarios')
-        .select('id')
-        .eq('project_id', projectId)
-        .eq('name', 'Base Case')
+    // 1. Get Project with Organization ID first
+    const { data: project } = await supabase
+        .from('projects')
+        .select('id, organization_id')
+        .eq('id', projectId)
         .single();
 
-    if (!scenario) throw new Error("Scenario not found");
+    if (!project) throw new Error("Project not found");
+    if (!project.organization_id) throw new Error("Project is not linked to an organization");
 
-    const payload = {
+    // 2. Get or Create Financial Scenario
+    let { data: scenarios } = await supabase
+        .from('financial_scenarios')
+        .select('id, scenario_type, is_active, organization_id')
+        .eq('project_id', projectId);
+
+    let scenario = scenarios?.find(s => s.scenario_type === 'base') ||
+        scenarios?.find(s => s.is_active === true) ||
+        scenarios?.[0];
+
+    // Auto-create scenario if missing
+    if (!scenario) {
+        console.log(`Creating base scenario for project ${projectId} with org ${project.organization_id}`);
+        const { data: newScenario, error: createError } = await supabase
+            .from('financial_scenarios')
+            .insert({
+                project_id: projectId,
+                organization_id: project.organization_id,
+                name: 'Base Case',
+                scenario_type: 'base',
+                is_active: true,
+                base_date: new Date().toISOString().split('T')[0]
+            })
+            .select()
+            .single();
+
+        if (createError) {
+            console.error('Failed to create scenario:', createError);
+            throw new Error(`Failed to initialize financial scenario: ${createError.message || JSON.stringify(createError)}`);
+        }
+        scenario = newScenario;
+    }
+
+    // Ensure scenario has org ID (for old records)
+    const scenarioOrgId = (scenario as any).organization_id || project.organization_id;
+
+    // Final safety check (TypeScript)
+    if (!scenario) throw new Error("Failed to initialize scenario");
+
+    const payload: any = {
         scenario_id: scenario.id,
+        organization_id: scenarioOrgId,
         category: item.category,
         item_name: item.item_name,
         input_value: item.total_estimated, // For now simple
@@ -342,16 +384,21 @@ export async function saveCostItem(projectId: string, item: any) {
         calculation_method: item.calculation_method || 'fixed',
         start_month_offset: item.start_month_offset || 0,
         duration_months: item.duration_months || 1,
-        distribution_curve: item.distribution_curve || 'linear',
-        updated_at: new Date().toISOString()
+        distribution_curve: item.distribution_curve || 'linear'
     };
 
     if (item.id) {
         const { error } = await supabase.from('cost_line_items').update(payload).eq('id', item.id);
-        if (error) throw error;
+        if (error) {
+            console.error('Supabase update error:', error);
+            throw new Error(`Failed to update cost item: ${error.message || JSON.stringify(error)}`);
+        }
     } else {
         const { error } = await supabase.from('cost_line_items').insert(payload);
-        if (error) throw error;
+        if (error) {
+            console.error('Supabase insert error:', error);
+            throw new Error(`Failed to create cost item: ${error.message || JSON.stringify(error)}`);
+        }
     }
 
     revalidatePath(`/dashboard/projects/${projectId}/feasibility/costs`);
@@ -370,15 +417,17 @@ export async function deleteCostItem(projectId: string, itemId: string) {
 export async function getProjectCashFlow(projectId: string) {
     const supabase = await createClient();
 
-    // 1. Get Scenario Data
-    const { data: scenario } = await supabase
+    // 1. Get Scenario Data (Robust selection)
+    const { data: scenarios } = await supabase
         .from('financial_scenarios')
         .select('*')
-        .eq('project_id', projectId)
-        .eq('name', 'Base Case')
-        .single();
+        .eq('project_id', projectId);
 
-    if (!scenario) return { totalGDV: 0, totalCosts: 0, months: [] };
+    const scenario = scenarios?.find(s => s.scenario_type === 'base') ||
+        scenarios?.find(s => s.is_active === true) ||
+        scenarios?.[0];
+
+    if (!scenario) return { totalGDV: 0, totalCosts: 0, months: [], scenarioId: '' };
 
     // 2. Get All Costs
     const { data: costs } = await supabase
@@ -410,24 +459,64 @@ export async function getProjectCashFlow(projectId: string) {
     const salesDuration = scenario.manual_absorption_curve ? scenario.manual_absorption_curve.length : 24;
     if (salesStart + salesDuration > maxMonth) maxMonth = salesStart + salesDuration;
 
-    // 5. Build Monthly Data
-    const monthsData = Array.from({ length: maxMonth + 1 }, (_, i) => {
-        const monthIndex = i;
+    // 5. Build Monthly Data (Distribution Logic)
+    const depositStructure = scenario.deposit_structure || {
+        initial_deposit: 10,
+        second_deposit: 10,
+        closing_funding: 80
+    };
 
-        // Calculate Revenue for this month
-        let monthRevenue = 0;
+    const deliveryMonthIndex = scenario.delivery_start_offset || 24;
+
+    // We first calculate when the SALES happen
+    const salesData = Array.from({ length: maxMonth + 1 }, (_, monthIndex) => {
+        let monthGenericPercent = 0;
         if (scenario.manual_absorption_curve && monthIndex >= salesStart && monthIndex < salesStart + scenario.manual_absorption_curve.length) {
             const curveIndex = monthIndex - salesStart;
-            const percent = scenario.manual_absorption_curve[curveIndex] / 100;
-            monthRevenue = totalGDV * percent;
+            monthGenericPercent = (scenario.manual_absorption_curve[curveIndex] || 0) / 100;
         } else if (!scenario.manual_absorption_curve && monthIndex >= salesStart) {
-            // Fallback to linear absorption if no manual curve but in sales period
             const rate = scenario.absorption_rate_monthly || 5; // 5% default
-            const remainingGDV = totalGDV - (totalGDV * (rate / 100) * (monthIndex - salesStart));
-            if (remainingGDV > 0) {
-                monthRevenue = Math.min(remainingGDV, totalGDV * (rate / 100));
+            const alreadySold = (monthIndex - salesStart) * (rate / 100);
+            if (alreadySold < 1) {
+                monthGenericPercent = Math.min(rate / 100, 1 - alreadySold);
             }
         }
+        return totalGDV * monthGenericPercent;
+    });
+
+    // We then distribute that SALE into actual CASH-IN (Receivables)
+    const cashInByMonth = new Array(maxMonth + 1).fill(0);
+
+    salesData.forEach((saleRevenue, saleIndex) => {
+        if (saleRevenue <= 0) return;
+
+        // a. Initial Deposit - Month of Sale
+        cashInByMonth[saleIndex] += (saleRevenue * (depositStructure.initial_deposit / 100));
+
+        // b. Closing Funding - At Delivery
+        const deliveryIdx = Math.min(deliveryMonthIndex, maxMonth);
+        cashInByMonth[deliveryIdx] += (saleRevenue * (depositStructure.closing_funding / 100));
+
+        // c. During Construction Installments
+        const installmentStart = saleIndex + 1;
+        const installmentEnd = Math.max(saleIndex, deliveryMonthIndex - 1);
+        const installmentMonths = Math.max(0, installmentEnd - installmentStart + 1);
+
+        if (installmentMonths > 0) {
+            const monthlyInst = (saleRevenue * (depositStructure.second_deposit / 100)) / installmentMonths;
+            for (let k = installmentStart; k <= installmentEnd; k++) {
+                if (k <= maxMonth) cashInByMonth[k] += monthlyInst;
+            }
+        } else if (depositStructure.second_deposit > 0) {
+            // Late sale: add to delivery
+            const deliveryIdxSafe = Math.min(deliveryMonthIndex, maxMonth);
+            cashInByMonth[deliveryIdxSafe] += (saleRevenue * (depositStructure.second_deposit / 100));
+        }
+    });
+
+    const monthsData = Array.from({ length: maxMonth + 1 }, (_, i) => {
+        const monthIndex = i;
+        const monthRevenue = cashInByMonth[monthIndex] || 0;
 
         // Calculate Costs for this month
         const monthCosts = (costs || []).reduce((sum, item) => {
@@ -456,6 +545,9 @@ export async function getProjectCashFlow(projectId: string) {
     return {
         totalGDV,
         totalCosts: (costs || []).reduce((sum, c) => sum + (c.total_estimated || 0), 0),
+        scenarioId: scenario.id,
+        healthScore: scenario.health_score, // We need to add this column
+        strategicAnalysis: scenario.strategic_analysis, // We need to add this column
         months: monthsWithCumulative
     };
 }
