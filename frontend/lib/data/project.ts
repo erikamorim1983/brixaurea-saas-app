@@ -22,5 +22,12 @@ export async function getProjectWithLocation(projectId: string) {
         .eq('project_id', projectId)
         .single();
 
-    return { project, location };
+    // 3. Fetch Subtype
+    const { data: subtype } = await supabase
+        .from('property_subtypes')
+        .select('*')
+        .eq('id', project.subtype_id)
+        .single();
+
+    return { project, location, subtype };
 }

@@ -14,9 +14,10 @@ interface InsightCardProps {
         read_time: number;
     };
     lang: string;
+    hrefPrefix?: string;
 }
 
-export default function InsightCard({ insight, lang }: InsightCardProps) {
+export default function InsightCard({ insight, lang, hrefPrefix = 'dashboard/insights' }: InsightCardProps) {
     const formattedDate = new Date(insight.published_at).toLocaleDateString(lang === 'pt' ? 'pt-BR' : lang === 'es' ? 'es-ES' : 'en-US', {
         day: '2-digit',
         month: 'short',
@@ -24,7 +25,7 @@ export default function InsightCard({ insight, lang }: InsightCardProps) {
     });
 
     return (
-        <Link href={`/${lang}/dashboard/insights/${insight.slug}`} className="group">
+        <Link href={`/${lang}/${hrefPrefix}/${insight.slug}`} className="group">
             <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:shadow-cyan-900/5 transition-all duration-300 flex flex-col h-full active:scale-[0.98]">
                 {/* Image Placeholder / Banner */}
                 <div className="h-48 bg-gray-100 relative overflow-hidden">

@@ -5,7 +5,8 @@
         "about": "Sobre",
         "login": "Entrar",
         "get_started": "Criar Conta",
-        "features": "Funcionalidades"
+        "features": "Funcionalidades",
+        "insights": "Insights"
     },
     "feature_details": {
         "magic-analysis": {
@@ -31,7 +32,7 @@
         "sales-projection": {
             "title": "Projeção de Vendas",
             "subtitle": "Estratégia Comercial e GDV",
-            "description": "Modele a velocidade de vendas (absorção) e a tabela de preços do empreendimento. Simule diferentes cenários de lançamento, repasses e valorização de mercado para maximizar a receita.",
+            "description": "Modele a velocidade de vendas (Absorption) e a tabela de preços do empreendimento. Simule diferentes cenários de lançamento, repasses e valorização de mercado para maximizar o GDV.",
             "benefits": [
                 "Montagem visual do Espelho de Vendas",
                 "Simulação de Velocidade de Vendas (Absorption Rate)",
@@ -103,13 +104,13 @@
                     "slug": "construction-simulation"
                 },
                 {
-                    "title": "Projeção de Vendas",
-                    "desc": "Definição de mix de unidades. Curva de vendas mensal ou trimestral. Receita bruta e líquida estimada.",
+                    "title": "Projeção de Vendas (Absorption)",
+                    "desc": "Definição de mix de unidades. Curva de vendas (Absorption) mensal ou trimestral. GDV bruto e líquido estimado.",
                     "slug": "sales-projection"
                 },
                 {
-                    "title": "Fluxo de Caixa Completo",
-                    "desc": "Entradas e Saídas completas. Geração automática de DRE projetado, ROI, TIR, VPL e Payback.",
+                    "title": "Fluxo de Caixa (Cash Flow)",
+                    "desc": "Entradas e Saídas completas. Geração automática de P&L projetado, ROI, IRR, NPV e Payback.",
                     "slug": "cash-flow"
                 },
                 {
@@ -137,6 +138,11 @@
             },
             "legal": {
                 "title": "Legal",
+                "privacy": "Política de Privacidade",
+                "terms": "Termos de Uso",
+                "support_policy": "Política de Suporte e Disponibilidade"
+            },
+            "legal_items": {
                 "privacy": "Política de Privacidade",
                 "terms": "Termos de Uso",
                 "support_policy": "Política de Suporte e Disponibilidade"
@@ -475,14 +481,27 @@
             "overview": "Visão Geral",
             "regional": "Dados Regionais",
             "project": "PROJETO",
-            "land": "Terreno",
-            "schedule": "Cronograma",
-            "floor_plan_library": "Biblioteca de Plantas",
-            "unit_mix": "Unidades",
-            "costs": "Custos",
-            "financials": "Financeiro",
-            "sales": "Vendas",
-            "feasibility": "Viabilidade"
+            "land": "TERRENO",
+            "schedule": "CRONOGRAMA",
+            "floor_plan_library": "BIBLIOTECA DE PLANTAS",
+            "unit_mix": "UNIDADES",
+            "costs": "ORÇAMENTO / CUSTOS",
+            "financials": "FINANCEIRO",
+            "sales": "ESTRATÉGIA DE VENDAS",
+            "feasibility": "VIABILIDADE DO INVESTIMENTO"
+        },
+        "overview": {
+            "title": "Análise do Projeto",
+            "project_configuration": "Configuração do Projeto",
+            "existing_construction": "Construção Existente no Local?",
+            "demolition_impact": "Impacta os custos de demolição.",
+            "structure_description": "Descrição da Estrutura",
+            "structure_placeholder": "ex: Edifício comercial antigo",
+            "project_type": "Tipo de Projeto",
+            "select_type": "Selecione o Tipo...",
+            "lot_size": "Tamanho do Lote (Acres)",
+            "save": "Salvar Detalhes",
+            "saving": "Salvando..."
         },
         "floor_plan_library": {
             "title": "Biblioteca de Plantas",
@@ -534,7 +553,7 @@
             "project_config": "Configuração do Projeto",
             "acquisition_details": "Detalhes da Aquisição",
             "owner": "Nome do Proprietário",
-            "value": "Valor do Terreno (R$)",
+            "value": "Valor do Terreno ($)",
             "payment_method": "Forma de Pagamento",
             "far": "Aproveitamento (FAR)",
             "notes": "Observações",
@@ -575,13 +594,55 @@
                 "balanced": "Equilibrado",
                 "pessimistic": "Conservador"
             },
-            "total_gdv": "VGV TOTAL (GDV)",
+            "total_gdv": "TOTAL REVENUE (GDV)",
             "total_units": "TOTAL UNIDADES",
             "distribute_remaining": "DISTRIBUIR RESTANTE",
-            "units": "Unidades"
+            "units": "Unidades",
+            "absorption_config": "CONFIGURAÇÃO DE ABSORÇÃO",
+            "sales_costs": "CUSTOS DE VENDA",
+            "macro_schedule": "Macro Cronograma (Base)",
+            "units_sold": "Unidades Vendidas",
+            "predicted_duration": "Duração Prevista",
+            "months_label": "MESES",
+            "fine_tuning": "Ajuste Fino (Início de Vendas)",
+            "offset_hint": "Deslocamento em meses a partir do T0",
+            "by_month": "VENDAS MÊS A MÊS",
+            "reset_linear": "RESETAR PARA LINEAR"
+        },
+        "costs": {
+            "title": "Orçamento do Projeto (Budget)",
+            "subtitle": "Gestão detalhada de custos diretos e indiretos baseada em padrões US.",
+            "total_budget": "Investimento Total (TDC)",
+            "hard_costs_title": "Custos Diretos (Hard Costs)",
+            "soft_costs_title": "Custos Indiretos (Soft Costs)",
+            "table": {
+                "item": "Item de Custo",
+                "amount": "Valor Estipulado",
+                "start": "Início (Mês)",
+                "duration": "Duração (Meses)",
+                "curve": "Curva",
+                "actions": "Ações"
+            },
+            "categories": {
+                "ACQUISITION": "Aquisição (Land)",
+                "SOFT_COSTS": "Soft Costs (Serviços)",
+                "HARD_COSTS": "Hard Costs (Obra)",
+                "FINANCIAL_COSTS": "Custos Financeiros/Closing",
+                "MARKETING_SALES": "Marketing e Vendas",
+                "OPERATIONAL_EXPENSES": "Despesas Outros",
+                "OTHER": "Contingência/Outros"
+            },
+            "items": {
+                "architect": "Architect and Consultants",
+                "approvals": "Approvals + Impact Fee",
+                "dev_management": "Development Management",
+                "legal": "Legal",
+                "marketing": "Marketing",
+                "equity_financing": "Equity Financing"
+            }
         },
         "schedule": {
-            "title": "Cronograma Macro de Atividades",
+            "title": "Cronograma Macro de Actividades",
             "subtitle": "Defina as datas principais e marcos do empreendimento.",
             "groups": {
                 "study": "Data do Estudo",
@@ -660,24 +721,25 @@
                 "avg_price_sqft": "Preço Médio ($/ft²)",
                 "gross_revenue": "GDV Bruto (Gross Revenue)"
             },
-            "add_btn": "Adicionar Unidade"
-        },
-        "overview": {
-            "project_configuration": "Configuração do Projeto",
-            "project_type": "Tipo de Projeto",
-            "select_type": "Selecione o Tipo...",
-            "lot_size": "Área do Terreno (Acres)",
-            "existing_construction": "Construção Existente no Local?",
-            "demolition_impact": "Impacta custos de demolição.",
-            "structure_description": "Descrição da Estrutura",
-            "structure_placeholder": "Ex: Prédio antigo de 2 andares",
-            "save": "Salvar Detalhes",
-            "saving": "Salvando..."
+            "add_btn": "Adicionar Unidade",
+            "ui": {
+                "comparison": "Cenários e Comparativos",
+                "half_baths": "Lavabos",
+                "living_area": "Área Útil",
+                "outdoor": "Área Ext.",
+                "sale_label": "Venda",
+                "const_label": "Obra",
+                "save_btn": "Gravar",
+                "edit_btn": "Editar",
+                "cancel_btn": "Cancelar",
+                "delete_msg": "Tem certeza que deseja excluir esta unidade?",
+                "editor_title": "Mix de Unidades (Editor)"
+            }
         },
         "types": {
-            "single_family": "Residência Unifamiliar",
-            "condo_building": "Edifício Residencial",
-            "townhomes": "Condomínio de Casas",
+            "single_family": "Single Family",
+            "condo_building": "Condo / Apartments",
+            "townhomes": "Townhomes",
             "retail": "Comércio / Shopping",
             "mixed_use": "Uso Misto (Res + Com)",
             "industrial": "Industrial / Galpão"
@@ -721,5 +783,58 @@
         "welcome_subtitle": "Sua assistente de investimentos.",
         "placeholder": "Pergunte sobre seus investimentos...",
         "error_generic": "Não foi possível conectar à IA no momento."
+    },
+    "financial_dashboard": {
+        "title": "Fluxo de Caixa do Projeto",
+        "subtitle": "Visualização mensal de Entradas e Saídas ao longo do ciclo de vida do projeto.",
+        "kpi": {
+            "health_score": "IA Health Score",
+            "gdv": "Receita Bruta (GDV)",
+            "costs": "Orçamento / Custos",
+            "profit": "Lucro Líquido (P&L)",
+            "margin": "Margem"
+        },
+        "views": {
+            "chart": "Visão Gráfica",
+            "table": "Visão Tabela"
+        },
+        "highlights": {
+            "title": "Destaques do Investimento",
+            "max_exposure": "Exposição Máxima de Caixa",
+            "breakeven": "Ponto de Equilíbrio (Breakeven)",
+            "sales_duration": "Ciclo de Vendas"
+        },
+        "ai": {
+            "title": "Inteligência Estratégica (IA)",
+            "button": "Recalcular com Cérebro IA",
+            "loading": "Analisando...",
+            "empty": "Pressione o botão para gerar uma análise estratégica profunda deste cenário usando o Cérebro IA."
+        },
+        "table": {
+            "month": "Mês",
+            "revenue": "Entradas (+)",
+            "expenses": "Saídas (-)",
+            "net_flow": "Fluxo Líquido",
+            "balance": "Saldo Acumulado"
+        },
+        "units": {
+            "months": "Meses"
+        }
+    },
+    "glossary": {
+        "title": "Metodologia BrixAurea",
+        "subtitle": "Conceitos Fundamentais de Viabilidade (Padrão US)",
+        "items": {
+            "single_family": "Single Family: Casa única em um lote individual. Foca na independência estrutural e na propriedade privada do lote (house + lot).",
+            "townhomes": "Townhomes: Estilo de habitação onde as unidades compartilham paredes laterais, mas possuem entradas próprias.",
+            "gdv": "Gross Development Value (GDV): O valor bruto total de vendas projetado. Representa a receita total que o projeto deve gerar.",
+            "soft_costs": "Soft Costs: Custos 'invisíveis' ou indiretos que não envolvem materiais de obra. Inclui arquitetura, taxas municipais (impact fees), jurídico e marketing.",
+            "hard_costs": "Hard Costs: Custos diretos de construção (mão de obra e materiais) para a edificação e infraestrutura do site.",
+            "impact_fees": "Impact Fees: Taxas pagas ao governo local (City/County) para compensar o impacto do novo empreendimento na infraestrutura pública (escolas, estradas, parques).",
+            "dev_fee": "Development Management (Developer Fee): Taxa que remunera o esforço de gestão e overhead da incorporadora durante o ciclo do projeto.",
+            "equity_financing": "Equity Financing: Custos relacionados à captação de recursos com investidores ou sócios, complementares ao financiamento bancário.",
+            "irr": "Internal Rate of Return (IRR): Mede a rentabilidade anualizada do capital investido.",
+            "absorption": "Absorption Rate: Velocidade de vendas das unidades. Crucial para determinar o tempo de exposição do capital."
+        }
     }
 }

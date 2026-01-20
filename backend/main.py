@@ -18,7 +18,10 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 # JWT validation
-from jose import jwt, JWTError
+import jwt
+
+# Internal Modules
+from api_finance import router as finance_router
 
 load_dotenv()
 
@@ -137,7 +140,11 @@ def verify_jwt(token: str) -> Optional[dict]:
             audience="authenticated",
         )
         return payload
-    except JWTError:
+    except jwt.InvalidTokenError as e:
+        print(f"JWT Validation Error: {e}")
+        return None
+    except Exception as e:
+        print(f"Unexpected JWT Error: {e}")
         return None
 
 
@@ -189,17 +196,21 @@ async def root():
 @app.get("/health")
 @limiter.limit("60/minute")
 async def health_check(request: Request):
-    """Health check endpoint for monitoring"""
+    """Enhanced health check endpoint"""
     return {
         "status": "healthy",
         "timestamp": time.time(),
         "environment": ENVIRONMENT,
+        "version": "0.1.1",
+        "system": "BrixAurea Core"
     }
 
 
 # ============================================
 # Protected Endpoints (require authentication)
 # ============================================
+
+app.include_router(finance_router)
 
 @app.get("/api/v1/me")
 @limiter.limit("30/minute")

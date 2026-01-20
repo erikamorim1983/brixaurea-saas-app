@@ -11,10 +11,10 @@ export default async function ProjectOverviewPage({ params }: { params: Promise<
 
     if (!data) return <div>Project not found</div>;
 
-    const { project, location } = data;
+    const { project, location: projectLocation, subtype } = data;
     const mapCenter = {
-        lat: location?.latitude || -23.5505,
-        lng: location?.longitude || -46.6333,
+        lat: projectLocation?.latitude || -23.5505,
+        lng: projectLocation?.longitude || -46.6333,
     };
 
     return (
@@ -28,7 +28,8 @@ export default async function ProjectOverviewPage({ params }: { params: Promise<
                 <div className="lg:col-span-1">
                     <OverviewTab
                         project={project}
-                        location={location}
+                        location={projectLocation}
+                        subtype={subtype}
                         lang={lang}
                         dict={dictionary}
                     />

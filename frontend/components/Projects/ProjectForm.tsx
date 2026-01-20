@@ -7,6 +7,7 @@ import * as z from 'zod';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Autocomplete from 'react-google-autocomplete';
+import { usePropertyTypes } from '@/hooks/usePropertyTypes';
 
 // --- Schema Definition ---
 const projectSchema = z.object({
@@ -22,6 +23,8 @@ const projectSchema = z.object({
     latitude: z.number().optional(),
     longitude: z.number().optional(),
     google_place_id: z.string().optional(),
+    category_id: z.string().min(1, "required"),
+    subtype_id: z.string().min(1, "required"),
 });
 
 type ProjectFormData = z.infer<typeof projectSchema>;
@@ -37,6 +40,7 @@ export default function ProjectForm({ userId, lang, dictionary }: ProjectFormPro
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    const { categories, subtypes, getLocalizedName } = usePropertyTypes(lang);
 
     const t = dictionary.projects?.new?.form || {};
     const tErrors = dictionary.projects?.new?.errors || {};
@@ -140,6 +144,8 @@ export default function ProjectForm({ userId, lang, dictionary }: ProjectFormPro
                     user_id: userId,
                     name: data.name,
                     status: 'draft',
+                    category_id: data.category_id,
+                    subtype_id: data.subtype_id
                 })
                 .select()
                 .single();
@@ -228,6 +234,40 @@ export default function ProjectForm({ userId, lang, dictionary }: ProjectFormPro
                     {/* Invisible register for address_full since Autocomplete doesn't use the ref easily */}
                     <input type="hidden" {...register('address_full')} />
                     {errors.address_full && <p className="text-red-500 text-sm mt-1">{getErrorMessage(errors.address_full.message)}</p>}
+                </div>
+
+                {/* 3. Category & Subtype */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">{dictionary.analysis?.overview?.project_type || 'Tipo de Projeto'}</label>
+                        <select
+                            {...register('category_id')}
+                            className={`w-full px-4 py-3 rounded-xl border-2 transition-all ${errors.category_id ? 'border-red-400' : 'border-gray-200 focus:border-[#00D9FF]'} focus:outline-none focus:ring-2 focus:ring-[#00D9FF]/50 bg-white`}
+                        >
+                            <option value="">{dictionary.analysis?.overview?.select_type || 'Seleccione...'}</option>
+                            {categories.map((cat) => (
+                                <option key={cat.id} value={cat.id}>{getLocalizedName(cat)}</option>
+                            ))}
+                        </select>
+                        {errors.category_id && <p className="text-red-500 text-sm mt-1">{getErrorMessage(errors.category_id.message)}</p>}
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">{dictionary.projects?.list?.typology_label || 'Tipologia'}</label>
+                        <select
+                            {...register('subtype_id')}
+                            className={`w-full px-4 py-3 rounded-xl border-2 transition-all ${errors.subtype_id ? 'border-red-400' : 'border-gray-200 focus:border-[#00D9FF]'} focus:outline-none focus:ring-2 focus:ring-[#00D9FF]/50 bg-white`}
+                            disabled={!watch('category_id')}
+                        >
+                            <option value="">{dictionary.analysis?.overview?.select_type || 'Seleccione...'}</option>
+                            {subtypes
+                                .filter(st => st.category_id === watch('category_id'))
+                                .map((st) => (
+                                    <option key={st.id} value={st.id}>{getLocalizedName(st)}</option>
+                                ))}
+                        </select>
+                        {errors.subtype_id && <p className="text-red-500 text-sm mt-1">{getErrorMessage(errors.subtype_id.message)}</p>}
+                    </div>
                 </div>
 
                 {/* 3. Hidden Location Details (Auto-filled) */}

@@ -3,10 +3,12 @@ uvicorn[standard]
 sqlmodel
 psycopg2-binary
 python-multipart
-python-jose[cryptography]
+PyJWT[crypto]
 passlib[bcrypt]
 supabase==2.3.0
 python-dotenv
+numpy
+numpy-financial
 
 # Security additions
 slowapi

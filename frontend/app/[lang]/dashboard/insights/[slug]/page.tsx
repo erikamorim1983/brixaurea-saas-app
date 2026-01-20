@@ -9,16 +9,22 @@ export default async function InsightArticlePage({ params }: { params: Promise<{
     const supabase = await createClient();
 
     // Fetch the specific insight from the database
-    const { data: dbArticle } = await supabase
+    const { data: dbArticle, error } = await supabase
         .from('insights')
-        .select(`
-            *,
-            author:author_id(first_name, last_name)
-        `)
+        .select('*')
         .eq('slug', slug)
         .single();
 
-    if (!dbArticle) notFound();
+    if (error || !dbArticle) {
+        return (
+            <div className="p-20 text-center">
+                <h1 className="text-2xl font-bold">Insight not found</h1>
+                <p className="text-gray-500 mt-4">Slug: {slug}</p>
+                {error && <p className="text-red-500 mt-2">{error.message}</p>}
+                <Link href={`/${lang}/dashboard/insights`} className="text-cyan-600 mt-8 inline-block">Back to list</Link>
+            </div>
+        );
+    }
 
     // Context formatting for presentation
     const article = {
@@ -26,6 +32,7 @@ export default async function InsightArticlePage({ params }: { params: Promise<{
         category: dbArticle.category,
         published_at: dbArticle.published_at,
         read_time: dbArticle.read_time_minutes,
+        image_url: dbArticle.image_url,
         author: dbArticle.author ? `${dbArticle.author.first_name} ${dbArticle.author.last_name}` : 'BrixAurea Team',
         content: dbArticle[`content_${lang}`] || dbArticle.content_en || '<p>Content in progress...</p>'
     };
@@ -39,6 +46,12 @@ export default async function InsightArticlePage({ params }: { params: Promise<{
 
             <article>
                 <header className="mb-12">
+                    {article.image_url && (
+                        <div className="w-full h-[400px] rounded-[2rem] overflow-hidden mb-12 shadow-2xl shadow-cyan-900/10">
+                            <img src={article.image_url} alt={article.title} className="w-full h-full object-cover" />
+                        </div>
+                    )}
+
                     <div className="flex items-center gap-3 mb-6">
                         <span className="px-4 py-1.5 bg-cyan-50 text-cyan-600 rounded-full text-xs font-black uppercase tracking-[0.2em] border border-cyan-100">
                             {article.category}
@@ -54,7 +67,7 @@ export default async function InsightArticlePage({ params }: { params: Promise<{
                     </h1>
 
                     <div className="flex items-center gap-4 py-8 border-y border-gray-100">
-                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center font-bold text-white italic shadow-lg shadow-cyan-500/20">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#081F2E] to-[#0F3A52] flex items-center justify-center font-bold text-white italic shadow-lg shadow-cyan-500/20">
                             BA
                         </div>
                         <div>

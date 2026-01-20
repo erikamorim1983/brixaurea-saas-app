@@ -201,7 +201,7 @@ const dictionary = {
         prefIndividual: "Individual (Documentos Separados)",
         mapTitle: "Localização do Terreno",
         mapHint: "Arraste o pino para ajustar (Em Breve)",
-        initialRent: "Aluguel Inicial Mensal (R$)",
+        initialRent: "Aluguel Inicial Mensal ($)",
         leaseTerm: "Prazo do Contrato (Anos)",
         dimensions: "Dimensões (Feet)",
         parcelNumber: "Número da Parcela (APN)",

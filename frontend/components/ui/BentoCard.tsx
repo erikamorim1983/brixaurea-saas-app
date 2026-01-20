@@ -25,12 +25,12 @@ export const BentoCard = ({
         <div
             onClick={onClick}
             className={cn(
-                "row-span-1 rounded-xl group/bento hover:shadow-xl transition duration-200 shadow-input dark:shadow-none p-4 w-full h-full flex flex-col space-y-4 glass-card cursor-pointer relative overflow-hidden",
+                "row-span-1 rounded-xl group/bento hover:shadow-xl transition duration-200 shadow-input dark:shadow-none p-4 w-full h-full flex flex-col space-y-4 cursor-pointer relative overflow-hidden",
                 className
             )}
         >
             {header}
-            <div className="group-hover/bento:translate-x-2 transition duration-200 relative z-10 h-full flex flex-col">
+            <div className="transition duration-200 relative z-10 h-full flex flex-col">
                 {icon}
                 {children || (
                     <div className="mt-auto">

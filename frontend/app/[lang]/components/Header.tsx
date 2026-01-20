@@ -8,6 +8,7 @@ interface HeaderProps {
             solution: string;
             plans: string;
             about: string;
+            insights: string;
             login: string;
             get_started: string;
         };
@@ -30,6 +31,9 @@ export default function Header({ lang, dictionary, showAuthButtons = true }: Hea
                 <nav className="hidden md:flex gap-6 items-center text-sm font-medium text-gray-600">
                     <Link href={`/${lang}#solution`} className="hover:text-cyan-500 transition-colors">
                         {dictionary.nav.solution}
+                    </Link>
+                    <Link href={`/${lang}/insights`} className="hover:text-cyan-500 transition-colors">
+                        {dictionary.nav.insights}
                     </Link>
                     <Link href={`/${lang}/pricing`} className="hover:text-cyan-500 transition-colors">
                         {dictionary.nav.plans}

@@ -5,7 +5,8 @@
         "about": "Nosotros",
         "login": "Entrar",
         "get_started": "Crear Cuenta",
-        "features": "Funcionalidades"
+        "features": "Funcionalidades",
+        "insights": "Insights"
     },
     "feature_details": {
         "magic-analysis": {
@@ -30,7 +31,7 @@
         },
         "sales-projection": {
             "title": "Proyección de Ventas",
-            "subtitle": "Estrategia Comercial y GDV",
+            "subtitle": "Estratégia Comercial y GDV",
             "description": "Modele la velocidad de ventas (absorción) y la lista de precios. Simule diferentes escenarios de lanzamiento y corrección monetaria para maximizar los ingresos.",
             "benefits": [
                 "Montaje visual de la Cuadrícula de Ventas",
@@ -78,7 +79,7 @@
     "sections": {
         "what_is": {
             "title": "¿Qué es BrixAurea?",
-            "description": "BrixAurea transforma el caos de hojas de cálculo desconectadas en un flujo de trabajo inteligente. Nuestra plataforma integra la búsqueda de terrenos (con datos de zonificación y mercado) directamente con un potente motor de Análisis de Rentabilidad del Proyecto, permitiéndote encontrar, analizar y financiar proyectos con velocidad récord."
+            "description": "¿Qué es BrixAurea? BrixAurea transforma el caos de hojas de cálculo desconectadas en un flujo de trabajo inteligente. Nuestra plataforma integra la búsqueda de terrenos (con datos de zonificación y mercado) directamente con un potente motor de Análisis de Rentabilidad del Proyecto, permitiéndote encontrar, analizar y financiar proyectos con velocidad récord."
         },
         "for_whom": {
             "title": "¿Para quién es?",
@@ -103,13 +104,13 @@
                     "slug": "construction-simulation"
                 },
                 {
-                    "title": "Proyección de Ventas",
-                    "desc": "Definición de mix de unidades. Curva de ventas mensual o trimestral. Ingresos brutos y netos estimados.",
+                    "title": "Proyección de Ventas (Absorption)",
+                    "desc": "Definición de mix de unidades. Curva de ventas (Absorption) mensual o trimestral. GDV bruto y neto estimado.",
                     "slug": "sales-projection"
                 },
                 {
-                    "title": "Flujo de Caja Completo",
-                    "desc": "Entradas y Salidas completas. Generación automática de Estado de Resultados proyectado, ROI, TIR, VPL y Payback.",
+                    "title": "Flujo de Caja (Cash Flow)",
+                    "desc": "Entradas y Salidas completas. Generación automática de P&L proyectado, ROI, IRR, NPV y Payback.",
                     "slug": "cash-flow"
                 },
                 {
@@ -389,7 +390,7 @@
             "roles": {
                 "owner": "Propietario",
                 "admin": "Administrador",
-                "member": "Miembro",
+                "member": "Membro",
                 "viewer": "Visualizador"
             },
             "upgrade_required": "Actualiza al plan Business para agregar miembros"
@@ -422,13 +423,14 @@
             "overview": "Resumen",
             "regional": "Datos Regionales",
             "project": "PROYECTO",
-            "land": "Terreno",
-            "schedule": "Cronograma",
-            "floor_plan_library": "Biblioteca de Plantas",
-            "unit_mix": "Unidades",
-            "costs": "Costos",
-            "financials": "Financiero",
-            "feasibility": "Viabilidad"
+            "land": "TERRENO",
+            "schedule": "CRONOGRAMA",
+            "floor_plan_library": "BIBLIOTECA DE PLANTAS",
+            "unit_mix": "UNIDADES",
+            "costs": "PRESUPUESTO / COSTOS",
+            "financials": "FINANCIERO",
+            "sales": "ESTRATEGIA DE VENTAS",
+            "feasibility": "VIABILIDAD DEL PROYECTO"
         },
         "floor_plan_library": {
             "title": "Biblioteca de Plantas",
@@ -501,7 +503,7 @@
             "payment_title": "Estructura de Pagos (Tabla)",
             "start_month": "Mes de Inicio de Ventas",
             "prior_sales": "Ventas Previas (Pre-Sales)",
-            "monthly_absorption": "Absorción Mensual",
+            "monthly_absorption": "Absorción Mensal",
             "units_per_month": "Unidades/Mes o %",
             "commission": "Comisiones (%)",
             "marketing": "Marketing (%)",
@@ -517,6 +519,52 @@
                 "optimistic": "Optimista",
                 "balanced": "Equilibrado",
                 "pessimistic": "Conservador"
+            },
+            "total_gdv": "TOTAL REVENUE (GDV)",
+            "total_units": "TOTAL UNIDADES",
+            "distribute_remaining": "DISTRIBUIR RESTANTE",
+            "units": "Unidades",
+            "absorption_config": "CONFIGURACIÓN DE ABSORCIÓN",
+            "sales_costs": "COSTOS DE VENTA",
+            "macro_schedule": "Cronograma Macro (Base)",
+            "units_sold": "Unidades Vendidas",
+            "predicted_duration": "Duración Prevista",
+            "months_label": "MESES",
+            "fine_tuning": "Ajuste Fino (Inicio de Ventas)",
+            "offset_hint": "Desplazamiento en meses desde T0",
+            "by_month": "VENTAS MES A MES",
+            "reset_linear": "RESTABLECER A LINEAL"
+        },
+        "costs": {
+            "title": "Presupuesto del Proyecto",
+            "subtitle": "Gestión detallada de costos directos e indirectos basada en estándares US.",
+            "total_budget": "Inversión Total (TDC)",
+            "hard_costs_title": "Costos Directos (Hard Costs)",
+            "soft_costs_title": "Costos Indirectos (Soft Costs)",
+            "table": {
+                "item": "Concepto de Costo",
+                "amount": "Monto Estimado",
+                "start": "Inicio (Mes)",
+                "duration": "Duración (Meses)",
+                "curve": "Curva",
+                "actions": "Acciones"
+            },
+            "categories": {
+                "ACQUISITION": "Adquisición (Land)",
+                "SOFT_COSTS": "Soft Costs (Honorarios)",
+                "HARD_COSTS": "Hard Costs (Obra)",
+                "FINANCIAL_COSTS": "Costos Financieros/Cierre",
+                "MARKETING_SALES": "Marketing y Ventas",
+                "OPERATIONAL_EXPENSES": "Gastos Operativos",
+                "OTHER": "Contingencia/Otros"
+            },
+            "items": {
+                "architect": "Arquitecto y Consultores",
+                "approvals": "Aprobaciones y Tasas de Impacto",
+                "dev_management": "Gestión de Desarrollo (Developer Fee)",
+                "legal": "Legal",
+                "marketing": "Marketing",
+                "equity_financing": "Financiamento de Equity"
             }
         },
         "schedule": {
@@ -565,12 +613,25 @@
                 "avg_price_sqft": "Precio Promedio ($/ft²)",
                 "gross_revenue": "Ingresos Brutos (GDV)"
             },
-            "add_btn": "Agregar Unidad"
+            "add_btn": "Agregar Unidad",
+            "ui": {
+                "comparison": "Escenarios y Comparativos",
+                "half_baths": "Aseos",
+                "living_area": "Área Útil",
+                "outdoor": "Área Ext.",
+                "sale_label": "Venta",
+                "const_label": "Obra",
+                "save_btn": "Guardar",
+                "edit_btn": "Editar",
+                "cancel_btn": "Cancelar",
+                "delete_msg": "¿Está seguro de que deseja eliminar esta unidad?",
+                "editor_title": "Mezcla de Unidades (Editor)"
+            }
         },
         "types": {
-            "single_family": "Casa Unifamiliar",
-            "condo_building": "Edificio de Condominios",
-            "townhomes": "Comunidad de Adosados",
+            "single_family": "Single Family",
+            "condo_building": "Condo / Apartments",
+            "townhomes": "Townhomes",
             "retail": "Comercial / Strip Mall",
             "mixed_use": "Uso Mixto (Res + Com)",
             "industrial": "Industrial / Almacén"
@@ -638,7 +699,7 @@
         },
         "new": {
             "title": "Nuevo Proyecto",
-            "subtitle": "Inicie un nuevo estudio de viabilidad inmobiliaria.",
+            "subtitle": "Inicie un nuevo estudio de viabilidade inmobiliaria.",
             "form": {
                 "name": "Nombre del Proyecto",
                 "name_placeholder": "Ej: Miami Beach Tower",
@@ -667,5 +728,58 @@
         "welcome_subtitle": "Tu asistente de inversiones.",
         "placeholder": "Pregunta sobre tus inversiones...",
         "error_generic": "No se pudo conectar a la IA en este momento."
+    },
+    "financial_dashboard": {
+        "title": "Flujo de Caja del Proyecto",
+        "subtitle": "Visualización mensual de ingresos y gastos a lo largo del ciclo de vida del proyecto.",
+        "kpi": {
+            "health_score": "IA Health Score",
+            "gdv": "Ingresos Brutos (GDV)",
+            "costs": "Presupuesto / Costos",
+            "profit": "Utilidad Neta (P&L)",
+            "margin": "Margen"
+        },
+        "views": {
+            "chart": "Vista Gráfica",
+            "table": "Vista de Tabla"
+        },
+        "highlights": {
+            "title": "Destaques del Proyecto",
+            "max_exposure": "Máxima Exposición de Caja",
+            "breakeven": "Punto de Equilibrio (Breakeven)",
+            "sales_duration": "Duración de Ventas"
+        },
+        "ai": {
+            "title": "Inteligencia Estratégica (IA)",
+            "button": "Recalcular con Cerebro IA",
+            "loading": "Analizando...",
+            "empty": "Presione el botón de abajo para generar un análisis estratégico profundo de este escenario utilizando el Cerebro IA."
+        },
+        "table": {
+            "month": "Mes",
+            "revenue": "Ingresos (+)",
+            "expenses": "Gastos (-)",
+            "net_flow": "Flujo Neto",
+            "balance": "Balance Acumulado"
+        },
+        "units": {
+            "months": "Meses"
+        }
+    },
+    "glossary": {
+        "title": "Metodología BrixAurea",
+        "subtitle": "Conceptos Fundamentales de Viabilidad (Estándar US)",
+        "items": {
+            "single_family": "Single Family: Casa única en un lote individual. Se centra en la independencia estructural e propiedad privada del lote (house + lot).",
+            "townhomes": "Townhomes: Estilo de vivienda donde las unidades comparten paredes laterales pero tienen entradas independientes.",
+            "gdv": "Gross Development Value (GDV): El valor bruto total de ventas proyectado. Representa los ingresos totales que se espera genere el proyecto.",
+            "soft_costs": "Soft Costs: Costos 'invisibles' o indirectos que no involucran materiales de obra. Inclui arquitectura, tasas municipales (impact fees), legal y marketing.",
+            "hard_costs": "Hard Costs: Costos directos de construcción (mano de obra e materiales) para la edificación e infraestructura del sitio.",
+            "impact_fees": "Impact Fees: Tasas pagadas al gobierno local (Ciudad/Condado) para compensar el impacto del nuevo desarrollo en la infraestructura pública.",
+            "dev_fee": "Development Management (Developer Fee): Tasa que remunera el esfuerzo de gestión y overhead de la desarrolladora durante el ciclo del proyecto.",
+            "equity_financing": "Equity Financing: Costos relacionados con la obtención de capital de socios o inversores, complementarios al financiamiento bancario.",
+            "irr": "Internal Rate of Return (IRR): Mide la rentabilidad anualizada do capital invertido.",
+            "absorption": "Absorption Rate: La velocidad a la que se venden las unidades en el mercado. Crítico para determinar el tiempo de exposición del capital."
+        }
     }
 }

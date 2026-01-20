@@ -5,7 +5,8 @@
         "about": "About",
         "login": "Login",
         "get_started": "Get Started",
-        "features": "Features"
+        "features": "Features",
+        "insights": "Insights"
     },
     "feature_details": {
         "magic-analysis": {
@@ -475,13 +476,14 @@
             "overview": "Overview",
             "regional": "Regional Data",
             "project": "PROJECT",
-            "land": "Land",
-            "schedule": "Schedule",
-            "floor_plan_library": "Floor Plan Library",
-            "unit_mix": "Units",
-            "costs": "Costs",
-            "financials": "Financials",
-            "feasibility": "Feasibility"
+            "land": "LAND",
+            "schedule": "SCHEDULE",
+            "floor_plan_library": "FLOOR PLAN LIBRARY",
+            "unit_mix": "UNITS",
+            "costs": "BUDGET / COSTS",
+            "financials": "FINANCIALS",
+            "sales": "SALES STRATEGY",
+            "feasibility": "INVESTMENT VIABILITY"
         },
         "floor_plan_library": {
             "title": "Floor Plan Library",
@@ -578,6 +580,38 @@
             "distribute_remaining": "DISTRIBUTE REMAINING",
             "units": "Units"
         },
+        "costs": {
+            "title": "Project Budget",
+            "subtitle": "Detailed management of direct and indirect costs based on US industry standards.",
+            "total_budget": "Total Project Cost (TDC)",
+            "hard_costs_title": "Hard Costs (Direct Construction)",
+            "soft_costs_title": "Soft Costs (Indirect & Professional)",
+            "table": {
+                "item": "Cost Item",
+                "amount": "Estimated Amount",
+                "start": "Start (Month)",
+                "duration": "Duration (Months)",
+                "curve": "Curve",
+                "actions": "Actions"
+            },
+            "categories": {
+                "ACQUISITION": "Acquisition (Land)",
+                "SOFT_COSTS": "Soft Costs (Professional Fees)",
+                "HARD_COSTS": "Hard Costs (Construction)",
+                "FINANCIAL_COSTS": "Financing & Closing Costs",
+                "MARKETING_SALES": "Marketing & Commissions",
+                "OPERATIONAL_EXPENSES": "Operational Expenses",
+                "OTHER": "Contingency & Others"
+            },
+            "items": {
+                "architect": "Architect and Consultants",
+                "approvals": "Approvals + Impact Fee",
+                "dev_management": "Development Management",
+                "legal": "Legal",
+                "marketing": "Marketing",
+                "equity_financing": "Equity Financing"
+            }
+        },
         "schedule": {
             "title": "Macro Activity Schedule",
             "subtitle": "Define key dates and project milestones.",
@@ -652,7 +686,20 @@
                 "avg_price_sqft": "Avg Price ($/ft²)",
                 "gross_revenue": "Gross Revenue"
             },
-            "add_btn": "Add Unit"
+            "add_btn": "Add Unit",
+            "ui": {
+                "comparison": "Scenarios & Comparison",
+                "half_baths": "Half Baths",
+                "living_area": "Living Area",
+                "outdoor": "Outdoor",
+                "sale_label": "Sale",
+                "const_label": "Const.",
+                "save_btn": "Save",
+                "edit_btn": "Edit",
+                "cancel_btn": "Cancel",
+                "delete_msg": "Are you sure you want to delete this unit?",
+                "editor_title": "Unit Mix (Editor)"
+            }
         },
         "overview": {
             "project_configuration": "Project Configuration",
@@ -713,5 +760,58 @@
         "welcome_subtitle": "Your investment assistant.",
         "placeholder": "Ask about your investments...",
         "error_generic": "Unable to connect to AI at this moment."
+    },
+    "financial_dashboard": {
+        "title": "Project Cash Flow",
+        "subtitle": "Monthly visualization of incomes and expenses across the project lifecycle.",
+        "kpi": {
+            "health_score": "AI Health Score",
+            "gdv": "Gross Revenue (GDV)",
+            "costs": "Budget / Costs",
+            "profit": "Net Profit (P&L)",
+            "margin": "Margin"
+        },
+        "views": {
+            "chart": "Chart View",
+            "table": "Table View"
+        },
+        "highlights": {
+            "title": "Investment Highlights",
+            "max_exposure": "Maximum Cash Exposure",
+            "breakeven": "Turning Point (Breakeven)",
+            "sales_duration": "Sales Duration"
+        },
+        "ai": {
+            "title": "Strategic Intelligence (AI)",
+            "button": "Recalculate with AI Brain",
+            "loading": "Analysing...",
+            "empty": "Press the button below to generate a deep strategic analysis of this scenario using the AI Brain."
+        },
+        "table": {
+            "month": "Month",
+            "revenue": "Revenue (+)",
+            "expenses": "Expenses (-)",
+            "net_flow": "Net Flow",
+            "balance": "Balance"
+        },
+        "units": {
+            "months": "Months"
+        }
+    },
+    "glossary": {
+        "title": "BrixAurea Methodology",
+        "subtitle": "Fundamental Viability Concepts (US Standard)",
+        "items": {
+            "single_family": "Single Family: Individual house on a private lot. Focuses on structural independence and private ownership (house + lot).",
+            "townhomes": "Townhomes: Housing style where units share side walls but have independent entrances.",
+            "gdv": "Gross Development Value (GDV): Total projected sales revenue. Represents the total gross income the project is expected to generate.",
+            "soft_costs": "Soft Costs: Indirect or 'invisible' costs not involving site materials. Includes architecture, permitting (impact fees), legal, and marketing.",
+            "hard_costs": "Hard Costs: Direct construction costs (labor and materials) for the building shell, site work, and infrastructure.",
+            "impact_fees": "Impact Fees: Fees paid to local government (City/County) to offset the burden on public infrastructure (roads, schools, parks, sewers) caused by new development.",
+            "dev_fee": "Development Management (Developer Fee): A fee paid to the developer to cover management effort and corporate overhead during the project cycle.",
+            "equity_financing": "Equity Financing: Costs related to raising capital from partners or investors, complementary to traditional bank financing.",
+            "irr": "Internal Rate of Return (IRR): Measures the annualized profitability of the invested capital.",
+            "absorption": "Absorption Rate: The speed at which units are sold in the market. Critical for determining capital exposure time."
+        }
     }
 }

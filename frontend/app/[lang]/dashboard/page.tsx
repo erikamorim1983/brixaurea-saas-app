@@ -3,6 +3,7 @@ import { getDictionary } from '@/get-dictionary';
 import Link from 'next/link';
 import SubscriptionStatusBadge from './components/SubscriptionStatusBadge';
 import YellowWaveEmoji from './components/YellowWaveEmoji';
+import { cn } from '@/lib/utils';
 
 export async function generateMetadata({
     params,
@@ -37,6 +38,7 @@ export default async function DashboardPage({
 
     if (userError || !user) {
         console.error('Dashboard Page Auth Error:', userError?.message);
+        return null;
     }
 
     // Get user profile safely
@@ -68,11 +70,28 @@ export default async function DashboardPage({
 
     const firstName = profile?.first_name || user?.email?.split('@')[0] || 'User';
 
-    // Placeholder stats (will be real data later)
+    // Fetch real project counts
+    const { count: totalProjects } = await supabase
+        .from('projects')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+    const { count: activeProjects } = await supabase
+        .from('projects')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('status', 'active');
+
+    const { count: analysisProjects } = await supabase
+        .from('projects')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .in('status', ['draft', 'feasibility']);
+
     const stats = [
         {
-            label: t.stats?.projects || 'Total de Projetos Analizados',
-            value: '0',
+            label: t.stats?.projects || (lang === 'pt' ? 'Total de Projetos Analisados' : 'Total Projects Analyzed'),
+            value: totalProjects?.toString() || '0',
             icon: (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -81,8 +100,8 @@ export default async function DashboardPage({
             color: 'from-cyan-500 to-blue-500',
         },
         {
-            label: t.stats?.analyses || 'Total de Projetos em andamento',
-            value: '0',
+            label: t.stats?.analyses || (lang === 'pt' ? 'Total de Projetos em Andamento' : 'Total Projects in Progress'),
+            value: activeProjects?.toString() || '0',
             icon: (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -91,8 +110,8 @@ export default async function DashboardPage({
             color: 'from-purple-500 to-pink-500',
         },
         {
-            label: t.stats?.reports || 'Total de Projetos em analise',
-            value: '0',
+            label: t.stats?.reports || (lang === 'pt' ? 'Total de Projetos em Análise' : 'Total Projects in Analysis'),
+            value: analysisProjects?.toString() || '0',
             icon: (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -156,7 +175,7 @@ export default async function DashboardPage({
                 {stats.map((stat, index) => (
                     <BentoCard
                         key={index}
-                        className={index === 0 ? "md:col-span-1" : ""}
+                        className={cn("glass-card", index === 0 ? "md:col-span-1" : "")}
                         header={
                             <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white bg-gradient-to-br ${stat.color} shadow-lg shadow-cyan-500/20`}>
                                 {stat.icon}
@@ -199,7 +218,7 @@ export default async function DashboardPage({
 
                 {/* Recent Activity */}
                 <BentoCard
-                    className="md:col-span-1 md:row-span-2"
+                    className="md:col-span-1 md:row-span-2 glass-card"
                     title={t.recent_activity || 'Recent Activity'}
                     description={t.no_activity || 'No recent activity'}
                     header={

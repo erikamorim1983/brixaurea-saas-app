@@ -429,6 +429,22 @@ export async function getProjectCashFlow(projectId: string) {
 
     if (!scenario) return { totalGDV: 0, totalCosts: 0, months: [], scenarioId: '' };
 
+    // Fetch Project metadata
+    const { data: project } = await supabase
+        .from('projects')
+        .select('id, name, category_id, subtype_id')
+        .eq('id', projectId)
+        .single();
+
+    if (!project) return { totalGDV: 0, totalCosts: 0, months: [], scenarioId: '' };
+
+    // Fetch Subtype details
+    const { data: subtype } = await supabase
+        .from('property_subtypes')
+        .select('*')
+        .eq('id', project.subtype_id)
+        .single();
+
     // 2. Get All Costs
     const { data: costs } = await supabase
         .from('cost_line_items')
@@ -546,8 +562,15 @@ export async function getProjectCashFlow(projectId: string) {
         totalGDV,
         totalCosts: (costs || []).reduce((sum, c) => sum + (c.total_estimated || 0), 0),
         scenarioId: scenario.id,
-        healthScore: scenario.health_score, // We need to add this column
-        strategicAnalysis: scenario.strategic_analysis, // We need to add this column
-        months: monthsWithCumulative
+        healthScore: (scenario as any).health_score,
+        strategicAnalysis: (scenario as any).strategic_analysis,
+        months: monthsWithCumulative,
+        project: {
+            id: project.id,
+            name: project.name,
+            category_id: project.category_id,
+            subtype_id: project.subtype_id
+        },
+        subtype: subtype || null
     };
 }

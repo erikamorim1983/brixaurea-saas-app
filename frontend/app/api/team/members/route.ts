@@ -23,8 +23,29 @@ export async function GET() {
             .eq('id', user.id)
             .single();
 
-        // Get organization members (as owner)
-        const { data: ownedMembers } = await supabase
+        // Get organization user belongs to (modern way)
+        const { data: membership } = await supabase
+            .from('organization_members')
+            .select('organization_id, role')
+            .eq('member_user_id', user.id)
+            .eq('status', 'active')
+            .single();
+
+        const orgId = membership?.organization_id;
+
+        if (!orgId) {
+            // Fallback: check if they own an org
+            const { data: ownedOrg } = await supabase
+                .from('organizations')
+                .select('id')
+                .eq('owner_id', user.id)
+                .single();
+
+            if (!ownedOrg) return NextResponse.json({ members: [] });
+        }
+
+        // Get all members of the organization
+        const { data: members } = await supabase
             .from('organization_members')
             .select(`
                 *,
@@ -37,39 +58,13 @@ export async function GET() {
                     last_name
                 )
             `)
-            .eq('organization_owner_id', user.id)
-            .eq('status', 'active');
-
-        // Get organizations user is a member of
-        const { data: membershipOrgs } = await supabase
-            .from('organization_members')
-            .select(`
-                *,
-                owner:organization_owner_id (
-                    id,
-                    email
-                ),
-                owner_profile:organization_owner_id (
-                    first_name,
-                    last_name,
-                    company_name
-                )
-            `)
-            .eq('member_user_id', user.id)
+            .eq('organization_id', orgId || user.id) // Fallback support
             .eq('status', 'active');
 
         return NextResponse.json({
-            isOwner: profile?.account_type === 'organization',
-            ownedTeam: {
-                owner: {
-                    id: user.id,
-                    email: user.email,
-                    name: profile?.first_name
-                        ? `${profile.first_name} ${profile.last_name || ''}`.trim()
-                        : user.email?.split('@')[0],
-                    role: 'owner',
-                },
-                members: (ownedMembers || []).map(m => ({
+            isOwner: profile?.account_type === 'organization' || membership?.role === 'owner',
+            team: {
+                members: (members || []).map(m => ({
                     id: m.id,
                     userId: m.member_user_id,
                     email: m.member?.email,
@@ -79,18 +74,7 @@ export async function GET() {
                     role: m.role,
                     joinedAt: m.joined_at,
                 })),
-            },
-            memberships: (membershipOrgs || []).map(m => ({
-                id: m.id,
-                ownerId: m.organization_owner_id,
-                ownerEmail: m.owner?.email,
-                companyName: m.owner_profile?.company_name,
-                ownerName: m.owner_profile?.first_name
-                    ? `${m.owner_profile.first_name} ${m.owner_profile.last_name || ''}`.trim()
-                    : m.owner?.email?.split('@')[0],
-                myRole: m.role,
-                joinedAt: m.joined_at,
-            })),
+            }
         });
     } catch (error) {
         console.error('Get members error:', error);
@@ -134,12 +118,22 @@ export async function PUT(request: Request) {
             );
         }
 
-        // Update member role (only if current user is owner)
+        // Get user's org
+        const { data: membership } = await supabase
+            .from('organization_members')
+            .select('organization_id')
+            .eq('member_user_id', user.id)
+            .eq('status', 'active')
+            .single();
+
+        const orgId = membership?.organization_id;
+
+        // Update member role (must belong to the same org)
         const { error } = await supabase
             .from('organization_members')
             .update({ role, updated_at: new Date().toISOString() })
             .eq('id', memberId)
-            .eq('organization_owner_id', user.id);
+            .eq('organization_id', orgId);
 
         if (error) {
             console.error('Update error:', error);
@@ -186,12 +180,22 @@ export async function DELETE(request: Request) {
             );
         }
 
-        // Remove member (set status to removed)
+        // Get user's org
+        const { data: membership } = await supabase
+            .from('organization_members')
+            .select('organization_id')
+            .eq('member_user_id', user.id)
+            .eq('status', 'active')
+            .single();
+
+        const orgId = membership?.organization_id;
+
+        // Remove member
         const { error } = await supabase
             .from('organization_members')
             .update({ status: 'removed', updated_at: new Date().toISOString() })
             .eq('id', memberId)
-            .eq('organization_owner_id', user.id);
+            .eq('organization_id', orgId);
 
         if (error) {
             console.error('Remove error:', error);

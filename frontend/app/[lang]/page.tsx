@@ -27,6 +27,9 @@ export default async function Page({
                         <Link href={`/${lang}#solution`} className="hover:text-cyan-500 transition-colors">
                             {dict.nav.solution}
                         </Link>
+                        <Link href={`/${lang}/insights`} className="hover:text-cyan-500 transition-colors">
+                            {dict.nav.insights}
+                        </Link>
                         <Link href={`/${lang}/pricing`} className="hover:text-cyan-500 transition-colors">
                             {dict.nav.plans}
                         </Link>
@@ -61,37 +64,55 @@ export default async function Page({
                 </div>
             </header>
 
-            {/* Hero Section with Light Theme */}
-            <section className="relative px-4 py-20 md:py-32 bg-gradient-to-br from-white via-gray-50 to-cyan-50 overflow-hidden">
+            {/* Hero Section with Background Image */}
+            <section className="relative px-4 py-20 md:py-32 overflow-hidden min-h-[80vh] flex items-center">
+                {/* Background Image - Made more visible */}
+                <div
+                    className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0"
+                    style={{
+                        backgroundImage: 'url(/images/hero-bg.png)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                    }}
+                />
+
+                {/* Gradient Overlay - Reduced opacity for more impact */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-white/70 to-cyan-50/60 z-1" />
+
                 {/* Floating Elements */}
-                <div className="absolute top-20 left-10 w-32 h-32 bg-cyan-400/10 rounded-full blur-3xl animate-[float_6s_ease-in-out_infinite]"></div>
-                <div className="absolute bottom-20 right-10 w-40 h-40 bg-blue-400/10 rounded-full blur-3xl animate-[float_8s_ease-in-out_infinite]"></div>
-                <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-cyan-300/5 rounded-full blur-3xl"></div>
+                <div className="absolute top-20 left-10 w-32 h-32 bg-cyan-400/20 rounded-full blur-3xl animate-[float_6s_ease-in-out_infinite] z-2"></div>
+                <div className="absolute bottom-20 right-10 w-40 h-40 bg-blue-400/20 rounded-full blur-3xl animate-[float_8s_ease-in-out_infinite] z-2"></div>
+                <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-cyan-300/10 rounded-full blur-3xl z-2"></div>
 
 
                 <div className="container mx-auto max-w-5xl text-center relative z-10">
-                    <div className="inline-block mb-4 px-4 py-2 bg-gradient-to-r from-cyan-50 to-blue-50 text-cyan-600 rounded-full text-xs font-bold uppercase tracking-wider border border-cyan-200 backdrop-blur-sm">
+                    <div className="inline-block mb-4 px-4 py-2 bg-white/40 backdrop-blur-md rounded-full text-cyan-700 text-xs font-bold uppercase tracking-wider border border-white/50 shadow-sm">
                         <span className="inline-flex items-center gap-2">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
-                            SaaS v1.8
+                            BrixAurea SaaS v1.8
                         </span>
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-extrabold text-[#081F2E] mb-6 tracking-tight leading-tight">
-                        {dict.hero.title}
-                    </h1>
-                    <p className="text-lg md:text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-                        {dict.hero.subtitle}
-                    </p>
+
+                    {/* Glassmorphism Container for Text */}
+                    <div className="glass-card p-8 md:p-12 rounded-3xl mb-10 border border-white/60 bg-white/30 backdrop-blur-xl shadow-2xl">
+                        <h1 className="text-5xl md:text-7xl font-extrabold text-[#081F2E] mb-6 tracking-tight leading-tight">
+                            {dict.hero.title}
+                        </h1>
+                        <p className="text-lg md:text-xl text-gray-700 mb-0 max-w-2xl mx-auto leading-relaxed">
+                            {dict.hero.subtitle}
+                        </p>
+                    </div>
+
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link
                             href={`/${lang}/auth/register`}
-                            className="btn-primary text-base font-bold !py-4 !px-8 !rounded-xl shadow-lg shadow-cyan-500/20 hover:shadow-2xl hover:shadow-cyan-500/40 transition-all duration-300"
+                            className="btn-primary text-base font-bold !py-4 !px-10 !rounded-xl shadow-lg shadow-cyan-500/20 hover:shadow-2xl hover:shadow-cyan-500/40 transition-all duration-300"
                         >
                             {dict.hero.cta_primary}
                         </Link>
-                        <button className="px-8 py-4 bg-white text-gray-700 text-base font-semibold rounded-xl border-2 border-gray-200 hover:border-cyan-300 hover:bg-gray-50 transition-all duration-300">
+                        <button className="px-10 py-4 bg-white/80 backdrop-blur-md text-gray-800 text-base font-semibold rounded-xl border border-white hover:border-cyan-300 hover:bg-white transition-all duration-300 shadow-lg">
                             {dict.hero.cta_secondary}
                         </button>
                     </div>
@@ -242,6 +263,8 @@ export default async function Page({
                     </div>
                 </div>
             </section>
+
+
 
             {/* CTA with Gradient */}
             <section className="py-24 bg-gradient-to-r from-[#081F2E] via-[#0F3A52] to-[#081F2E] text-white relative overflow-hidden">

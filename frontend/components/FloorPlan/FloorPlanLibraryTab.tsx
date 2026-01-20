@@ -109,6 +109,23 @@ export default function FloorPlanLibraryTab({ userId, lang, dict }: FloorPlanLib
         }
     };
 
+    const handleDeletePlan = async (id: string) => {
+        if (!confirm(dict.floor_plan_library?.delete_confirm || 'Are you sure you want to delete this plan?')) return;
+
+        try {
+            const { error } = await supabase
+                .from('floor_plan_library')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+            setPlans(plans.filter(p => p.id !== id));
+        } catch (err) {
+            console.error('Error deleting plan:', err);
+            alert('Error deleting floor plan.');
+        }
+    };
+
     if (loading || typesLoading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
@@ -166,7 +183,7 @@ export default function FloorPlanLibraryTab({ userId, lang, dict }: FloorPlanLib
                             subtypes={subtypes}
                             getLocalizedName={getLocalizedName}
                             onEdit={() => { setEditingPlan(plan); setShowForm(true); }}
-                            onDelete={() => { }}
+                            onDelete={() => handleDeletePlan(plan.id)}
                             dict={t}
                         />
                     ))}

@@ -333,7 +333,7 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                         }`}
                 >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                    {dict.scenarios?.base || 'Base Case (Editor)'}
+                    {dict.ui?.editor_title || dict.scenarios?.base || 'Base Case (Editor)'}
                 </button>
                 <button
                     onClick={() => setViewMode('scenarios')}
@@ -343,7 +343,7 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                         }`}
                 >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                    {lang === 'pt' ? 'Cenários e Comparativos' : 'Scenarios & Comparison'}
+                    {dict.ui?.comparison || 'Scenarios & Comparison'}
                 </button>
             </div>
 
@@ -404,18 +404,18 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                     <th className="px-2 py-2 text-left text-[10px] font-black tracking-widest uppercase">{dict.table.model}</th>
                                     <th className={HeaderClass} title={dict.table.beds}>🛏️</th>
                                     <th className={HeaderClass} title={dict.table.baths}>🚿</th>
-                                    <th className={HeaderClass} title={lang === 'pt' ? 'Lavabos' : 'Half Baths'}>🚽</th>
+                                    <th className={HeaderClass} title={dict.ui?.half_baths}>🚽</th>
 
-                                    <th className={HeaderClass} title={dict.table.area_sellable}>{lang === 'pt' ? 'Área Util' : 'Living Area'}</th>
-                                    <th className={HeaderClass} title={dict.table.area_outdoor}>{lang === 'pt' ? 'Área Ext.' : 'Outdoor'}</th>
+                                    <th className={HeaderClass} title={dict.table.area_sellable}>{dict.ui?.living_area}</th>
+                                    <th className={HeaderClass} title={dict.table.area_outdoor}>{dict.ui?.outdoor}</th>
                                     <th className={HeaderClass} title={dict.table.area_total}>Total</th>
 
                                     <th className={HeaderClass}>{dict.table.count}</th>
                                     <th className={HeaderClass}>$/sqft</th>
                                     <th className={HeaderClass}>{dict.table.avg_price}</th>
                                     <th className={HeaderClass}>Total GDV</th>
-                                    <th className={HeaderClass} title={lang === 'pt' ? 'Data de Venda' : 'Sale Date'}>{lang === 'pt' ? 'Venda' : 'Sale'}</th>
-                                    <th className={HeaderClass} title={lang === 'pt' ? 'Início da Obra' : 'Construction Start'}>{lang === 'pt' ? 'Obra' : 'Const.'}</th>
+                                    <th className={HeaderClass} title={dict.ui?.sale_label}>{dict.ui?.sale_label}</th>
+                                    <th className={HeaderClass} title={dict.ui?.const_label}>{dict.ui?.const_label}</th>
                                     <th className="px-2 py-2"></th>
                                 </tr>
                             </thead>
@@ -569,7 +569,7 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                             className="bg-cyan-600 text-white px-4 py-1.5 rounded-lg flex items-center gap-2 hover:bg-cyan-700 transition-all shadow-sm font-bold text-xs"
                                         >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
-                                            {lang === 'pt' ? 'Gravar' : 'Save'}
+                                            {dict.ui?.save_btn || 'Save'}
                                         </button>
                                     </td>
                                 </tr>
@@ -666,7 +666,7 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                                         }}
                                                         className="text-cyan-600 hover:text-cyan-800 text-xs font-bold uppercase transition-colors"
                                                     >
-                                                        {lang === 'pt' ? 'Editar' : 'Edit'}
+                                                        {dict.ui?.edit_btn || 'Edit'}
                                                     </button>
                                                     <button
                                                         onClick={() => confirmDelete(unit.id)}
@@ -714,9 +714,9 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                         onClose={() => setDeleteModalOpen(false)}
                         onConfirm={handleDelete}
                         title="BrixAurea"
-                        message={lang === 'pt' ? 'Tem certeza que deseja excluir esta unidade?' : 'Are you sure you want to delete this unit?'}
-                        confirmText={lang === 'pt' ? 'Excluir' : 'Delete'}
-                        cancelText={lang === 'pt' ? 'Cancelar' : 'Cancel'}
+                        message={dict.ui?.delete_msg || 'Are you sure?'}
+                        confirmText={dict.ui?.save_btn || 'Delete'}
+                        cancelText={dict.ui?.cancel_btn || 'Cancel'}
                         isDestructive={true}
                     />
                 </div>

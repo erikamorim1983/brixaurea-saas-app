@@ -28,6 +28,22 @@ export default function FloorPlanCard({ plan, subtypes, getLocalizedName, onEdit
                 )}
             </div>
 
+            {/* Image Preview */}
+            {plan.file_url && (
+                <div className="aspect-[16/10] bg-gray-100 overflow-hidden relative group-hover:bg-gray-200 transition-colors">
+                    <img
+                        src={plan.file_url}
+                        alt={plan.plan_name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-90"
+                        onError={(e) => {
+                            // If it's a PDF or failed, hide image
+                            (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+            )}
+
             <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
                     <h3 className="font-black text-gray-900 text-xl leading-tight group-hover:text-cyan-600 transition-colors">
@@ -84,10 +100,19 @@ export default function FloorPlanCard({ plan, subtypes, getLocalizedName, onEdit
                     >
                         {dict.edit_plan}
                     </button>
+                    <button
+                        onClick={onDelete}
+                        className="px-3 py-2.5 bg-white border border-red-100 text-red-500 rounded-xl hover:bg-red-50 hover:border-red-200 transition-all flex items-center justify-center shadow-sm active:scale-95"
+                        title={dict.delete_plan}
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
                     {plan.file_url && (
                         <button
                             onClick={() => window.open(plan.file_url, '_blank')}
-                            className="p-2.5 bg-cyan-100 text-cyan-600 rounded-xl hover:bg-cyan-200 transition-all"
+                            className="p-2.5 bg-teal-50 text-teal-600 rounded-xl hover:bg-teal-100 transition-all border border-teal-100"
                             title="Ver Planta"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

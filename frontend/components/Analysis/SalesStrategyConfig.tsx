@@ -77,7 +77,21 @@ export default function SalesStrategyConfig({ project, location, lang, dictionar
             optimistic: "Otimista",
             balanced: "Equilibrado",
             pessimistic: "Conservador"
-        }
+        },
+        total_gdv: "TOTAL REVENUE (GDV)",
+        total_units: "TOTAL UNIDADES",
+        distribute_remaining: "DISTRIBUIR RESTANTE",
+        units: "Unidades",
+        absorption_config: "CONFIGURAÇÃO DE ABSORÇÃO",
+        sales_costs: "CUSTOS DE VENDA",
+        macro_schedule: "Macro Cronograma",
+        units_sold: "Unidades Vendidas",
+        predicted_duration: "Duração Prevista",
+        months_label: "MESES",
+        fine_tuning: "Ajuste Fino",
+        offset_hint: "Deslocamento em meses",
+        by_month: "VENDAS MÊS A MÊS",
+        reset_linear: "RESETAR PARA LINEAR"
     };
 
     useEffect(() => {
@@ -522,7 +536,7 @@ export default function SalesStrategyConfig({ project, location, lang, dictionar
                     <div className="space-y-8">
                         <div>
                             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-4">
-                                <span>CONFIGURAÇÃO DE ABSORÇÃO</span>
+                                <span>{dict.absorption_config}</span>
                                 <div className="h-px flex-1 bg-gray-100"></div>
                             </h4>
 
@@ -533,7 +547,7 @@ export default function SalesStrategyConfig({ project, location, lang, dictionar
                                         <div>
                                             <div className="flex items-center gap-2 mb-2">
                                                 <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]"></div>
-                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Macro Cronograma (Base)</p>
+                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{dict.macro_schedule || 'Macro Cronograma'}</p>
                                             </div>
                                             <p className="text-2xl font-black text-gray-900 uppercase tracking-tight">
                                                 {format(addMonths(startOfMonth(new Date(assumptions.study_date)), assumptions.sales_start_offset), 'MMM yyyy', { locale: lang === 'pt' ? undefined : undefined })}
@@ -541,14 +555,14 @@ export default function SalesStrategyConfig({ project, location, lang, dictionar
                                         </div>
                                         <div className="text-right flex items-center gap-6">
                                             <div className={`px-4 py-2 rounded-2xl border text-right transition-all ${Math.abs(fullData.reduce((sum, r) => sum + r.monthlyUnits, 0) - unitsData.totalUnits) < 0.1 ? 'bg-emerald-50 border-emerald-100' : 'bg-gray-50 border-gray-100'}`}>
-                                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Unidades Vendidas</p>
+                                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">{dict.units_sold || 'Unidades Vendidas'}</p>
                                                 <p className={`text-base font-black transition-colors ${fullData.reduce((sum, r) => sum + r.monthlyUnits, 0) > unitsData.totalUnits + 0.1 ? 'text-rose-500' : 'text-gray-800'}`}>
                                                     {~~(fullData.reduce((sum, r) => sum + r.monthlyUnits, 0))} / {unitsData.totalUnits}
                                                 </p>
                                             </div>
                                             <div className="bg-gray-50 px-4 py-2 rounded-2xl border border-gray-100 text-right">
-                                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Duração Prevista</p>
-                                                <p className="text-base font-black text-gray-800">{assumptions.sales_duration_months} <span className="text-[10px] text-gray-400 font-bold">MESES</span></p>
+                                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">{dict.predicted_duration || 'Duração Prevista'}</p>
+                                                <p className="text-base font-black text-gray-800">{assumptions.sales_duration_months} <span className="text-[10px] text-gray-400 font-bold">{dict.months_label}</span></p>
                                             </div>
                                         </div>
                                     </div>
@@ -556,8 +570,8 @@ export default function SalesStrategyConfig({ project, location, lang, dictionar
                                     {/* Fine Tuning Input */}
                                     <div className="flex items-center justify-between gap-6">
                                         <div className="flex-1">
-                                            <label className="block text-[11px] font-black text-blue-600 uppercase tracking-widest mb-1">Ajuste Fino (Início de Vendas)</label>
-                                            <p className="text-[10px] text-gray-400 font-semibold leading-tight">Deslocamento em meses a partir do T0</p>
+                                            <label className="block text-[11px] font-black text-blue-600 uppercase tracking-widest mb-1">{dict.fine_tuning || 'Ajuste Fino'}</label>
+                                            <p className="text-[10px] text-gray-400 font-semibold leading-tight">{dict.offset_hint || 'Deslocamento em meses'}</p>
                                         </div>
                                         <div className="flex items-center gap-4 bg-blue-50/70 p-3 rounded-2xl border border-blue-100 shadow-inner">
                                             <input
@@ -586,7 +600,7 @@ export default function SalesStrategyConfig({ project, location, lang, dictionar
                             </div>
 
                             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-4 mt-8">
-                                <span>CUSTOS DE VENDA</span>
+                                <span>{dict.sales_costs || 'CUSTOS DE VENDA'}</span>
                                 <div className="h-px flex-1 bg-gray-100"></div>
                             </h4>
 
@@ -720,14 +734,14 @@ export default function SalesStrategyConfig({ project, location, lang, dictionar
                         {/* Month by Month Table */}
                         <div className="pt-8 border-t border-gray-100">
                             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6 flex items-center justify-between">
-                                <span>VENDAS MÊS A MÊS</span>
+                                <span>{dict.by_month || 'VENDAS MÊS A MÊS'}</span>
                                 <div className="flex gap-4">
                                     {assumptions.manual_absorption_curve && (
                                         <button
                                             onClick={() => setAssumptions(prev => ({ ...prev, manual_absorption_curve: null }))}
                                             className="text-[9px] text-rose-500 hover:underline font-black"
                                         >
-                                            RESETAR PARA LINEAR
+                                            {dict.reset_linear || 'RESETAR PARA LINEAR'}
                                         </button>
                                     )}
                                     <button
