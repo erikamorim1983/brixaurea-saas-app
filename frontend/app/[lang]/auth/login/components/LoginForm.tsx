@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 interface LoginFormProps {
@@ -35,6 +35,14 @@ export default function LoginForm({ dictionary, lang }: LoginFormProps) {
         password: '',
         rememberMe: false,
     });
+
+    // Load saved email on mount
+    useEffect(() => {
+        const savedEmail = localStorage.getItem('remembered_email');
+        if (savedEmail) {
+            setFormData(prev => ({ ...prev, email: savedEmail, rememberMe: true }));
+        }
+    }, []);
 
     const t = dictionary.login;
 
@@ -83,6 +91,12 @@ export default function LoginForm({ dictionary, lang }: LoginFormProps) {
             });
 
             if (response.ok) {
+                // Save or clear email for "Remember Me"
+                if (formData.rememberMe) {
+                    localStorage.setItem('remembered_email', formData.email);
+                } else {
+                    localStorage.removeItem('remembered_email');
+                }
                 window.location.href = `/${lang}/dashboard`;
             } else {
                 const error = await response.json();

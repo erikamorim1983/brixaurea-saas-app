@@ -50,7 +50,10 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
         suites: 0,
         garages: 0,
         sale_date: '',
-        construction_start_date: ''
+        construction_start_date: '',
+        is_model_unit: false,
+        construction_duration_months: 10,
+        subtype_id: ''
     });
 
     // Editing State
@@ -186,7 +189,8 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                 sale_date: newItem.sale_date ? (newItem.sale_date.length === 7 ? `${newItem.sale_date}-01` : newItem.sale_date) : null,
                 construction_start_date: newItem.construction_start_date ? (newItem.construction_start_date.length === 7 ? `${newItem.construction_start_date}-01` : newItem.construction_start_date) : null,
                 area_total: finalTotalArea,
-                avg_price: finalAvgPrice
+                avg_price: finalAvgPrice,
+                is_model_unit: newItem.is_model_unit
             });
 
         if (!error) {
@@ -204,7 +208,10 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                 suites: 0,
                 garages: 0,
                 sale_date: '',
-                construction_start_date: ''
+                construction_start_date: '',
+                is_model_unit: false,
+                construction_duration_months: 10,
+                subtype_id: ''
             });
             fetchUnits(baseScenarioId);
         } else {
@@ -246,7 +253,8 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                 construction_start_date: editItem.construction_start_date && editItem.construction_start_date.trim() !== ''
                     ? (editItem.construction_start_date.length === 7 ? `${editItem.construction_start_date}-01` : editItem.construction_start_date)
                     : null,
-                area_total: finalTotalArea
+                area_total: finalTotalArea,
+                is_model_unit: editItem.is_model_unit
             })
             .eq('id', editingId);
 
@@ -416,6 +424,7 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                     <th className={HeaderClass}>Total GDV</th>
                                     <th className={HeaderClass} title={dict.ui?.sale_label}>{dict.ui?.sale_label}</th>
                                     <th className={HeaderClass} title={dict.ui?.const_label}>{dict.ui?.const_label}</th>
+                                    <th className={HeaderClass} title={dict.model_unit}>M</th>
                                     <th className="px-2 py-2"></th>
                                 </tr>
                             </thead>
@@ -447,10 +456,18 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                                         suites: plan.suites || 0,
                                                         garages: plan.garages || 0,
                                                         price_sqft: plan.standard_price_sqft || 0,
-                                                        avg_price: (plan.standard_price_sqft || 0) * (plan.living_area_sqft || plan.area_sqft || 0)
+                                                        avg_price: (plan.standard_price_sqft || 0) * (plan.living_area_sqft || plan.area_sqft || 0),
+                                                        construction_duration_months: plan.construction_duration_months || 10,
+                                                        subtype_id: plan.subtype_id || ''
                                                     });
                                                 }}
                                             />
+                                            {newItem.subtype_id && project.subtype_id !== newItem.subtype_id && (
+                                                <div className="flex items-center gap-1.5 px-2 py-1 bg-amber-50 border border-amber-200 rounded text-[9px] text-amber-700 font-bold animate-pulse mt-1">
+                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                                    TIPO DIVERGENTE DO PROJETO
+                                                </div>
+                                            )}
                                         </div>
                                     </td>
                                     <td className="px-2 py-2">
@@ -563,6 +580,14 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                             onChange={e => setNewItem({ ...newItem, construction_start_date: e.target.value })}
                                         />
                                     </td>
+                                    <td className="px-1 py-2 text-center">
+                                        <input
+                                            type="checkbox"
+                                            className="w-4 h-4 accent-cyan-600"
+                                            checked={newItem.is_model_unit}
+                                            onChange={e => setNewItem({ ...newItem, is_model_unit: e.target.checked })}
+                                        />
+                                    </td>
                                     <td className="px-4 py-2 text-right">
                                         <button
                                             onClick={handleAddUnit}
@@ -622,6 +647,9 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                                 <td className="px-2 py-2">
                                                     <input type="month" className="bg-transparent outline-none w-full text-[10px] font-bold text-gray-600 uppercase border-b border-amber-500" value={editItem.construction_start_date ? editItem.construction_start_date.slice(0, 7) : ''} onChange={e => setEditItem({ ...editItem, construction_start_date: e.target.value })} />
                                                 </td>
+                                                <td className="px-2 py-2 text-center">
+                                                    <input type="checkbox" checked={editItem.is_model_unit} onChange={e => setEditItem({ ...editItem, is_model_unit: e.target.checked })} />
+                                                </td>
                                                 <td className="px-4 py-2 flex gap-2 justify-end">
                                                     <button onClick={handleUpdateUnit} className="text-green-600 font-bold text-xs uppercase">OK</button>
                                                     <button onClick={() => setEditingId(null)} className="text-gray-400 font-bold text-xs uppercase">X</button>
@@ -656,6 +684,9 @@ export default function UnitMixTab({ project, lang, dictionary }: UnitMixTabProp
                                             </td>
                                             <td className="px-2 py-3 text-center text-[10px] font-bold text-gray-400 uppercase">
                                                 {unit.construction_start_date ? format(new Date(unit.construction_start_date + 'T12:00:00'), 'MMM yy') : '-'}
+                                            </td>
+                                            <td className="px-2 py-3 text-center text-[10px] font-bold text-gray-400">
+                                                {unit.is_model_unit ? '⭐' : ''}
                                             </td>
                                             <td className="px-4 py-3 text-right">
                                                 <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">

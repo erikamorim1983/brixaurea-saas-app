@@ -100,7 +100,7 @@
                 },
                 {
                     "title": "Simulação de Construção",
-                    "desc": "Definição de tipologia (casas, sobrados, prédios). Estimativa de custo por m². Cronograma físico-financeiro.",
+                    "desc": "Definição de tipologia (casas, sobrados, prédios). Estimativa de custo por SqFt. Cronograma físico-financeiro.",
                     "slug": "construction-simulation"
                 },
                 {
@@ -216,7 +216,7 @@
             "title": "Dados da Empresa",
             "subtitle": "Informações da sua organização",
             "company_name": "Nome da Empresa",
-            "ein": "CNPJ/EIN",
+            "ein": "EIN",
             "ein_placeholder": "XX-XXXXXXX",
             "website": "Website",
             "organization_types": "Tipo de Organização",
@@ -472,7 +472,8 @@
                 "city_required": "Cidade é obrigatória",
                 "state_len": "Use a sigla do estado (ex: FL)",
                 "zip_invalid": "Zip Code inválido",
-                "creation_failed": "Erro ao criar projeto"
+                "creation_failed": "Erro ao criar projeto",
+                "usa_only": "No momento, apenas projetos localizados nos Estados Unidos são suportados."
             }
         }
     },
@@ -485,9 +486,10 @@
             "schedule": "CRONOGRAMA",
             "floor_plan_library": "BIBLIOTECA DE PLANTAS",
             "unit_mix": "UNIDADES",
-            "costs": "ORÇAMENTO / CUSTOS",
-            "financials": "FINANCEIRO",
             "sales": "ESTRATÉGIA DE VENDAS",
+            "hard_costs": "OBRA (HARD COSTS)",
+            "costs": "SOFT COSTS / OUTROS",
+            "financials": "FINANCEIRO",
             "feasibility": "VIABILIDADE DO INVESTIMENTO"
         },
         "overview": {
@@ -544,9 +546,9 @@
             "saving": "Salvando...",
             "delete_confirm": "Tem certeza que deseja excluir esta planta?",
             "delete_warning": "Esta ação não pode ser desfeita.",
-            "filter_by_type": "Filtrar por Tipo",
             "all_types": "Todos os Tipos",
-            "plans_count": "planta(s)"
+            "plans_count": "planta(s)",
+            "save_success": "Planta salva com sucesso! ✨"
         },
         "land": {
             "header": "Aquisição de Terreno",
@@ -617,6 +619,7 @@
             "soft_costs_title": "Custos Indiretos (Soft Costs)",
             "table": {
                 "item": "Item de Custo",
+                "method": "Base / Cálculo",
                 "amount": "Valor Estipulado",
                 "start": "Início (Mês)",
                 "duration": "Duração (Meses)",
@@ -633,12 +636,63 @@
                 "OTHER": "Contingência/Outros"
             },
             "items": {
-                "architect": "Architect and Consultants",
-                "approvals": "Approvals + Impact Fee",
-                "dev_management": "Development Management",
-                "legal": "Legal",
+                "architect": "Arquitetura e Consultores",
+                "approvals": "Aprovações e Taxas de Impacto",
+                "dev_management": "Gestão de Desenvolvimento (Developer Fee)",
+                "legal": "Jurídico e Títulos",
                 "marketing": "Marketing",
-                "equity_financing": "Equity Financing"
+                "equity_financing": "Financiamento de Equity",
+                "contingency": "Contingência do Proprietário",
+                "insurance": "Seguro de Obra (Builder's Risk)"
+            },
+            "ui": {
+                "standard_template": "+ Sugerir Itens EUA",
+                "add_btn": "Adicionar",
+                "save_btn": "Salvar",
+                "edit_btn": "Editar",
+                "placeholder_item": "Novo Item...",
+                "placeholder_amount": "Valor",
+                "curve_linear": "Linear",
+                "curve_single": "Único",
+                "method_fixed": "Fixo ($)",
+                "method_pct_hard": "% Custo Obra",
+                "method_pct_gdv": "% do VGV (GDV)",
+                "method_pct_tdc": "% do TDC",
+                "automated_costs_title": "Custos Automatizados",
+                "automated_costs_desc": "Os custos de AQUISIÇÃO, CUSTOS DE OBRA (Hard Costs) e CUSTOS FINANCEIROS são gerenciados em suas respectivas abas especializadas."
+            },
+            "hard_costs": {
+                "title": "Custos de Obra (Hard Costs)",
+                "subtitle": "Gestão e dimensionamento dos custos diretos de construção.",
+                "area_summary": "Resumo de Áreas",
+                "total_area": "Área Total de Construção",
+                "cost_base": "Custo Base de Construção",
+                "per_sqft": "por SqFt",
+                "automatic_calc": "Cálculo Automático",
+                "manual_adjustment": "Ajuste Manual",
+                "infrastructure": "Infraestrutura (Pre-operational)",
+                "vertical_construction": "Construção Vertical",
+                "strategy_label": "Estratégia de Produção",
+                "strategy_detached": "Individual (Casas Isoladas)",
+                "strategy_blocks": "Por Blocos (Townhomes)",
+                "strategy_monolithic": "Escala Única (Prédio/Estrutura)",
+                "unit_duration": "Duração p/ Unidade (Meses)",
+                "stagger_interval": "Intervalo entre Unidades (Meses)",
+                "construction_wave": "Onda de Produção",
+                "sync_sales": "Sincronizar com Vendas",
+                "spec_build": "Especulativo (Construir p/ Vender)",
+                "build_to_order": "Sob Encomenda (Vender p/ Construir)",
+                "delivery_lag": "Prazo de Entrega após Venda (Meses)",
+                "linked_to_sales": "Vinculado ao Fluxo de Vendas",
+                "model_homes": "Casas Modelo / Especulativas",
+                "leaseback_label": "Aluguel de Casa Modelo",
+                "items": {
+                    "construction": "Construção (Hard Cost)",
+                    "site_prep": "Preparação do Terreno",
+                    "landscaping": "Paisagismo e Áreas Externas",
+                    "interior_design": "Design de Interiores e FF&E",
+                    "amenities": "Áreas Comuns e Amenidades"
+                }
             }
         },
         "schedule": {

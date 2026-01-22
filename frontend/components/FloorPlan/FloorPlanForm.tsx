@@ -12,11 +12,9 @@ interface FloorPlanFormProps {
     onSave: (plan: Partial<FloorPlan>) => Promise<void>;
     onCancel: () => void;
     dict: any;
-    userId: string;
 }
 
-export default function FloorPlanForm({ plan, subtypes, getLocalizedName, onSave, onCancel, dict, userId }: FloorPlanFormProps) {
-    const supabase = createClient();
+export default function FloorPlanForm({ plan, subtypes, getLocalizedName, onSave, onCancel, dict }: FloorPlanFormProps) {
     const [mounted, setMounted] = useState(false);
 
     const [formData, setFormData] = useState<Partial<FloorPlan>>({
@@ -45,9 +43,11 @@ export default function FloorPlanForm({ plan, subtypes, getLocalizedName, onSave
         notes: plan?.notes || '',
         is_template: plan?.is_template || false,
         file_url: plan?.file_url || '',
+        architect_firm: plan?.architect_firm || '',
+        construction_duration_months: plan?.construction_duration_months || 10,
+        construction_curve: plan?.construction_curve || { type: 'linear', percentages: [] },
     });
 
-    const [uploading, setUploading] = useState(false);
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
@@ -56,39 +56,105 @@ export default function FloorPlanForm({ plan, subtypes, getLocalizedName, onSave
     }, []);
 
     useEffect(() => {
-        const total = (formData.living_area_sqft || 0) +
-            (formData.entry_area_sqft || 0) +
-            (formData.lanai_area_sqft || 0) +
-            (formData.garage_area_sqft || 0);
+        const total = (Number(formData.living_area_sqft) || 0) +
+            (Number(formData.entry_area_sqft) || 0) +
+            (Number(formData.lanai_area_sqft) || 0) +
+            (Number(formData.garage_area_sqft) || 0);
 
         setFormData(prev => ({
             ...prev,
             total_const_area_sqft: total,
             area_sqft: formData.living_area_sqft,
-            area_outdoor: (formData.entry_area_sqft || 0) + (formData.lanai_area_sqft || 0),
+            area_outdoor: (Number(formData.entry_area_sqft) || 0) + (Number(formData.lanai_area_sqft) || 0),
             area_total: total
         }));
     }, [formData.living_area_sqft, formData.entry_area_sqft, formData.lanai_area_sqft, formData.garage_area_sqft]);
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        setUploading(true);
-        try {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${userId}/${Date.now()}.${fileExt}`;
-            const filePath = `floor-plans/${fileName}`;
-            const { error: uploadError } = await supabase.storage.from('project-assets').upload(filePath, file);
-            if (uploadError) throw uploadError;
-            const { data: { publicUrl } } = supabase.storage.from('project-assets').getPublicUrl(filePath);
-            setFormData(prev => ({ ...prev, file_url: publicUrl }));
-        } catch (err) {
-            console.error('Error uploading:', err);
-            alert('Error uploading file');
-        } finally {
-            setUploading(false);
+    const handleDurationChange = (months: number) => {
+        let newCurve = { ...formData.construction_curve };
+        if (newCurve.type === 'linear' || !newCurve.percentages?.length) {
+            newCurve.percentages = Array(months).fill(Math.round(100 / months * 10) / 10);
+            const sum = newCurve.percentages.reduce((a, b) => a + b, 0);
+            if (sum !== 100 && newCurve.percentages.length > 0) {
+                newCurve.percentages[newCurve.percentages.length - 1] = Math.max(0, newCurve.percentages[newCurve.percentages.length - 1] + (100 - sum));
+            }
+        } else {
+            const current = [...(newCurve.percentages || [])];
+            if (current.length < months) {
+                newCurve.percentages = [...current, ...Array(months - current.length).fill(0)];
+            } else {
+                newCurve.percentages = current.slice(0, months);
+            }
         }
+        setFormData(prev => ({ ...prev, construction_duration_months: months, construction_curve: newCurve as any }));
     };
+
+    const handleCurvePercentageChange = (index: number, val: number) => {
+        const newPercentages = [...(formData.construction_curve?.percentages || [])];
+        newPercentages[index] = val;
+        setFormData(prev => ({
+            ...prev,
+            construction_curve: {
+                ...(prev.construction_curve as any),
+                type: 'custom',
+                percentages: newPercentages
+            }
+        }));
+    };
+
+    const distributeRemaining = () => {
+        const currentTotal = (formData.construction_curve?.percentages || []).reduce((a, b) => a + Number(b), 0);
+        const remaining = Math.max(0, 100 - currentTotal);
+        if (remaining <= 0) return;
+
+        const newPercentages = [...(formData.construction_curve?.percentages || [])];
+        const emptyIndices = newPercentages.map((p, i) => p === 0 ? i : -1).filter(i => i !== -1);
+
+        if (emptyIndices.length > 0) {
+            const perMonth = Math.round((remaining / emptyIndices.length) * 10) / 10;
+            emptyIndices.forEach(idx => {
+                newPercentages[idx] = perMonth;
+            });
+        } else {
+            // Add to last month
+            newPercentages[newPercentages.length - 1] = Math.round((newPercentages[newPercentages.length - 1] + remaining) * 10) / 10;
+        }
+
+        // Final nudge for float precision
+        const finalSum = newPercentages.reduce((a, b) => a + b, 0);
+        if (finalSum !== 100) {
+            newPercentages[newPercentages.length - 1] = Math.round((newPercentages[newPercentages.length - 1] + (100 - finalSum)) * 10) / 10;
+        }
+
+        setFormData(prev => ({
+            ...prev,
+            construction_curve: { ...(prev.construction_curve as any), type: 'custom', percentages: newPercentages }
+        }));
+    };
+
+    const resetToLinear = () => {
+        const months = formData.construction_duration_months || 10;
+        const perMonth = Math.round((100 / months) * 10) / 10;
+        const newPercentages = Array(months).fill(perMonth);
+        const sum = newPercentages.reduce((a, b) => a + b, 0);
+        if (sum !== 100) newPercentages[newPercentages.length - 1] = Math.round((newPercentages[newPercentages.length - 1] + (100 - sum)) * 10) / 10;
+
+        setFormData(prev => ({
+            ...prev,
+            construction_curve: { type: 'linear', percentages: newPercentages }
+        }));
+    };
+
+    const curveTotal = (formData.construction_curve?.percentages || []).reduce((a, b) => a + Number(b), 0);
+    const isValidCurve = formData.construction_curve?.type === 'linear' || Math.abs(curveTotal - 100) < 0.1;
+
+    // Initialization fix: ensure percentages array exists on mount if missing
+    useEffect(() => {
+        if (formData.construction_curve?.percentages?.length === 0) {
+            resetToLinear();
+        }
+    }, []);
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -117,159 +183,223 @@ export default function FloorPlanForm({ plan, subtypes, getLocalizedName, onSave
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                        {/* LEFT COLUMN: THE PHYSICAL ASSET (O QUE É?) */}
                         <div className="space-y-6">
-                            <div className="bg-gray-50 p-6 rounded-2xl space-y-4">
-                                <h3 className="font-bold text-lg text-cyan-800 flex items-center gap-2">
-                                    <span className="w-2 h-2 bg-cyan-500 rounded-full"></span>
-                                    Informações Básicas
+                            {/* 1. Identity & Architecture */}
+                            <div className="bg-gray-50 p-6 rounded-3xl space-y-6 border border-gray-100 shadow-sm">
+                                <h3 className="font-black text-xs text-cyan-800 uppercase tracking-widest flex items-center gap-2">
+                                    <div className="w-1.5 h-4 bg-cyan-600 rounded-full"></div>
+                                    Identidade e Arquitetura
                                 </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                                     <div className="col-span-2">
-                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">{dict.plan_name || 'Nome da Planta'}</label>
-                                        <input type="text" required value={formData.plan_name} onChange={e => setFormData({ ...formData, plan_name: e.target.value })} className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-cyan-500 outline-none" placeholder="Ex: Victoria Model" />
+                                        <label className="block text-[10px] font-black text-gray-400 uppercase mb-1">Nome da Planta</label>
+                                        <input type="text" required value={formData.plan_name} onChange={e => setFormData({ ...formData, plan_name: e.target.value })} className="w-full px-4 py-2.5 border-2 border-transparent bg-white rounded-xl focus:border-cyan-500 outline-none font-bold text-gray-900 shadow-sm" placeholder="Ex: Victoria Model" />
+                                    </div>
+                                    <div className="col-span-2">
+                                        <label className="block text-[10px] font-black text-gray-400 uppercase mb-1">Escritório de Arquitetura</label>
+                                        <input type="text" value={formData.architect_firm} onChange={e => setFormData({ ...formData, architect_firm: e.target.value })} className="w-full px-4 py-2.5 border-2 border-transparent bg-white rounded-xl focus:border-cyan-500 outline-none font-bold text-gray-900 shadow-sm" placeholder="Ex: Brix Prime Architects" />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">{dict.plan_code || 'Código'}</label>
-                                        <input type="text" value={formData.plan_code} onChange={e => setFormData({ ...formData, plan_code: e.target.value })} className="w-full px-4 py-2 border rounded-xl outline-none" placeholder="FA-01" />
+                                        <label className="block text-[10px] font-black text-gray-400 uppercase mb-1">Código</label>
+                                        <input type="text" value={formData.plan_code} onChange={e => setFormData({ ...formData, plan_code: e.target.value })} className="w-full px-4 py-2 border-b-2 border-gray-200 bg-transparent outline-none focus:border-cyan-600 font-bold" placeholder="FA-01" />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Tipo</label>
-                                        <select value={formData.subtype_id} onChange={e => setFormData({ ...formData, subtype_id: e.target.value })} className="w-full px-4 py-2 border rounded-xl outline-none">
+                                        <label className="block text-[10px] font-black text-gray-400 uppercase mb-1">Tipo de Produto</label>
+                                        <select value={formData.subtype_id} onChange={e => setFormData({ ...formData, subtype_id: e.target.value })} className="w-full px-4 py-2 bg-transparent border-b-2 border-gray-200 outline-none focus:border-cyan-600 font-bold cursor-pointer">
                                             <option value="">Selecione...</option>
-                                            {subtypes.map((s: any) => <option key={s.id} value={s.id}>{getLocalizedName(s)}</option>)}
+                                            {[
+                                                'single_family_generic',
+                                                'townhomes',
+                                                'fourplex',
+                                                'villas_patio_homes',
+                                                'garden_style_apartments',
+                                                'condos_low_rise'
+                                            ].map(key => {
+                                                const s = subtypes.find(st => st.key === key);
+                                                if (!s) return null;
+                                                return <option key={s.id} value={s.id}>{getLocalizedName(s)}</option>;
+                                            })}
                                         </select>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="bg-gray-50 p-6 rounded-2xl space-y-4">
-                                <h3 className="font-bold text-lg text-cyan-800 flex items-center gap-2">
-                                    <span className="w-2 h-2 bg-cyan-500 rounded-full"></span>
-                                    Configuração Comôdos
-                                </h3>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">{dict.bedrooms || 'Quartos'}</label>
-                                        <input type="number" min="0" value={formData.bedrooms} onChange={e => setFormData({ ...formData, bedrooms: parseInt(e.target.value) || 0 })} className="w-full px-3 py-2 border rounded-lg outline-none" />
+                                <div className="grid grid-cols-4 gap-3 pt-2">
+                                    <div className="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm">
+                                        <label className="block text-[8px] font-black text-gray-400 uppercase mb-1 text-center">Dorms</label>
+                                        <input type="number" min="0" value={formData.bedrooms} onChange={e => setFormData({ ...formData, bedrooms: parseInt(e.target.value) || 0 })} className="w-full text-center font-black text-lg outline-none bg-transparent" />
                                     </div>
-                                    <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">{dict.bathrooms || 'Banheiros'}</label>
-                                        <input type="number" min="0" value={formData.bathrooms} onChange={e => setFormData({ ...formData, bathrooms: parseInt(e.target.value) || 0 })} className="w-full px-3 py-2 border rounded-lg outline-none" />
+                                    <div className="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm">
+                                        <label className="block text-[8px] font-black text-gray-400 uppercase mb-1 text-center">Banhos</label>
+                                        <input type="number" min="0" value={formData.bathrooms} onChange={e => setFormData({ ...formData, bathrooms: parseInt(e.target.value) || 0 })} className="w-full text-center font-black text-lg outline-none bg-transparent" />
                                     </div>
-                                    <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">{dict.half_baths || 'Lavabos'}</label>
-                                        <input type="number" min="0" value={formData.half_baths} onChange={e => setFormData({ ...formData, half_baths: parseInt(e.target.value) || 0 })} className="w-full px-3 py-2 border rounded-lg outline-none text-cyan-600 font-bold" />
+                                    <div className="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm">
+                                        <label className="block text-[8px] font-black text-gray-400 uppercase mb-1 text-center">Suítes</label>
+                                        <input type="number" min="0" value={formData.suites} onChange={e => setFormData({ ...formData, suites: parseInt(e.target.value) || 0 })} className="w-full text-center font-black text-lg outline-none bg-transparent text-cyan-600" />
                                     </div>
-                                    <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">{dict.garages || 'Garagem'}</label>
-                                        <input type="number" min="0" value={formData.garages} onChange={e => setFormData({ ...formData, garages: parseInt(e.target.value) || 0 })} className="w-full px-3 py-2 border rounded-lg outline-none" />
+                                    <div className="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm">
+                                        <label className="block text-[8px] font-black text-gray-400 uppercase mb-1 text-center">Vagas</label>
+                                        <input type="number" min="0" value={formData.garages} onChange={e => setFormData({ ...formData, garages: parseInt(e.target.value) || 0 })} className="w-full text-center font-black text-lg outline-none bg-transparent" />
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-6 pt-2">
+
+                                <div className="flex items-center justify-between px-2">
+                                    <div className="flex items-center gap-3">
+                                        <input type="checkbox" id="has_pool" checked={formData.has_pool} onChange={e => setFormData({ ...formData, has_pool: e.target.checked })} className="w-5 h-5 accent-cyan-600 rounded-md cursor-pointer" />
+                                        <label htmlFor="has_pool" className="text-xs font-bold text-gray-600 uppercase cursor-pointer">Piscina Privativa</label>
+                                    </div>
                                     <div className="flex items-center gap-2">
-                                        <input type="checkbox" id="has_pool" checked={formData.has_pool} onChange={e => setFormData({ ...formData, has_pool: e.target.checked })} className="w-5 h-5 text-cyan-600" />
-                                        <label htmlFor="has_pool" className="text-sm font-medium">Com Piscina</label>
-                                    </div>
-                                    <div>
-                                        <label className="text-xs font-bold text-gray-400 uppercase mr-2">Stories:</label>
-                                        <input type="number" min="1" value={formData.stories} onChange={e => setFormData({ ...formData, stories: parseInt(e.target.value) || 1 })} className="w-12 border-b border-gray-300 focus:border-cyan-500 text-center outline-none" />
+                                        <label className="text-[10px] font-black text-gray-400 uppercase">Pavimentos:</label>
+                                        <input type="number" min="1" value={formData.stories} onChange={e => setFormData({ ...formData, stories: parseInt(e.target.value) || 1 })} className="w-12 border-b border-gray-300 font-black text-sm text-center outline-none focus:border-cyan-600" />
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-gray-50 p-6 rounded-2xl space-y-4 shadow-inner border border-gray-100">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="font-bold text-lg text-cyan-800 flex items-center gap-2">
-                                        <span className="w-2 h-2 bg-cyan-500 rounded-full"></span>
-                                        Benchmarks Referência
-                                    </h3>
-                                    <span className="text-[9px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-black uppercase">⚠️ REG. VAR</span>
-                                </div>
-                                <p className="text-[11px] text-amber-600/80 leading-relaxed italic border-l-2 border-amber-200 pl-3">
-                                    Os valores abaixo são referências de mercado para auxiliar no cálculo rápido. Lembre-se que custos de construção e preços de venda variam drasticamente por região.
-                                </p>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">{dict.standard_cost_sqft || 'Custo/sqft'} (Const.)</label>
-                                        <div className="relative">
-                                            <span className="absolute left-3 top-2 text-gray-400 text-sm">$</span>
-                                            <input type="number" min="0" step="0.01" value={formData.standard_cost_sqft} onChange={e => setFormData({ ...formData, standard_cost_sqft: parseFloat(e.target.value) || 0 })} className="w-full pl-7 pr-4 py-2 border rounded-xl outline-none focus:ring-2 focus:ring-cyan-500 bg-white text-sm" />
-                                        </div>
+                            {/* 2. Areas & Measurements */}
+                            <div className="bg-cyan-50/50 p-6 rounded-3xl border border-cyan-100 space-y-6">
+                                <h3 className="font-black text-xs text-cyan-900 uppercase tracking-widest flex justify-between items-center">
+                                    <span>Levantamento de Áreas (SF)</span>
+                                    <span className="bg-white/60 px-2 py-0.5 rounded text-[8px] font-black text-cyan-600 shadow-sm">AUTO-CALC</span>
+                                </h3>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-white p-3 rounded-2xl border border-cyan-100 shadow-sm">
+                                        <label className="block text-[9px] font-black text-cyan-700 uppercase mb-1">Living (Climatizada)</label>
+                                        <input type="number" min="0" value={formData.living_area_sqft} onChange={e => setFormData({ ...formData, living_area_sqft: parseFloat(e.target.value) || 0 })} className="w-full text-right font-black text-lg outline-none" />
                                     </div>
+                                    <div className="bg-white p-3 rounded-2xl border border-cyan-100 shadow-sm">
+                                        <label className="block text-[9px] font-black text-cyan-700 uppercase mb-1">Garagem</label>
+                                        <input type="number" min="0" value={formData.garage_area_sqft} onChange={e => setFormData({ ...formData, garage_area_sqft: parseFloat(e.target.value) || 0 })} className="w-full text-right font-black text-lg outline-none" />
+                                    </div>
+                                    <div className="bg-white/30 p-3 rounded-2xl border border-cyan-100/50">
+                                        <label className="block text-[9px] font-black text-cyan-700 uppercase mb-1">Entry / Porch</label>
+                                        <input type="number" min="0" value={formData.entry_area_sqft} onChange={e => setFormData({ ...formData, entry_area_sqft: parseFloat(e.target.value) || 0 })} className="w-full text-right font-bold text-sm outline-none bg-transparent" />
+                                    </div>
+                                    <div className="bg-white/30 p-3 rounded-2xl border border-cyan-100/50">
+                                        <label className="block text-[9px] font-black text-cyan-700 uppercase mb-1">Lanai / Terraço</label>
+                                        <input type="number" min="0" value={formData.lanai_area_sqft} onChange={e => setFormData({ ...formData, lanai_area_sqft: parseFloat(e.target.value) || 0 })} className="w-full text-right font-bold text-sm outline-none bg-transparent" />
+                                    </div>
+                                </div>
+
+                                <div className="bg-white p-5 rounded-2xl border-2 border-cyan-200 flex justify-between items-center shadow-lg">
                                     <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">{dict.standard_price_sqft || 'Venda/sqft'} (Venda)</label>
-                                        <div className="relative">
-                                            <span className="absolute left-3 top-2 text-gray-400 text-sm">$</span>
-                                            <input type="number" min="0" step="0.01" value={formData.standard_price_sqft} onChange={e => setFormData({ ...formData, standard_price_sqft: parseFloat(e.target.value) || 0 })} className="w-full pl-7 pr-4 py-2 border rounded-xl outline-none focus:ring-2 focus:ring-cyan-500 bg-white text-cyan-600 font-bold text-sm" />
+                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-tighter block">ÁREA TOTAL CONSTRUÍDA</span>
+                                        <span className="text-2xl font-black text-gray-900">{formData.total_const_area_sqft?.toLocaleString()} <span className="text-sm text-cyan-600 font-black">SF</span></span>
+                                    </div>
+                                    <div className="flex gap-4 border-l border-cyan-100 pl-6 h-10 items-center">
+                                        <div className="text-center">
+                                            <span className="text-[8px] font-black text-gray-400 uppercase block leading-none">WIDTH</span>
+                                            <input type="number" step="0.1" value={formData.plan_width_lf || ''} onChange={e => setFormData({ ...formData, plan_width_lf: parseFloat(e.target.value) || 0 })} className="w-12 font-black text-xs text-center outline-none bg-transparent border-b border-gray-200" placeholder="0'" />
+                                        </div>
+                                        <div className="text-center">
+                                            <span className="text-[8px] font-black text-gray-400 uppercase block leading-none">DEPTH</span>
+                                            <input type="number" step="0.1" value={formData.plan_depth_lf || ''} onChange={e => setFormData({ ...formData, plan_depth_lf: parseFloat(e.target.value) || 0 })} className="w-12 font-black text-xs text-center outline-none bg-transparent border-b border-gray-200" placeholder="0'" />
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
+                        {/* RIGHT COLUMN: PLANNING & PERFORMANCE (COMO EXECUTAR?) */}
                         <div className="space-y-6">
-                            <div className="bg-cyan-50/50 p-6 rounded-2xl space-y-4 border border-cyan-100">
-                                <h3 className="font-bold text-lg text-cyan-900 flex justify-between">
-                                    <span>Cálculo Áreas</span>
-                                    <span className="text-xs bg-cyan-100 px-2 py-1 rounded-full text-cyan-600">Auto-calc</span>
+                            {/* 3. Benchmarks & Financials */}
+                            <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-4">
+                                <h3 className="font-black text-xs text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                    <div className="w-1.5 h-4 bg-amber-500 rounded-full"></div>
+                                    Benchmarks Financeiros
                                 </h3>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-[10px] font-bold text-cyan-700 uppercase mb-1">Living</label>
-                                        <input type="number" min="0" value={formData.living_area_sqft} onChange={e => setFormData({ ...formData, living_area_sqft: parseFloat(e.target.value) || 0 })} className="w-full px-3 py-2 border border-cyan-200 rounded-lg text-right font-bold" />
+                                        <label className="block text-[10px] font-black text-gray-400 uppercase mb-2">Custo de Const. $/SF</label>
+                                        <div className="relative">
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
+                                            <input type="number" step="0.01" value={formData.standard_cost_sqft} onChange={e => setFormData({ ...formData, standard_cost_sqft: parseFloat(e.target.value) || 0 })} className="w-full pl-10 pr-4 py-3 bg-gray-50 rounded-2xl font-black text-lg outline-none focus:ring-2 focus:ring-cyan-500/10" />
+                                        </div>
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-bold text-cyan-700 uppercase mb-1">Entry</label>
-                                        <input type="number" min="0" value={formData.entry_area_sqft} onChange={e => setFormData({ ...formData, entry_area_sqft: parseFloat(e.target.value) || 0 })} className="w-full px-3 py-2 border border-cyan-200 rounded-lg text-right font-bold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[10px] font-bold text-cyan-700 uppercase mb-1">Lanai</label>
-                                        <input type="number" min="0" value={formData.lanai_area_sqft} onChange={e => setFormData({ ...formData, lanai_area_sqft: parseFloat(e.target.value) || 0 })} className="w-full px-3 py-2 border border-cyan-200 rounded-lg text-right font-bold" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[10px] font-bold text-cyan-700 uppercase mb-1">Garage</label>
-                                        <input type="number" min="0" value={formData.garage_area_sqft} onChange={e => setFormData({ ...formData, garage_area_sqft: parseFloat(e.target.value) || 0 })} className="w-full px-3 py-2 border border-cyan-200 rounded-lg text-right font-bold" />
-                                    </div>
-                                    <div className="col-span-2 pt-2 border-t border-cyan-200 flex justify-between items-center font-black">
-                                        <span className="text-cyan-900">TOTAL CONST.</span>
-                                        <span className="text-cyan-600">{formData.total_const_area_sqft?.toLocaleString()} SF</span>
+                                        <label className="block text-[10px] font-black text-gray-400 uppercase mb-2">Preço de Venda $/SF</label>
+                                        <div className="relative">
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-600 font-bold">$</span>
+                                            <input type="number" step="0.01" value={formData.standard_price_sqft} onChange={e => setFormData({ ...formData, standard_price_sqft: parseFloat(e.target.value) || 0 })} className="w-full pl-10 pr-4 py-3 bg-cyan-50 rounded-2xl font-black text-lg text-cyan-700 outline-none focus:ring-2 focus:ring-cyan-500/10" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-gray-50 p-6 rounded-2xl space-y-4">
-                                <h3 className="font-bold text-lg text-gray-800">Dimensões Plan</h3>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <input type="number" step="0.1" value={formData.plan_width_lf || ''} onChange={e => setFormData({ ...formData, plan_width_lf: parseFloat(e.target.value) || 0 })} className="w-full px-3 py-2 border rounded-lg" placeholder="Width" />
-                                    <input type="number" step="0.1" value={formData.plan_depth_lf || ''} onChange={e => setFormData({ ...formData, plan_depth_lf: parseFloat(e.target.value) || 0 })} className="w-full px-3 py-2 border rounded-lg" placeholder="Depth" />
-                                </div>
-                            </div>
+                            {/* 4. Timeline & Curve (O GRANDE BLOCO) */}
+                            <div className="bg-[#081F2E] p-1 rounded-[2.5rem] shadow-2xl">
+                                <div className="bg-white m-1 p-6 rounded-[2rem] space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="font-black text-xs text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                            <div className="w-1.5 h-4 bg-cyan-600 rounded-full"></div>
+                                            Cronograma de Execução
+                                        </h3>
+                                        <div className="flex bg-gray-100 p-1 rounded-xl">
+                                            <button type="button" onClick={resetToLinear} className={`px-4 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all ${formData.construction_curve?.type === 'linear' ? 'bg-white text-cyan-600 shadow-sm' : 'text-gray-400'}`}>Linear</button>
+                                            <button type="button" onClick={() => {
+                                                if (!formData.construction_curve?.percentages?.length) resetToLinear();
+                                                setFormData(prev => ({ ...prev, construction_curve: { ...prev.construction_curve, type: 'custom' } as any }));
+                                            }} className={`px-4 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all ${formData.construction_curve?.type === 'custom' ? 'bg-[#081F2E] text-white shadow-lg' : 'text-gray-400'}`}>Custom</button>
+                                        </div>
+                                    </div>
 
-                            <div className="bg-gray-50 p-6 rounded-2xl space-y-4 border-2 border-dashed border-gray-200 hover:border-cyan-300 transition-colors">
-                                <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
-                                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                                    Arquivos do Projeto
-                                </h3>
-                                <div>
-                                    <label className="block w-full border-2 border-dashed border-cyan-100 rounded-xl p-4 text-center cursor-pointer hover:bg-cyan-50 transition-all">
-                                        <input type="file" className="hidden" onChange={handleFileUpload} accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" />
-                                        {uploading ? (
-                                            <div className="flex flex-col items-center gap-2">
-                                                <div className="w-6 h-6 border-2 border-cyan-600 border-t-transparent animate-spin rounded-full"></div>
-                                                <span className="text-xs font-bold text-cyan-600">Enviando...</span>
+                                    <div className="bg-cyan-50 p-5 rounded-3xl border border-cyan-100 space-y-6 shadow-inner">
+                                        <div className="flex items-center gap-6">
+                                            <input type="range" min="1" max="30" value={formData.construction_duration_months} onChange={e => handleDurationChange(parseInt(e.target.value))} className="flex-1 h-1.5 bg-cyan-200 rounded-full appearance-none cursor-pointer accent-cyan-600" />
+                                            <div className="bg-white px-4 py-2 rounded-2xl border border-cyan-200 shadow-sm">
+                                                <span className="text-2xl font-black text-cyan-600 leading-none">{formData.construction_duration_months}</span>
+                                                <span className="text-[10px] font-black text-cyan-300 uppercase ml-1">MESES</span>
                                             </div>
-                                        ) : formData.file_url ? (
-                                            <div className="flex flex-col items-center gap-1">
-                                                <span className="text-xs font-bold text-green-600">Arquivo Carregado! ✅</span>
-                                                <span className="text-[10px] text-gray-400 truncate max-w-[200px]">{formData.file_url}</span>
-                                            </div>
-                                        ) : (
-                                            <div className="flex flex-col items-center gap-1">
-                                                <span className="text-xs font-bold text-gray-600">Clique para enviar Memorial/PDF</span>
-                                                <span className="text-[10px] text-gray-400">PDF, Word ou Imagem (Máx 10MB)</span>
+                                        </div>
+
+                                        {/* Chart Integrated */}
+                                        <div className="h-24 flex items-end gap-1 px-1 bg-white/40 rounded-2xl border border-white/50">
+                                            {(formData.construction_curve?.percentages || []).map((p, i) => {
+                                                const maxVal = Math.max(...(formData.construction_curve?.percentages || []), 1);
+                                                const height = (p / maxVal) * 100;
+                                                return (
+                                                    <div key={i} className={`flex-1 min-w-[4px] rounded-t-lg transition-all duration-700 ${Math.abs(curveTotal - 100) < 0.1 ? 'bg-cyan-500' : 'bg-amber-400'}`} style={{ height: `${Math.max(6, height)}%` }}></div>
+                                                );
+                                            })}
+                                        </div>
+
+                                        {formData.construction_curve?.type === 'custom' && (
+                                            <div className="space-y-4">
+                                                <div className="flex justify-between items-center px-2">
+                                                    <div>
+                                                        <span className="text-[9px] font-black text-cyan-800 uppercase block">STATUS TOTAL</span>
+                                                        <span className={`text-xl font-black ${Math.abs(curveTotal - 100) < 0.1 ? 'text-green-600' : 'text-red-500'}`}>{curveTotal.toFixed(1)}%</span>
+                                                    </div>
+                                                    <button type="button" onClick={distributeRemaining} className="bg-[#081F2E] text-white text-[9px] font-black px-4 py-2 rounded-xl hover:scale-105 transition-all shadow-lg active:scale-95">DISTRIBUIR RESTANTE</button>
+                                                </div>
+
+                                                <div className="max-h-[280px] overflow-y-auto pr-2 custom-scrollbar bg-white/50 rounded-2xl border border-cyan-100 italic">
+                                                    <table className="w-full border-collapse">
+                                                        <thead className="sticky top-0 bg-white/95 backdrop-blur-sm z-10 border-b border-cyan-100">
+                                                            <tr>
+                                                                <th className="px-4 py-2 text-[9px] font-black text-cyan-800 uppercase text-left italic">Mês de Obra</th>
+                                                                <th className="px-4 py-2 text-[9px] font-black text-cyan-800 uppercase text-right italic">Execução (%)</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className="divide-y divide-cyan-50">
+                                                            {(formData.construction_curve?.percentages || []).map((p, i) => (
+                                                                <tr key={i} className="hover:bg-white transition-colors">
+                                                                    <td className="px-5 py-2.5 text-xs font-black text-gray-400">#{i + 1}</td>
+                                                                    <td className="px-5 py-2.5 text-right">
+                                                                        <div className="flex items-center justify-end gap-1">
+                                                                            <input type="number" step="0.1" value={p} onChange={e => handleCurvePercentageChange(i, parseFloat(e.target.value) || 0)} className="w-16 text-right font-black text-gray-900 bg-transparent outline-none focus:text-cyan-600 focus:text-lg transition-all" />
+                                                                            <span className="text-[9px] font-black text-gray-300 font-mono">%</span>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         )}
-                                    </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -277,7 +407,7 @@ export default function FloorPlanForm({ plan, subtypes, getLocalizedName, onSave
 
                     <div className="pt-8 border-t border-gray-100 flex gap-4">
                         <button type="button" onClick={onCancel} className="flex-1 px-8 py-4 bg-gray-100 text-gray-700 font-bold rounded-2xl hover:bg-gray-200 transition-all">Cancelar</button>
-                        <button type="submit" disabled={saving || !formData.plan_name || uploading} className="flex-[2] px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold rounded-2xl hover:from-cyan-700 hover:to-blue-700 transition-all shadow-xl disabled:opacity-50">
+                        <button type="submit" disabled={saving || !formData.plan_name || !isValidCurve} className="flex-[2] px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold rounded-2xl hover:from-cyan-700 hover:to-blue-700 transition-all shadow-xl disabled:opacity-50">
                             {saving ? 'Salvando...' : 'Salvar Planta'}
                         </button>
                     </div>

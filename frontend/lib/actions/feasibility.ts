@@ -204,6 +204,18 @@ async function syncLandCostsToBudget(projectId: string, land: Partial<LandDetail
 
     if (!scenarioId) return;
 
+    // 0. Get Project Organization ID
+    const { data: project } = await supabase
+        .from('projects')
+        .select('organization_id')
+        .eq('id', projectId)
+        .single();
+
+    if (!project?.organization_id) {
+        console.warn(`Project ${projectId} has no organization ID. Skipping cost sync.`);
+        return;
+    }
+
     // Helper to upsert cost item by name
     const upsertCostItem = async (
         category: string,
@@ -212,8 +224,7 @@ async function syncLandCostsToBudget(projectId: string, land: Partial<LandDetail
         startMonth: number,
         distribution: string = 'linear'
     ) => {
-        if (value === undefined || value === 0) return; // Skip zero values? Or maybe set to 0 to clear? 
-        // For MVP, simple upsert based on name + scenario
+        if (value === undefined || value === 0) return;
 
         // Check if exists
         const { data: existing } = await supabase
@@ -225,6 +236,7 @@ async function syncLandCostsToBudget(projectId: string, land: Partial<LandDetail
 
         const payload = {
             scenario_id: scenarioId,
+            organization_id: project.organization_id, // Ensure organization_id is set for RLS bypass prevention
             category,
             item_name: name,
             input_value: value,
@@ -232,7 +244,7 @@ async function syncLandCostsToBudget(projectId: string, land: Partial<LandDetail
             calculation_method: 'fixed',
             start_month_offset: startMonth,
             distribution_curve: distribution,
-            duration_months: 1, // Default to single month payout
+            duration_months: 1,
             display_order: 0
         };
 
@@ -294,6 +306,38 @@ export async function deleteLandOwner(ownerId: string) {
     const { error } = await supabase.from('land_owners').delete().eq('id', ownerId);
     if (error) throw new Error(error.message);
     return { success: true };
+}
+
+
+export async function getUnitMix(projectId: string) {
+    const supabase = await createClient();
+
+    // 1. Get Scenario Data
+    const { data: scenarios } = await supabase
+        .from('financial_scenarios')
+        .select('id, scenario_type, is_active')
+        .eq('project_id', projectId);
+
+    const scenario = scenarios?.find(s => s.scenario_type === 'base') ||
+        scenarios?.find(s => s.is_active === true) ||
+        scenarios?.[0];
+
+    if (!scenario) return [];
+
+    // 2. Get Units
+    const { data: units } = await supabase
+        .from('units_mix')
+        .select(`
+            *,
+            floor_plans:floor_plan_library (
+                construction_duration_months,
+                construction_curve
+            )
+        `)
+        .eq('scenario_id', scenario.id)
+        .order('created_at', { ascending: true });
+
+    return units || [];
 }
 
 export async function getProjectCosts(projectId: string) {

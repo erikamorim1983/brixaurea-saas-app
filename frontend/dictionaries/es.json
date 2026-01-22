@@ -460,7 +460,8 @@
             "delete_warning": "Esta acción no se puede deshacer.",
             "filter_by_type": "Filtrar por Tipo",
             "all_types": "Todos los Tipos",
-            "plans_count": "planta(s)"
+            "plans_count": "planta(s)",
+            "save_success": "¡Planta guardada con éxito! ✨"
         },
         "overview": {
             "title": "Análisis del Proyecto",
@@ -543,6 +544,7 @@
             "soft_costs_title": "Costos Indirectos (Soft Costs)",
             "table": {
                 "item": "Concepto de Costo",
+                "method": "Base / Cálculo",
                 "amount": "Monto Estimado",
                 "start": "Inicio (Mes)",
                 "duration": "Duración (Meses)",
@@ -559,12 +561,47 @@
                 "OTHER": "Contingencia/Otros"
             },
             "items": {
-                "architect": "Arquitecto y Consultores",
+                "architect": "Arquitectura y Consultores",
                 "approvals": "Aprobaciones y Tasas de Impacto",
                 "dev_management": "Gestión de Desarrollo (Developer Fee)",
-                "legal": "Legal",
+                "legal": "Legal y Títulos",
                 "marketing": "Marketing",
-                "equity_financing": "Financiamento de Equity"
+                "equity_financing": "Financiación de Equity",
+                "contingency": "Contingencia del Propietario",
+                "insurance": "Seguro de Obra (Builder's Risk)"
+            },
+            "ui": {
+                "standard_template": "+ Sugerir Conceptos EUA",
+                "add_btn": "Agregar",
+                "save_btn": "Guardar",
+                "edit_btn": "Editar",
+                "placeholder_item": "Nuevo Concepto...",
+                "placeholder_amount": "Monto",
+                "curve_linear": "Lineal",
+                "curve_single": "Único",
+                "method_fixed": "Fijo ($)",
+                "method_pct_hard": "% Costo Obra",
+                "method_pct_gdv": "% de GDV",
+                "method_pct_tdc": "% de TDC",
+                "automated_costs_title": "Costos Automatizados",
+                "automated_costs_desc": "Los costos de ADQUISICIÓN, COSTOS DE OBRA (Hard Costs) y COSTOS FINANCIEROS se gestionan en sus respectivas pestañas especializadas."
+            },
+            "hard_costs": {
+                "title": "Costos de Obra (Hard Costs)",
+                "subtitle": "Gestión y dimensionamiento de los costos directos de construcción.",
+                "area_summary": "Resumen de Áreas",
+                "total_area": "Área Total de Construcción",
+                "cost_base": "Costo Base de Construcción",
+                "per_sqft": "por SqFt",
+                "automatic_calc": "Cálculo Automático",
+                "manual_adjustment": "Ajuste Manual",
+                "items": {
+                    "construction": "Construcción (Hard Cost)",
+                    "site_prep": "Preparación del Terreno",
+                    "landscaping": "Paisajismo y Áreas Externas",
+                    "interior_design": "Diseño de Interiores y FF&E",
+                    "amenities": "Áreas Comunes y Amenidades"
+                }
             }
         },
         "schedule": {

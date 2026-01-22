@@ -137,11 +137,48 @@ export default function ProjectForm({ userId, lang, dictionary }: ProjectFormPro
         const supabase = createClient();
 
         try {
+            // 0. Get User's Organization (The "Chave Principal")
+            const { data: orgMember } = await supabase
+                .from('organization_members')
+                .select('organization_id, organization_owner_id')
+                .eq('member_user_id', userId)
+                .is('status', 'active')
+                .maybeSingle();
+
+            let orgId = orgMember?.organization_id;
+            let ownerId = orgMember?.organization_owner_id;
+
+            if (!orgId) {
+                const { data: ownedOrg } = await supabase
+                    .from('organizations')
+                    .select('id, owner_id')
+                    .eq('owner_id', userId)
+                    .maybeSingle();
+
+                orgId = ownedOrg?.id;
+                ownerId = ownedOrg?.owner_id;
+            }
+
+            if (!orgId) {
+                throw new Error("No organization found. Please complete your registration.");
+            }
+
+            // --- STRICT USA ONLY CHECK ---
+            const isUS = data.state_code || data.address_full.toLowerCase().includes('usa') || data.address_full.toLowerCase().includes('united states');
+
+            if (!isUS) {
+                setErrorMsg(tErrors.usa_only || "Only projects in the United States are currently supported.");
+                setIsSubmitting(false);
+                return;
+            }
+
             // 1. Create Project
             const { data: projectData, error: projectError } = await supabase
                 .from('projects')
                 .insert({
                     user_id: userId,
+                    organization_id: orgId,
+                    organization_owner_id: ownerId || userId,
                     name: data.name,
                     status: 'draft',
                     category_id: data.category_id,
@@ -157,6 +194,8 @@ export default function ProjectForm({ userId, lang, dictionary }: ProjectFormPro
                 .from('project_locations')
                 .insert({
                     project_id: projectData.id,
+                    organization_id: orgId,
+                    organization_owner_id: ownerId || userId,
                     address_full: data.address_full,
                     city: data.city,
                     state: data.state,

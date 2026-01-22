@@ -29,6 +29,7 @@ export default function ProjectTabs({ lang, projectId, dictionary }: ProjectTabs
         { key: 'unit_mix', label: dictionary.analysis.tabs.unit_mix, path: '/feasibility/units' },
         { key: 'sales', label: dictionary.analysis.tabs.sales || 'Vendas', path: '/feasibility/sales' },
         { key: 'costs', label: dictionary.analysis.tabs.costs, path: '/feasibility/costs' },
+        { key: 'hard_costs', label: dictionary.analysis.tabs.hard_costs, path: '/feasibility/hard-costs' },
         { key: 'financials', label: dictionary.analysis.tabs.financials, path: '/feasibility/financial' },
         // Add placeholders for Construction & Financing if/when routes exist
     ];

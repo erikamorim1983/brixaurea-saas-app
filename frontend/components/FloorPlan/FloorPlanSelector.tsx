@@ -26,6 +26,7 @@ export interface FloorPlan {
     standard_price_sqft?: number;
     subtype_id?: string;
     file_url?: string;
+    construction_duration_months?: number;
 }
 
 export interface FloorPlanSelectorProps {

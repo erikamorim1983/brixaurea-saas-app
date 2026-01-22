@@ -15,9 +15,9 @@ export default async function ProjectCostsPage({ params }: { params: Promise<{ l
     }, {});
 
     const formatCurrency = (val: number) => {
-        return new Intl.NumberFormat(lang === 'pt' ? 'pt-BR' : 'en-US', {
+        return new Intl.NumberFormat('en-US', {
             style: 'currency',
-            currency: lang === 'pt' ? 'BRL' : 'USD'
+            currency: 'USD'
         }).format(val);
     };
 

@@ -467,7 +467,8 @@
                 "city_required": "City is required",
                 "state_len": "Use state abbreviation (e.g. FL)",
                 "zip_invalid": "Invalid Zip Code",
-                "creation_failed": "Error creating project"
+                "creation_failed": "Error creating project",
+                "usa_only": "Only projects in the United States are currently supported."
             }
         }
     },
@@ -480,9 +481,10 @@
             "schedule": "SCHEDULE",
             "floor_plan_library": "FLOOR PLAN LIBRARY",
             "unit_mix": "UNITS",
-            "costs": "BUDGET / COSTS",
-            "financials": "FINANCIALS",
             "sales": "SALES STRATEGY",
+            "hard_costs": "HARD COSTS",
+            "costs": "SOFT COSTS / OTHER",
+            "financials": "FINANCIALS",
             "feasibility": "INVESTMENT VIABILITY"
         },
         "floor_plan_library": {
@@ -528,7 +530,8 @@
             "delete_warning": "This action cannot be undone.",
             "filter_by_type": "Filter by Type",
             "all_types": "All Types",
-            "plans_count": "plan(s)"
+            "plans_count": "plan(s)",
+            "save_success": "Floor plan saved successfully! ✨"
         },
         "land": {
             "project_config": "Project Configuration",
@@ -588,6 +591,7 @@
             "soft_costs_title": "Soft Costs (Indirect & Professional)",
             "table": {
                 "item": "Cost Item",
+                "method": "Base / Calculation",
                 "amount": "Estimated Amount",
                 "start": "Start (Month)",
                 "duration": "Duration (Months)",
@@ -610,6 +614,39 @@
                 "legal": "Legal",
                 "marketing": "Marketing",
                 "equity_financing": "Equity Financing"
+            },
+            "ui": {
+                "standard_template": "+ Suggest US Items",
+                "add_btn": "Add",
+                "save_btn": "Save",
+                "edit_btn": "Edit",
+                "placeholder_item": "New Item Name...",
+                "placeholder_amount": "Amount",
+                "curve_linear": "Linear",
+                "curve_single": "Single",
+                "method_fixed": "Fixed ($)",
+                "method_pct_hard": "% Hard Costs",
+                "method_pct_gdv": "% of GDV",
+                "method_pct_tdc": "% of TDC",
+                "automated_costs_title": "Automated Costs",
+                "automated_costs_desc": "ACQUISITION, HARD COSTS, and FINANCIAL COSTS are managed in their respective specialized tabs."
+            },
+            "hard_costs": {
+                "title": "Construction Costs (Hard Costs)",
+                "subtitle": "Management and sizing of direct construction expenditures.",
+                "area_summary": "Area Summary",
+                "total_area": "Total Construction Area",
+                "cost_base": "Basic Construction Cost",
+                "per_sqft": "per SqFt",
+                "automatic_calc": "Calculate Automatically",
+                "manual_adjustment": "Manual Adjustment",
+                "items": {
+                    "construction": "Construction (Hard Cost)",
+                    "site_prep": "Site Preparation",
+                    "landscaping": "Landscaping & Exterior",
+                    "interior_design": "Interior Design & FF&E",
+                    "amenities": "Common Areas & Amenities"
+                }
             }
         },
         "schedule": {
