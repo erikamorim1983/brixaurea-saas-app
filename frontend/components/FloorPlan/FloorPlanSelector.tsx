@@ -213,7 +213,6 @@ export default function FloorPlanSelector({ onSelect, lang, userId }: FloorPlanS
                     onSave={handleSaveNewPlan}
                     onCancel={() => setShowNewForm(false)}
                     dict={{}}
-                    userId={userId}
                 />
             )}
         </>
