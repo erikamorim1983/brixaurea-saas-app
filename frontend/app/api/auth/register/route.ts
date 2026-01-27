@@ -192,6 +192,33 @@ export async function POST(request: Request) {
             // Consider rollback logic or queueing for retry
         }
 
+        // 6.5. Create organization for all account types
+        // For organization accounts: use company name
+        // For individual accounts: use "FirstName LastName" as personal organization
+        const orgName = derivedAccountType === 'organization' && companyName
+            ? companyName
+            : `${firstName} ${lastName}`;
+
+        const { error: orgError } = await supabaseAdmin
+            .from('organizations')
+            .insert({
+                name: orgName,
+                ein: derivedAccountType === 'organization' ? (ein || null) : null,
+                organization_types: derivedAccountType === 'organization' ? (organizationTypes || []) : [],
+                website: derivedAccountType === 'organization' ? (website || null) : null,
+                address_street: addressStreet || null,
+                address_suite: addressSuite || null,
+                address_city: addressCity || null,
+                address_state: addressState || null,
+                address_zip: addressZip || null,
+                owner_id: authData.user.id,
+            });
+
+        if (orgError) {
+            console.error('Organization creation error:', orgError);
+            // Log but don't fail - ProjectForm will auto-create if missing
+        }
+
         // 7. Create subscription with trial using Admin Client
         const trialEndsAt = trialDays > 0
             ? new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000).toISOString()

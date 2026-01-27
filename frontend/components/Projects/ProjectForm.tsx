@@ -159,6 +159,52 @@ export default function ProjectForm({ userId, lang, dictionary }: ProjectFormPro
                 ownerId = ownedOrg?.owner_id;
             }
 
+            // Auto-create organization if user has account_type = 'organization' but no org yet
+            if (!orgId) {
+                const { data: profile } = await supabase
+                    .from('user_profiles')
+                    .select('account_type, first_name, last_name, company_name, ein, organization_types, website, address_street, address_suite, address_city, address_state, address_zip')
+                    .eq('id', userId)
+                    .single();
+
+                if (profile) {
+                    // Determine organization name based on account type
+                    let orgName = 'My Organization';
+                    if (profile.account_type === 'organization' && profile.company_name) {
+                        orgName = profile.company_name;
+                    } else if (profile.first_name && profile.last_name) {
+                        // For individual accounts, create personal organization
+                        orgName = `${profile.first_name} ${profile.last_name}`;
+                    }
+
+                    // Create organization from profile data
+                    const { data: newOrg, error: orgCreateError } = await supabase
+                        .from('organizations')
+                        .insert({
+                            name: orgName,
+                            ein: profile.ein || null,
+                            organization_types: profile.organization_types || [],
+                            website: profile.website || null,
+                            address_street: profile.address_street || null,
+                            address_suite: profile.address_suite || null,
+                            address_city: profile.address_city || null,
+                            address_state: profile.address_state || null,
+                            address_zip: profile.address_zip || null,
+                            owner_id: userId,
+                        })
+                        .select('id, owner_id')
+                        .single();
+
+                    if (orgCreateError) {
+                        console.error('Failed to auto-create organization:', orgCreateError);
+                        throw new Error("Failed to create organization. Please contact support.");
+                    }
+
+                    orgId = newOrg.id;
+                    ownerId = newOrg.owner_id;
+                }
+            }
+
             if (!orgId) {
                 throw new Error("No organization found. Please complete your registration.");
             }
